@@ -18,9 +18,11 @@ f:
         bne $9, $10, halt
         jr $31
 
-halt :	j halt
+halt :	
+	j halt
 
-addr:	jal f
+addr:	
+	jal f
 ```
 
 맨처음 main에서 jal f를 하면 $ra 레지스터에 move $2, $8에 해당하는 명령어 주소를 저장하고 f로 분기한다.
@@ -45,7 +47,3 @@ $10에는 addr메모리 주소에 있는 기계어 명령이 들어가는데 add
 그래서 정상적으로 jr $31을 하게되면 move $2, $8의 명령어를 실행하게 되고 j halt를 하게된다.
 
 $9와 $10이 다르면 halt한다.
-
-```assembly
-bne $9, $10, halt
-```
