@@ -43,9 +43,9 @@ halt:
 main:	
 	la $9, end  
 	lw $8, 0($9)
-    addi $8, $8, -1
-    addi $8, $8, -2
-    sw $8, 0($9)
+    	addi $8, $8, -1
+    	addi $8, $8, -2
+    	sw $8, 0($9)
 end:
 	j dead
 	
@@ -71,13 +71,13 @@ main:
       
 loop:
 	beq $8, $4, halt  
-    addi $8, $8, 1    
-    add $10, $9, $2   
+    	addi $8, $8, 1    
+    	add $10, $9, $2   
       
 key:
 	addi $2, $2, 0
-    sw $10, key    	 
-    j loop		     
+    	sw $10, key    	 
+    	j loop		     
       
 halt: 
 	j halt
@@ -94,7 +94,8 @@ vec2:   .word 7, 429, 6
 result: .word 0
         
     	.text              
-main:   li $4, 3           
+main:   
+	li $4, 3           
         li $8, 0           
         la $9, gen         
         la $11, tpl        
@@ -102,7 +103,8 @@ main:   li $4, 3
         sw $12, 0($9)      
         addi $9, $9, 4     
 
-loop:   beq $8, $4, post   
+loop:   
+	beq $8, $4, post   
         li $13, 4	   
         mul $13, $13, $8  
         lw $10, vec1($13) 
@@ -119,10 +121,12 @@ loop:   beq $8, $4, post
         sw $12, 12($9)	   
         addi $9, $9, 16    
 
-next:   addi $8, $8, 1
+next:  
+	addi $8, $8, 1
         j loop
 
-post:   lw $12, 20($11)
+post:  
+	lw $12, 20($11)
         sw $12, 0($9)
         la $4, vec2
         jal gen
@@ -130,7 +134,8 @@ post:   lw $12, 20($11)
         sw $2, result
         j main
 
-tpl:    li $2, 0           
+tpl:    
+	li $2, 0           
         lw $13, 0($4)
         li $12, 0
         mul $12, $12, $13
@@ -138,7 +143,8 @@ tpl:    li $2, 0
         jr $31	
 
 #Generated code of vector dot product
-gen:	li $2, 0           # int gen(int *v)
+gen:	
+	li $2, 0           # int gen(int *v)
 	lw $13, 0($4)      # {
 	li $12, 22         # int res = 0;
 	mul $12, $12, $13  # res += 22 * v[0];
@@ -158,15 +164,15 @@ gen:	li $2, 0           # int gen(int *v)
 		.text
 main:	
 	jal f	 	
-    move $2, $8 
-    j halt		
+   	move $2, $8 
+    	j halt		
         
 f:	
 	li $8, 42
-    lw $9, -4($31) 
-    lw $10, addr   
-    bne $9, $10, halt
-    jr $31
+    	lw $9, -4($31) 
+    	lw $10, addr   
+    	bne $9, $10, halt
+    	jr $31
 
 halt :
 	j halt
