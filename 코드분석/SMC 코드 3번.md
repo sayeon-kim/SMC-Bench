@@ -6,20 +6,24 @@ Unbounded code rewriting
 	.data
 num:	.byte 8
 	.text
-main:	lw $4, num # Set Argument
+main:	
+	lw $4, num # Set Argument
      	lw $9, key # $9 = Ec(add $2 $2 0)
      	li $8, 1   # counter
      	li $2, 1   # accumulator
       
-loop:	beq $8, $4, halt  # check if done
+loop:	
+	beq $8, $4, halt  # check if done
      	addi $8, $8, 1    # inc counter
      	add $10, $9, $2   # new instr to put
       
-key: 	addi $2, $2, 0
+key: 	
+	addi $2, $2, 0
      	sw $10, key    	     # store new instr
      	j loop		     # next round
       
-halt: 	j halt
+halt: 	
+	j halt
 ```
 
 
@@ -44,18 +48,3 @@ $9에는 그럼 0x20420000이 저장되고 해당 주소에 $2를 더한다. $2�
 
 이런식으로 진행된다. 맨뒤의 값이 피보나치 수열이 됨.
 
-![image-20200511233600405](C:\Users\User\AppData\Roaming\Typora\typora-user-images\image-20200511233600405.png)
-
-![image-20200511233415069](C:\Users\User\AppData\Roaming\Typora\typora-user-images\image-20200511233415069.png)
-
-![image-20200511233541629](C:\Users\User\AppData\Roaming\Typora\typora-user-images\image-20200511233541629.png)
-
-![image-20200511233445621](C:\Users\User\AppData\Roaming\Typora\typora-user-images\image-20200511233445621.png)
-
-![image-20200511233458453](C:\Users\User\AppData\Roaming\Typora\typora-user-images\image-20200511233458453.png)
-
-![image-20200511233514499](C:\Users\User\AppData\Roaming\Typora\typora-user-images\image-20200511233514499.png)
-
-![image-20200511233625004](C:\Users\User\AppData\Roaming\Typora\typora-user-images\image-20200511233625004.png)
-
-![image-20200511233635190](C:\Users\User\AppData\Roaming\Typora\typora-user-images\image-20200511233635190.png)
