@@ -17,13 +17,9 @@ alter: lw $8, main
 
 먼저 alter로 분기한다.
 
-![image-20200513014817634](C:\Users\SWlab\AppData\Roaming\Typora\typora-user-images\image-20200513014817634.png)
-
 $8에 main 의 포인터를 load 한다. 그리고 $9에 0을 immediate load한다.
 
 $9의 값을 main에 store 한다.
-
-![image-20200513015111544](C:\Users\SWlab\AppData\Roaming\Typora\typora-user-images\image-20200513015111544.png)
 
 이때 main 부분의 code 값이 바뀐것을 볼 수 있다.
 
@@ -36,11 +32,7 @@ main:  j alter
 
 이때, 이미 main의 첫번째 부분이  ( j alter)가 아닌 아무 문장이 없으므로, 아까 j분기로 건너뛰게 되었던, ( sw $8, alter ) 문장이 실행된다.
 
-![image-20200513015517029](C:\Users\SWlab\AppData\Roaming\Typora\typora-user-images\image-20200513015517029.png)
-
  ( sw $8, alter ) 문장이 실행된 결과로 이렇게 바뀌게 된다.  그리고 프로그램이 끝나게 된다.
-
-![image-20200513015610664](C:\Users\SWlab\AppData\Roaming\Typora\typora-user-images\image-20200513015610664.png)
 
 
 

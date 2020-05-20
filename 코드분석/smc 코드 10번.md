@@ -1,4 +1,4 @@
-# smc 코드 10번
+# SMC 코드 10번
 
 **Speciﬁcation - Mutual Modiﬁcation**
 

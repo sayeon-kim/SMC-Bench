@@ -1,4 +1,4 @@
-# smc 코드 11번
+# SMC 코드 11번
 
  **encrypt.s: Code and speciﬁcation**
 
