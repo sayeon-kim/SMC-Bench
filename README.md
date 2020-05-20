@@ -183,6 +183,31 @@ addr:
 
 
 
+##### Multilevel Runtime Code Generation
+
+```assembly
+	.text
+main: 
+	la $9, gen        # get the target addr
+    li $8, 0xac880000 # load Ec(sw $8,0($4))
+    sw $8, 0($9)      # store to gen
+    li $8, 0x00800008 # load Ec(jr $4)
+    sw $8, 4($9)      # store to gen+4
+    la $4, ggen       # $4 = ggen
+    la $9, main       # $9 = main
+    li $8, 0x01200008 # load Ec(jr $9) to $8
+    j gen             # jump to target
+      
+gen: 
+	nop               # to be generated
+    nop               # to be generated
+      
+ggen: 
+	nop               # to be generated
+```
+
+
+
 **Self-mutating code block**
 
 ```assembly
@@ -208,6 +233,22 @@ dead:
 
 
 
+##### Mutual Modifying Modules
+
+```assembly
+	.text
+main:
+	j alter
+	sw $8, alter
+alter: 
+	lw $8, main
+    li $9, 0
+    sw $9, main
+    j main
+```
+
+
+
 ##### Self Modifying Code
 
 ```assembly
@@ -225,5 +266,71 @@ loop:
 	bne $8, $10, loop
 	move $10, $9
 new:
+```
+
+
+
+**Speciﬁcation - Mutual Modiﬁcation**
+
+```assembly
+main: 
+	la $10, body
+
+body:
+	lw $8, 12($10)		
+    lw $9, 16($10)
+    sw $9, 12($10)                     
+    addi $2,$2, 21       
+    addi $2,$2, 21   
+    sw $8, 16($10)        
+    lw $9, 8($10)        
+    lw $8, 20($10)        
+    sw $9, 20($10)        
+    sw $8, 8($10)         
+    j body  
+                   
+```
+
+
+
+ **encrypt.s: Code and speciﬁcation**
+
+```assembly
+main: 
+	la $8, pg
+    la $9, pgend
+    li $10, 0xffffffff
+      
+xor1:
+	lw $11, 0($8)
+    xor $11, $11, $10 # $11에 xor 한 값 저장
+    sw $11, 0($8) # xor 결과값을 pg에 넣는다.
+    addi $8, $8, 4
+    blt $8, $9, xor1	# blt = branch on less than
+
+decr:
+	la $8, pg
+    la $9, pgend
+    la $10, 0xffffffff
+
+xor2:
+	lw $11, 0($8)
+    xor $11, $11, $10
+    sw $11, 0($8)
+    addi $8, $8, 4
+    blt $8, $9, xor2
+    j pg
+      
+
+halt:
+	j halt
+
+pg: 
+	li $2, 1
+    li $3, 2
+    add $2, $2, $3
+    j halt
+      
+pgend:
 ```
 
