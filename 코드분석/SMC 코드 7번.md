@@ -1,6 +1,6 @@
 # SMC 7번
 
-
+##### self-mutating code block
 
 ```assembly
 	.text
