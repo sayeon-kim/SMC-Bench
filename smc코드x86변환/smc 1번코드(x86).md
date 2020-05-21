@@ -26,12 +26,12 @@ section .text
 global _start
 
 _start:
-    cmp eax, edx		; beq $2, $4, modify
+    cmp eax, edx	; beq $2, $4, modify
     jz modify
 target:
     mov eax, edx     	; move $2, $4
 halt:
-    hlt					; j halt
+    hlt			; j halt
 modify:
     mov ebx, [new]      ; lw $9, new
     mov [target], ebx	; sw $9, target
@@ -69,8 +69,8 @@ mov ebx, [new] : new분기의 주소가 가리키는 값 즉, add eax, 1이라�
 mov [target], ebx : add eax, 1이라는 명령어를 target분기의 주소가 가리키는 값에 저장
 
 ```assembly
-target:				->	target:
-    mov eax, edx			add eax, 1
+target:			->	target:
+    mov eax, edx		add eax, 1
 ```
 
 jmp target : target 분기로 이동

@@ -9,7 +9,7 @@
 halt:	
 	j halt
 main:	
-	la $9, end  
+la $9, end  
     lw $8, 0($9)
     addi $8, $8, -1
     addi $8, $8, -2
@@ -26,17 +26,17 @@ section .data
 section .text
 global _start
 
-	jmp _start		; j main
+	jmp _start	; j main
 halt:
-   	hlt				; j halt
+   	hlt		; j halt
 _start:
     mov eax, end	; la $9, end
 	mov ebx, [eax]	; lw $8, 0($9)
-	sub ebx, 1		; addi $8, $8, -1
-	sub ebx, 2		; addi $8, $8, -2
+	sub ebx, 1	; addi $8, $8, -1
+	sub ebx, 2	; addi $8, $8, -2
 	mov [eax], ebx	; sw $8, 0($9)
 End:
-	jmp dead		; j dead
+	jmp dead	; j dead
 Dead:
 ```
 
@@ -72,8 +72,8 @@ jmp dead 명령어 : 10번째 명령어로 분기
 _start:
     mov eax, end	; la $9, end
 	mov ebx, [eax]	; lw $8, 0($9)
-	sub ebx, 1		; addi $8, $8, -1
-	sub ebx, 2		; addi $8, $8, -2
+	sub ebx, 1	; addi $8, $8, -1
+	sub ebx, 2	; addi $8, $8, -2
 	mov [eax], ebx	; sw $8, 0($9)
 ```
 
