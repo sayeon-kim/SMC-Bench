@@ -9,7 +9,7 @@
 halt:	
 	j halt
 main:	
-la $9, end  
+	la $9, end  
     lw $8, 0($9)
     addi $8, $8, -1
     addi $8, $8, -2
@@ -70,7 +70,7 @@ jmp dead 명령어 : 10번째 명령어로 분기
 
 ```assembly
 _start:
-    mov eax, end	; la $9, end
+    	mov eax, end; la $9, end
 	mov ebx, [eax]	; lw $8, 0($9)
 	sub ebx, 1	; addi $8, $8, -1
 	sub ebx, 2	; addi $8, $8, -2
