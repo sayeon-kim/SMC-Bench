@@ -91,3 +91,9 @@ halt:
 </br>
 
 end 분기의 명령어 jmp dead에 뺄셈으로분기 방향을 정해주는 overwriting코드
+
+
+<br><br>
+\_start의 mov [eax], ebx	;에서 segmentation fault에러가 납니다
+![image](https://user-images.githubusercontent.com/37640219/82619100-f8c00e00-9c0f-11ea-84ad-e6ea49f50b88.png)
+![image](https://user-images.githubusercontent.com/37640219/82619026-b8609000-9c0f-11ea-9472-509a11133a87.png)
