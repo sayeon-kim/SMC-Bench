@@ -110,3 +110,8 @@ halt:
 </br>
 
 target 분기의 명령어 mov eax, edx-> add eax, 1 overwriting하는 코드
+
+
+<br><br>
+modify의 mov [target], ebx 에서 segmentation fault 발생
+![image](https://user-images.githubusercontent.com/37640219/82619275-7ab03700-9c10-11ea-9da2-c884ed7b4b28.png)
