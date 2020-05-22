@@ -50,7 +50,7 @@ $4=> 함수 인수 저장용 레지스터 ($4~$7)
 
 cmp와 분기 명령어는 항상 세트로 움직인다.
 
-cmp eax, edx : eax == edx 이면  zero 플래그 레지스터를 1로 바꿈
+cmp eax, edx : eax == edx 이면  zero 플래그 레지스터에 1을 저장
 
 jz modify : Zero Flag (ZF)가 1이면 modify로 분기. 아니면 다음 줄로 이동
 
