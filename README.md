@@ -1,5 +1,11 @@
 # SMC Bench
 
+#### x86_32 syscall
+https://www.informatik.htw-dresden.de/~beck/ASM/syscall_list.html
+
+#### x86_64 syscall
+https://filippo.io/linux-syscall-table/
+
 ### Hello World
 
 #### elf64
