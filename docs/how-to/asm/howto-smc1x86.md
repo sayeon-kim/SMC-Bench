@@ -15,7 +15,7 @@ modify:
     mov [target], ebx	; ebx -> [target] (sw ebx, target)
     jmp target        	; eip <- target
 target:
-    mov eax, 1     	; eax <- 1
+    mov ebx, 1     	; eax <- 1
 	jmp halt
 new:
     mov ebx, 0        	; ebx <- 0
