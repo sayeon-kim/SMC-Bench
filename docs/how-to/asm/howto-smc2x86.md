@@ -24,7 +24,7 @@ halt:
 #### 어셈블링, 링킹, 실행
 
 ```bash
-nasm -felf32 smc2.x86.s && ld -m elf_i386 --omgaics smc2.x86.o -o smc2.x86 && ./smc2.x86
+nasm -felf32 smc2.x86.s && ld -m elf_i386 --omagic smc2.x86.o -o smc2.x86 && ./smc2.x86
 ```
 
 본래라면 gohome 으로 가서 정상 종료가 되겠지만.
