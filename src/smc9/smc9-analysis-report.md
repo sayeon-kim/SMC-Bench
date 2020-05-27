@@ -1,6 +1,6 @@
 # SMC 코드 9번
 
-#### Self Modifying Code
+#### Self Growing Code
 
 ```assembly
 	.text
