@@ -1,6 +1,6 @@
 # smc 코드 8번
 
-**Mutual-modifying Modules**
+**Mutual-modifying Modules - mutual modification**
 
 ```asm
 	.text
