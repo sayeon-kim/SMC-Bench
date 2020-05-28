@@ -36,26 +36,26 @@ global _start
 
 _start:
 	mov edi, _start		; edi에 _start분기를 넣어줌
-	add edi, 16			; edi = edi + 16 (_start의 4번째 명령어)
+	add edi, 16		; edi = edi + 16 (_start의 4번째 명령어)
 	mov edx, edi		; edx = edi
-	jmp f				; jal f
+	jmp f			; jal f
 	mov eax, ebx		; move $2, $8
-	jmp halt			; j halt
+	jmp halt		; j halt
 f:
-	mov ebx, 42			; li $8, 42
+	mov ebx, 42		; li $8, 42
 	mov ecx, [edx-4]	; lw $9, -4($31)
 	mov esi, addr		; lw $10, addr
 	mov esp, [esi]
 	cmp ecx, esp		; bne $9, $10, halt
 	jne halt
-	jmp edx				; jr $31
+	jmp edx			; jr $31
 halt:
-	hlt					; j halt
+	hlt			; j halt
 addr:
 	mov edi, _start		; edi에 _start분기를 넣어줌
-	add edi, 16			; edi = edi + 16 (_start의 4번째 명령어)
+	add edi, 16		; edi = edi + 16 (_start의 4번째 명령어)
 	mov edx, edi		; edx = edi
-	jmp f				; jal f
+	jmp f			; jal f
 ```
 
 <br>
@@ -65,9 +65,9 @@ addr:
 ```assembly
 _start:
 	mov edi, _start		; edi에 _start분기를 넣어줌
-	add edi, 16			; edi = edi + 16 (_start의 4번째 명령어)
+	add edi, 16		; edi = edi + 16 (_start의 4번째 명령어)
 	mov edx, edi		; edx = edi
-	jmp f				; jal f
+	jmp f			; jal f
 ```
 
 mov edx, edi : edx에 _start의 5번째 명령어 저장($31 == $ra)
@@ -76,13 +76,13 @@ mov edx, edi : edx에 _start의 5번째 명령어 저장($31 == $ra)
 
 ```assembly
 f:
-	mov ebx, 42			; li $8, 42
+	mov ebx, 42		; li $8, 42
 	mov ecx, [edx-4]	; lw $9, -4($31)
 	mov esi, addr		; lw $10, addr
 	mov esp, [esi]
 	cmp ecx, esp		; bne $9, $10, halt
 	jne halt
-	jmp edx				; jr $31
+	jmp edx			; jr $31
 ```
 
 mov ecx, [edx-4] : _start의 4번째 명령어 저장
@@ -99,7 +99,7 @@ jmp edx : edx가 가리키는 주소로 분기(mov eax, ebx)
 
 ```assembly
 mov eax, ebx		; move $2, $8
-jmp halt			; j halt
+jmp halt		; j halt
 ```
 mov eax, ebx : eax에 ebx 저장
 
