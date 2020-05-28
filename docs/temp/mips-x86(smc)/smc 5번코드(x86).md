@@ -170,6 +170,23 @@ gen:
 ### 코드설명
 
 ```assembly
+_vec1 dw 22, 0, 25
+_vec2 dw 7, 429, 6
+```
+
+벡터선언
+
+<br>
+
+```assembly
+mov edx, dword [_vec1+0x2]
+```
+
+벡터를 레지스터에 저장
+
+<br>
+
+```assembly
 mov esi, [edx] 				; lw $12, 0($11)
 mov edx, [esi] 				; sw $12, 0($9) 
 mov [edi], edx 				 
