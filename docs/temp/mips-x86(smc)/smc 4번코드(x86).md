@@ -105,3 +105,8 @@ mov eax, ebx : eax에 ebx 저장
 
 jmp halt : halt로 분기 후 종료
 
+<br>
+
+세그먼트오류
+
+![image-20200529012007044](C:\Users\spide\AppData\Roaming\Typora\typora-user-images\image-20200529012007044.png)
