@@ -114,7 +114,7 @@ loop:
    cmp edx, 0					; beqz $10, next
    je next
 
-   mov esi, [ebx+0x4]         		; lw $12, 4($11)    
+   mov esi, [ebx+0x4]         			; lw $12, 4($11)    
    add esi, ebp					; add $12, $12, $13 
    mov [edi], esi				; sw $12, 0($9)
 
@@ -122,7 +122,7 @@ loop:
    add esi, [edx]				; add $12, $12, $10
    mov [edi+0x4], esi         			; sw $12, 4($9) 
 
-   mov esi, [ebx+0x11]			; lw $12, 16($11)
+   mov esi, [ebx+0x11]				; lw $12, 16($11)
    mov [edi+0x8], esi         			; sw $12, 8($9) 
 
    mov esi, [ebx+0x16]				; lw $12, 16($11)
