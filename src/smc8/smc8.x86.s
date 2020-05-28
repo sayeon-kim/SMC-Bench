@@ -11,7 +11,7 @@ alter:
     mov [_start], ebx ; sw $9, _start
     jmp _start
 
-modify :
+modify:
     mov ebx, 0x0
     
     
