@@ -210,4 +210,4 @@ esi에 gen 두번째 명령어 주소 저장
 
 세그먼트오류
 
-![image-20200529012203663](C:\Users\spide\AppData\Roaming\Typora\typora-user-images\image-20200529012203663.png)
+<img src="C:\Users\spide\AppData\Roaming\Typora\typora-user-images\image-20200529012203663.png" alt="image-20200529012203663" style="zoom:100%;" />

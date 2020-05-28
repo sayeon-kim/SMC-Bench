@@ -109,4 +109,4 @@ jmp halt : halt로 분기 후 종료
 
 세그먼트오류
 
-![image-20200529012007044](C:\Users\spide\AppData\Roaming\Typora\typora-user-images\image-20200529012007044.png)
+<img src="C:\Users\spide\AppData\Roaming\Typora\typora-user-images\image-20200529012007044.png" alt="image-20200529012007044" style="zoom:100%;" />
