@@ -100,17 +100,15 @@ _start:
    mov esi, [edx] 				; lw $12, 0($11)   
    mov edx, [esi] 				; sw $12, 0($9) 
    mov [edi], edx 				 
-
-   mov edx, dword [_vec1-0x2]  			; 2byte씩 꺼내오기 위해 미리저장해놓음 ???
    add edi, 4					; addi $9, $9, 4 	
 
 loop:
    cmp eax, ecx					; beq $8, $4, post 
    je post
-   mov ebp, 4					; li $13, 4
+   mov ebp, 2					; li $13, 4
    imul ebp, [eax]				;mul $13, $13, $8
 
-   mov edx, dword [_vec1+0x2] 			; lw $10, vec1($13) 
+   mov edx, dword [_vec1+ebp] 			; lw $10, vec1($13) 
    cmp edx, 0					; beqz $10, next
    je next
 
@@ -137,8 +135,8 @@ post:
    mov esi, [ebx+0x20]				; lw $12, 20($11)
    mov edi, [esi]				; sw $12, 0($9)
    mov edx, dword [_vec2] 			; la $4, vec2
-   ;mov esp, [eip]             			; jal gen(점프하기 전 스택포인터에 주소 저장?)???
-   mov esp, [edi+0x4]				; jal gen(gen 두번째 명령어 $31에 저장)
+   mov esp, post             			; jal gen(gen 두번째 명령어 $31에 저장)
+   add esp, 20				
    jmp gen                    	
 
    mov [result], eax				; sw $2, result
