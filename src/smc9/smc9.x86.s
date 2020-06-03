@@ -9,14 +9,14 @@ _start:
     mov eax, loop ; eax <- addr of loop
     mov ebx, new
     mov ecx, new
-    mov esi, 2
-    mov edi, 10
+    mov esi, 4
+    mov edi, 20
     mov ebp, 0
 loop:
     mov edx, [eax] ; edx <- instruction of loop
     mov [ebx], edx ; [ebx] <- store instruction of loop in pointer of ebx
-    add eax, esi ; eax += 2, instruction length is 2byte
-    add ebx, esi ; ebx += 2
+    add eax, esi ; eax += 4, instruction length is 2byte 2줄씩 복사
+    add ebx, esi ; ebx += 4
     cmp eax, ecx ; comparison about eax and ecx
     jne loop ; if not equal, than jump to the loop.
     mov ecx, ebx ; if equal, all code is copied in new label
