@@ -15,74 +15,119 @@ result dd 0
 global _start
 
 _start:
-   mov eax, 3     ; $4
-   mov ecx, 0     ; $8
-   mov edi, gen   ; $9
-   mov ebx, tpl   ; $11
+   mov eax, 3     
+   mov ecx, 0     
+   mov edi, gen   
+   mov ebx, tpl   
 
-   mov edx, [ebx] ; lw $12, 0($11)	
-   mov [edi], edx ; sw $12, 0($9) ;★ 첫 번째 명령어 생성
-   ;mov [edi+1], word 0
-   ;mov [edi+3], word 0 
+   mov edx, [ebx]       ; edx <- tpl 1st instruction
+   mov [edi], edx       ; gen 1st instruction <- tpl 1st instruction overwriting
+   mov [edi+1], word 0  ; 00 00 
+   mov [edi+3], word 0 
 
-   ;mov esi, dword [_vec1-4]  ; 2byte씩 꺼내오기 위해 미리저장해놓음
-   add edi, 5     ; mov명령이므로 5 뒤에 넣어줌
+   add edi, 5           ; edi <- 2nd instruction
 
 loop:
-   cmp eax, ecx
+   cmp eax, ecx         ; loop cycle count 3
    je post
    mov ebp, 4
-   imul ebp, ecx 
+   imul ebp, ecx        ; vec index           
 
-   mov esi, dword [_vec1+ebp]  ; lw $10, vec1($13) 
-   cmp esi, 0
+   mov esi, dword [_vec1+ebp]  
+   cmp esi, 0           ; if vec's value 0 -> jmp next //vec1 2nd value
    je next
 
-   mov edx, [ebx+5]         ; edx <- tpl 두번째 명령어
-   add edx, ebp             ; edx <- tpl 두번째 명령어 + ebp
-   mov [edi], edx           ; gen 두번째 명령어 <- edx overwriting
-  
-   mov edx, [ebx+7]         ; edx <- tpl 세번째 명령어
-   add edx, esi             ; edx <- tpl 세번째 명령어 + vec1 첫번째 원소(22)
-   mov [edi+2], edx         ; gen 세번째 명령어 <- tpl 세번째 명령어 + vec1 첫번째 원소(22)
-  
-   mov edx, [ebx+12]        ; edx <- tpl 네번째 명령어
-   mov [edi+7], edx         ; gen 네번째 명령어 <- tpl 네번째 명령어
-   
-   mov edx, [ebx+16]        ; edx <- tpl 다섯번째 명령어
-   mov [edi+10], edx        ; gen 다섯번째 명령어 <- tpl 다섯번째 명령어
+   mov dx, [ebx+5]      ; gen 2nd instruction <- tpl 2nd instruction overwriting
+   mov [edi], dx
+   mov edx, ebp         
+   mov [edi+2], dl      
 
-   add edi, 17              ; edi <- 
+   mov dx, [ebx+8]      ; gen 3rd instruction <- tpl 3rd instruction overwriting       
+   mov [edi+3], dx             
+
+   mov dl, [ebx+10]     ; gen 4th instruction <- tpl 4th instruction overwriting
+   mov [edi+5], dl       
+   mov edx, esi
+   mov [edi+6], dl       
+   mov [edi+7], byte 0
+   mov [edi+8], word 0      
+
+   mov edx, [ebx+15]    ; gen 5th instruction <- tpl 5th instruction overwriting
+   mov [edi+10], edx     
+
+   mov dx, [ebx+19]     ; gen 6th instruction <- tpl 6th instruction overwriting
+   mov [edi+14], dx
+
+   add edi, 16
 
 next:
    add ecx, 1
    jmp loop
 
 post:
-   mov edx, [ebx+18]				; lw $12, 20($11)
-   mov [edi], edx				   ; sw $12, 0($9)
-   mov esi, dword [_vec2] 			; la $4, vec2            						
-   jmp gen                    	
+   mov dx, [ebx+21]     ; gen 7th instruction <- tpl 7th instruction overwriting         
+   mov [edi], dx 
+   
+   mov esi, _vec2      
+   mov esp, post        
+   add esp, 21          ; esp <- post 7th instruction (mov [result], eax)
+   jmp gen                       
 
-   mov [result], esp				; sw $2, result
-   jmp _start
+   mov [result], eax    
+
+   mov eax, 1           ; exit
+   xor ebx, ebx
+   int 0x80
   
 tpl:
-   mov esp, 0
-   mov ebp, [eax]
+   mov eax, 0
+   add esi, 0
+   mov ebp, [esi]
    mov edx, 0
-   imul edx, ebp
-   add esp, edx
-   jmp [esp]                  
+
+   imul edx, ebp   
+   nop
+   add eax, edx
+   jmp esp              ; jmp post
+   nop
 
 gen:
-   mov esp, 0					; li $2, 0           
-   mov ebp, [eax]				; lw $13, 0($4)      
-   mov edx, 22					; li $12, 22
-   imul edx, ebp				; mul $12, $12, $13
-   add esp, edx					; add $2, $2, $12
-   mov ebp, [eax+8]				; lw $13, 8($4)
-   mov edx, 25					; li $12, 25
-   imul edx, ebp				; mul $12, $12, $13
-   add esp, edx					; add $2, $2, $12
-   jmp [esp]					; jr $31
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
+   nop
