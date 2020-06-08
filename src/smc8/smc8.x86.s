@@ -1,18 +1,22 @@
 section .data
+
 section .text
+
 global _start
 
 _start:
-    jmp alter	        ;j alter
-    mov [alter], ebx  ;sw $8, alter
+    jmp alter           ; jmp alter
+    mov [alter], ax
+    
 alter:
-    mov eax, [_start] ; lw $8, _start
-    mov ebx, [modify] ; li $9, 0
-    mov [_start], ebx ; sw $9, _start
-    jmp _start
+    mov ax, [_start]    ; ax <- load instruction of _start (jmp alter)
+    mov bl, 0x90        ; bl <- load instruction of nop
+    mov [_start], bl    ; store address of 'nop' in _start
+    mov [_start+1], bl
+    jmp _start          ; jmp _start
 
-modify:
-    mov ebx, 0x0
-    
-    
-   
+;_start:
+;   nop
+;   mov [alter], ax
+;alter:
+;   jmp alter
