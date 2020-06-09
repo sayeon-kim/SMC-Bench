@@ -1,6 +1,6 @@
 # smc1
 
-#### The Simple Instruction Relpacing Modification Code
+#### The Simple Instruction Replacing Modification Code
 
 Before modifying, This program print a text "Exit Program." and terminate program.
 
