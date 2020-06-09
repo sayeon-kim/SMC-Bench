@@ -1,3 +1,4 @@
+```asm
 ;Effective Addresses
 ;https://nasm.us/doc/nasmdoc3.html#section-3.3
 section .data
@@ -28,3 +29,4 @@ halt:
 
 ;1byte 씩 읽습니다.
 ;nasm -felf32 read1byte.s && ld -m elf_i386 --omagic read1byte.o -o read1byte && gdb read1byte
+```
