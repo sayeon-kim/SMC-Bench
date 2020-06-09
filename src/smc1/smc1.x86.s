@@ -46,6 +46,7 @@ target:
 	nop
 	nop
 	nop
+	nop
 exit:
 	mov eax, 4 ; eax <- 4, syscall number (print) But, never execute.
 	mov ebx, 1 ; ebx <- 1, syscall argument1 (stdout) But, never execute.
