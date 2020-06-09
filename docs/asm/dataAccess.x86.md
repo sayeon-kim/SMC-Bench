@@ -1,3 +1,4 @@
+```asm
 ;Effective Addresses
 ;https://nasm.us/doc/nasmdoc3.html#section-3.3
 section .data
@@ -19,3 +20,4 @@ halt:
 
 ;eax에 var1에 저장되어 있는 값을 가져옵니다.
 ;nasm -felf32 loadData.s && ld -m elf_i386 --omagic loadData.o -o loadData && gdb loadData
+```

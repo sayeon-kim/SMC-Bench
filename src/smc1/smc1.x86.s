@@ -14,18 +14,18 @@ section .text
 global _start
 
 _start:
-    jmp modify
+	jmp modify
 modify:
 	;write 7byte instructions to target.
-    mov eax, [new] ; eax <- (new+0, new+1, new+2, new+3)
-    mov [target], eax ; eax(new+0, new+1, new+2, new+3) -> target(target+0, target+1, target+2, target+3)
+	mov eax, [new] ; eax <- (new+0, new+1, new+2, new+3)
+	mov [target], eax ; eax(new+0, new+1, new+2, new+3) -> target(target+0, target+1, target+2, target+3)
 	mov eax, [new+3] ; eax <- (new+3, new+4, new+5, new+6)
 	mov [target+3], eax ; eax(new+3, new+4, new+5, new+6) -> target+3(target+3, target+4, target+5, target+6)
 	
-    jmp target
+	jmp target
 new:
 	mov eax, halt ; 5byte instruction
-    jmp eax    	  ; 2byte instruction, absolute jump.
+	jmp eax    	  ; 2byte instruction, absolute jump.
 halt:
 	mov eax, 4 ; eax <- 4, syscall number (print)
 	mov ebx, 1 ; ebx <- 1, syscall argument1 (stdout)
@@ -40,7 +40,7 @@ halt:
 
 	jmp halt ; infinity loop
 target:
-    nop ;place holder
+	nop ;place holder
 	nop
 	nop
 	nop
