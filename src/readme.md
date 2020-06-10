@@ -9,6 +9,7 @@ There are nasm, ld, python, mars
 #### usage
 
 ```bash
+python run_x86.py smc1/smc1.x86.s
 ```
 
 #### todo
