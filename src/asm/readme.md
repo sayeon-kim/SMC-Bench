@@ -1,10 +1,10 @@
 # SMC Bench
 
+## SMC
+
 #### Requirements
 
-you run at Ubuntu 18.04
-
-There are nasm, ld, python, mars
+We assume your os is Ubuntu 18.04 and you have python, nasm, mars, ld, etc...
 
 #### usage
 
@@ -23,7 +23,6 @@ python run_x86.py smc1/smc1.x86.s
 
 - [ ] code refactoring
   - [x] smc1
-  - [ ] smc2
   - [ ] smc3
   - [ ] smc4
   - [ ] smc5
