@@ -2,11 +2,23 @@
 
 #### Requirements
 
+you run at Ubuntu 18.04
+
+There are nasm, ld, python, mars
+
 #### usage
+
+```bash
+```
 
 #### todo
 
 - [ ] make python script for running smc code
+  - [x] running x86 code
+  - [ ] running mips code
+  - [ ] objdump option
+  - [ ] gdb option
+  - [ ] pmap option
 
 - [ ] code refactoring
   - [x] smc1
