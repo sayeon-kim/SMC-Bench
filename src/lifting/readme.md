@@ -19,11 +19,11 @@ lifterRuntime = "/usr/local/lib/libmcsema_rt64-9.0.a"
 #### usage
 
 ```bash
-python lifting.py --help
-python lifting.py --compile <target>
-python lifting.py --lift <target>
-python lifting.py --ll <target>
-python lifting.py --recompile <target>
+python3 lifting.py --help
+python3 lifting.py --compile <target>
+python3 lifting.py --lift <target>
+python3 lifting.py --ll <target>
+python3 lifting.py --recompile <target>
 
 #default setting
 ARCH = "amd64"
