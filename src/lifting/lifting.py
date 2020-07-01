@@ -1,76 +1,148 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 
-# todo
-## [ ] if file exists then skip phase. save time.
-## [ ] make abi_libraries option.
-
-"""do lifting
-
-this code.
-
-"""
-
 import os
 import sys
 
-def debugingPrint(*args):
-	for i in args:
-		print(i)
+# Config
+cfgTool = "mcsema-disass --disassembler /opt/ida-7.1/idat64" 
+lifterTool = "mcsema-lift-9.0"
+llvmDisTool = "llvm-dis"
+compileTool = "clang-9"
+lifterRuntime = "/usr/local/lib/libmcsema_rt64-9.0.a"
+linkerTool = "ld"
+
+ARCH = "amd64"
+COMPILE_TARGET = ["x86_64","unknown","linux","gnu"]
+ENTRY_POINT = "main"
+OS = "linux"
+
+FULL_PATH = ""
+TARGET_FILE_PATH = ""
+TARGET_FILE_FULL = ""
+TARGET_FILE = ""
+TARGET_DEST = ""
+
+OBJ_FILE = ""
+BINARY_FILE = ""
+BINARY_FILE_NEW = ""
+
+CFG_FILE = ""
+LOG_FILE = ""
+BC_FILE = ""
+LL_FILE = ""
 
 def help():
 	""" print usage """
 	
 	print("Usage")
 	print("")
-	print("    python lifting.py <path-to-source>")
+	print("    python3 lifting.py --compile <path-to-target>")
+	print("    python3 lifting.py --recompile <path-to-target>")
+	print("    python3 lifting.py --lift <path-to-target>")
+	print("    python3 lifting.py --ll <path-to-target>")
 	print("")
 	print("Example")
 	print("")
-	print("    python lifting.py ./helloWorld/helloWorld.c")
+	print("    python3 lifting.py --compile ./helloWorld/helloWorld.c")
+	print("    python3 lifting.py --compile ./helloWorld/helloWorld.c --arch x86")
+	print("    python3 lifting.py --compile ./helloWorld/helloWorld.c --arch amd64")
+	print("    python3 lifting.py --recompile ./helloWorld/helloWorld.c --arch x86")
+	print("    python3 lifting.py --lift ./helloWorld/helloWorld.out --arch x86")
+	print("    python3 lifting.py --ll ./helloWorld/helloWorld.out")
 	return 0
+
+def getTargetFilePath(inputString):
+	return os.path.dirname(inputString)
+
+def getTargetFile(inputString):
+	fileName = os.path.basename(inputString)
+	if ''.join(fileName.split(".")[:-1]) == "":
+		return inputString
+	else:
+		return ''.join(fileName.split(".")[:-1])
 
 def makeABILibrary():
 	# "clang-9 -S -emit-llvm "
 	pass
 
+def updateTarget(inputString):
+	global FULL_PATH, TARGET_FILE_PATH, TARGET_FILE, OBJ_FILE, BINARY_FILE, CFG_FILE, BC_FILE, LOG_FILE, TARGET_DEST, TARGET_FILE_FULL, LL_FILE, BINARY_FILE_NEW
+	FULL_PATH = inputString
+	TARGET_FILE_PATH = getTargetFilePath(FULL_PATH)
+	TARGET_FILE_FULL = os.path.basename(FULL_PATH)
+	TARGET_FILE = getTargetFile(FULL_PATH)
+	TARGET_DEST = TARGET_FILE_PATH
+	OBJ_FILE = os.path.join(TARGET_DEST, TARGET_FILE+".o")
+	BINARY_FILE = os.path.join(TARGET_DEST, TARGET_FILE+".out")
+	BINARY_FILE_NEW = os.path.join(TARGET_DEST, TARGET_FILE+".new.out")
+	CFG_FILE = os.path.join(TARGET_DEST, TARGET_FILE + ".cfg")
+	BC_FILE = os.path.join(TARGET_DEST, TARGET_FILE + ".bc")
+	LOG_FILE = os.path.join(TARGET_DEST, TARGET_FILE + ".log")
+	LL_FILE = os.path.join(TARGET_DEST, TARGET_FILE + ".ll")
+
 def main():
-	# Validation
+	global ARCH, ENTRY_POINT, OS, COMPILE_TARGET
+
+	#Validation
+	## to do something.
+
+	# print help
 	ARG_LEN = len(sys.argv)-1
-	if ARG_LEN > 1  or ARG_LEN < 1:
+	if ARG_LEN < 1:
 		help()
 		return 1
+	for i in sys.argv[1:]:
+		if i == "--help":
+			help()
+			return 1
+	# config
+	if "--arch" in sys.argv[1:]:
+		ARCH = sys.argv[sys.argv.index("--arch")+1]
+		if ARCH == "amd64":
+			ARCH_TEMP = "x86_64"
+		elif ARCH == "x86":
+			ARCH_TEMP = "i386"
+		COMPILE_TARGET[0] = f"{ARCH_TEMP}"
+
+	if "--os" in sys.argv[1:]:
+		OS = sys.argv[sys.argv.index("--os")+1]
+		if OS == "win32":
+			print(f"Not yet, this script don't suuport {OS}")
+		elif OS == "win64":
+			print(f"Not yet, this script don't suuport {OS}")
+		COMPILE_TARGET[2] = OS
+		
 
 	# run
+	if "--compile" in sys.argv[1:]:
+		updateTarget(sys.argv[sys.argv.index("--compile")+1])
+		os.system(f"mkdir -p {TARGET_DEST}")
+		os.system(f"{compileTool} -c {FULL_PATH} -o {OBJ_FILE} -target {'-'.join(COMPILE_TARGET)} && {compileTool} {OBJ_FILE} -o {BINARY_FILE} -target {'-'.join(COMPILE_TARGET)}")
+	
+	if "--recompile" in sys.argv[1:]:
+		updateTarget(sys.argv[sys.argv.index("--recompile")+1])
+		os.system(f"mkdir -p {TARGET_DEST}")
+		os.system(f"{compileTool} {BC_FILE} {lifterRuntime} -o {BINARY_FILE_NEW} -target {'-'.join(COMPILE_TARGET)}")
 
-	## Exe BUILD VARIABLES
-	SOURCE_FILE_PATH = sys.argv[-1]
-	SOURCE_FILE = os.path.basename(SOURCE_FILE_PATH)
-	TARGET_DEST = os.path.join(os.path.dirname(SOURCE_FILE_PATH), ".dest")
-	OBJ_FILE = os.path.join(TARGET_DEST, SOURCE_FILE[:-2]+".o")
-	BINARY_FILE = os.path.join(TARGET_DEST, SOURCE_FILE[:-2])
+	if "--lift" in sys.argv[1:]:
+		updateTarget(sys.argv[sys.argv.index("--lift")+1])
+		os.system(f"mkdir -p {TARGET_DEST}")
+		os.system(f"{cfgTool} --os {OS} --arch {ARCH} --entrypoint {ENTRY_POINT} --binary {FULL_PATH} --output {CFG_FILE} --log_file {LOG_FILE}")
+		os.system(f"{lifterTool} --os {OS} --arch {ARCH} --cfg {CFG_FILE} --output {BC_FILE}")
 
-	## Make CFG VARIABLES
-	CFG_FILE = os.path.join(TARGET_DEST, ''.join(SOURCE_FILE.split(".")[:-1]) + ".cfg")
-	BC_FILE = os.path.join(TARGET_DEST, ''.join(SOURCE_FILE.split(".")[:-1]) + ".bc")
-	LOG_FILE = os.path.join(TARGET_DEST, ''.join(SOURCE_FILE.split(".")[:-1]) + ".log")
+	if "--ll" in sys.argv[1:]:
+		updateTarget(sys.argv[sys.argv.index("--ll")+1])
+		os.system(f"mkdir -p {TARGET_DEST}")
+		os.system(f"{llvmDisTool} {FULL_PATH} -o {LL_FILE}")
 
-	## LIFTING VARIABLES
-	DISASSEMBLER = "/opt/ida-7.1/idat64"
-	ARCH = "amd64"
-	ENTRYPOINT = "main"
-	ABI_FILE = os.path.abspath(os.path.join(os.path.dirname(SOURCE_FILE_PATH), ''.join(SOURCE_FILE.split(".")[:-1]) + ".abi.bc"))
-
-	## Todo
-	# LL_FILE = os.path.join(TARGET_DEST, ''.join(SOURCE_FILE.split(".")[:-1]) + ".ll")
-
-
-	os.system("mkdir -p {}".format(TARGET_DEST))
-	os.system("clang-9 {} -o {}".format(SOURCE_FILE_PATH, BINARY_FILE)) # make binary
-	os.system("mcsema-disass --disassembler {} --os linux --arch {} --binary {} --output {} --entrypoint {} --log_file {}".format(DISASSEMBLER, ARCH, BINARY_FILE, CFG_FILE, ENTRYPOINT, LOG_FILE)) # make cfg
-	os.system("mcsema-lift-9.0 --os linux --arch {} --cfg {} --output {} --abi_libraries {}".format(ARCH, CFG_FILE, BC_FILE, ABI_FILE)) # lift
-	print("mcsema-lift-9.0 --os linux --arch {} --cfg {} --output {} --abi_libraries {}".format(ARCH, CFG_FILE, BC_FILE, ABI_FILE))
 	return 0
 
 if __name__ == "__main__":
 	main()
+
+# clang-9 -rdynamic -o# -g a.c -o a
+# mcsema-disass --disassembler /opt/ida-7.1/idat64 --os linux --arch amd64 --entrypoint main --binary a.out --output a.cfg --log_file a.log
+# mcsema-lift-9.0 --os linux --arch amd64 --cfg a.cfg --output a.bc
+# llvm-dis a.bc -o a.ll
+# clang-9 -o a.new a.bc /usr/local/lib/libmcsema_rt64-9.0.a
