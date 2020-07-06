@@ -1,7 +1,0 @@
-## objdump
-
-## gdb
-
-## pwndbg
-
-## 
