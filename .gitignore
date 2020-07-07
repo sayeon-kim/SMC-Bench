@@ -1,6 +1,6 @@
 .dest
-.ll
-.bc
-.log
-.out
-.o
+*.ll
+*.bc
+*.log
+*.out
+*.o
