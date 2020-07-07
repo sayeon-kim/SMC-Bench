@@ -23,13 +23,13 @@ Num:    Value          Size Type    Bind   Vis      Ndx Name
 3: 0000000000000000    18 FUNC    GLOBAL DEFAULT    2 add
 4: 0000000000000020    15 FUNC    GLOBAL DEFAULT    2 main
 
-xxd -p -s 0x40 -l 18 function.o
-554889e5897dfc8975f88b45fc0345f85dc3
-xxd -p -s 0x60 -l 15 function.o
-554889e531c0c745fc000000005dc3
+xxd -p -s 0x40 -l 0x18 function.o
+554889e5897dfc8975f88b45fc0345f85dc3662e0f1f8400
+xxd -p -s 0x60 -l 0x15 function.o
+554889e531c0c745fc000000005dc300636c616e67
 
-remill-lift-9.0 --os linux --arch amd64 --bytes 554889e5897dfc8975f88b45fc0345f85dc3 --ir_out add.ll
-remill-lift-9.0 --os linux --arch amd64 --bytes 554889e531c0c745fc000000005dc3 --ir_out main.ll
+remill-lift-9.0 --os linux --arch amd64 --bytes 554889e5897dfc8975f88b45fc0345f85dc3662e0f1f8400 --ir_out add.ll
+remill-lift-9.0 --os linux --arch amd64 --bytes 554889e531c0c745fc000000005dc300636c616e67 --ir_out main.ll
 ```
 
 ## Example 2 
@@ -80,12 +80,13 @@ readelf -s smc1.x86.o
 15: 0000004e     0 NOTYPE  LOCAL  DEFAULT    2 exit
 16: 00000000     0 NOTYPE  GLOBAL DEFAULT    2 _start
 
-xxd -p -s 0x190 -l 70 smc1.x86.o
+xxd -p -s 0x190 -l 0x70 smc1.x86.o
 eb00a118000000a348000000a11b000000a34b000000eb30b81f000000ff
 e0b804000000bb01000000b90f000000ba17000000cd80b8a2000000bb26
-000000b9e8030000cd80
+000000b9e8030000cd80ebd7909090909090b804000000bb01000000b900
+000000ba0f000000cd80b801000000bb00000000cd80
 
 remill-lift-9.0 --os linux --arch x86 --bytes eb00a118000000a348000000a11b000000a34b000000eb30b81f000000ff
 e0b804000000bb01000000b90f000000ba17000000cd80b8a2000000bb26
-000000b9e8030000cd80 --ir_out smc1.x86.o
+000000b9e8030000cd80 --ir_out smc1.x86.ll
 ```
