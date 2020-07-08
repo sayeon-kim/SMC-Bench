@@ -9,7 +9,8 @@ cfgTool = "mcsema-disass --disassembler /opt/ida-7.1/idat64"
 lifterTool = "mcsema-lift-9.0"
 llvmDisTool = "llvm-dis"
 compileTool = "clang-9"
-lifterRuntime = "/usr/local/lib/libmcsema_rt64-9.0.a"
+lifterRuntimeAMD64 = "/usr/local/lib/libmcsema_rt64-9.0.a"
+lifterRuntimeX86 = "/usr/local/lib/libmcsema_rt32-9.0.a"
 linkerTool = "ld"
 
 ARCH = "amd64"
@@ -19,7 +20,6 @@ OS = "linux"
 
 FULL_PATH = ""
 TARGET_FILE_PATH = ""
-TARGET_FILE_FULL = ""
 TARGET_FILE = ""
 TARGET_DEST = ""
 
@@ -37,19 +37,22 @@ def help():
 	
 	print("Usage")
 	print("")
-	print("    python3 lifting.py --compile <path-to-target>")
-	print("    python3 lifting.py --recompile <path-to-target>")
-	print("    python3 lifting.py --lift <path-to-target>")
+	print("    python3 lifting.py --compile <path-to-target> --arch <x86|amd64>")
+	print("    python3 lifting.py --recompile <path-to-target> --arch <x86|amd64>")
+	print("    python3 lifting.py --lift <path-to-target> --arch <x86|amd64>")
 	print("    python3 lifting.py --ll <path-to-target>")
 	print("")
 	print("Example")
 	print("")
-	print("    python3 lifting.py --compile ./helloWorld/helloWorld.c")
 	print("    python3 lifting.py --compile ./helloWorld/helloWorld.c --arch x86")
+	print("    python3 lifting.py --lift ./helloWorld/helloWorld.x86.out --arch x86")
+	print("    python3 lifting.py --ll ./helloWorld/helloWorld.x86.bc")
+	print("    python3 lifting.py --recompile ./helloWorld/helloWorld.x86.bc --arch x86")
+	print("")
 	print("    python3 lifting.py --compile ./helloWorld/helloWorld.c --arch amd64")
-	print("    python3 lifting.py --recompile ./helloWorld/helloWorld.c --arch x86")
-	print("    python3 lifting.py --lift ./helloWorld/helloWorld.out --arch x86")
-	print("    python3 lifting.py --ll ./helloWorld/helloWorld.out")
+	print("    python3 lifting.py --lift ./helloWorld/helloWorld.amd64.out --arch amd64")
+	print("    python3 lifting.py --ll ./helloWorld/helloWorld.amd64.bc")
+	print("    python3 lifting.py --recompile ./helloWorld/helloWorld.amd64.bc --arch amd64")
 	return 0
 
 def getTargetFilePath(inputString):
@@ -58,24 +61,31 @@ def getTargetFilePath(inputString):
 def getTargetFile(inputString):
 	fileName = os.path.basename(inputString)
 	if ''.join(fileName.split(".")[:-1]) == "":
-		return inputString
+		return fileName
 	else:
-		return ''.join(fileName.split(".")[:-1])
+		return '.'.join(fileName.split(".")[:-1])
 
 def makeABILibrary():
 	# "clang-9 -S -emit-llvm "
 	pass
 
 def updateTarget(inputString):
-	global FULL_PATH, TARGET_FILE_PATH, TARGET_FILE, OBJ_FILE, BINARY_FILE, CFG_FILE, BC_FILE, LOG_FILE, TARGET_DEST, TARGET_FILE_FULL, LL_FILE, BINARY_FILE_NEW
+	global FULL_PATH, TARGET_FILE_PATH, TARGET_FILE, OBJ_FILE, BINARY_FILE, CFG_FILE, BC_FILE, LOG_FILE, TARGET_DEST, LL_FILE, BINARY_FILE_NEW
 	FULL_PATH = inputString
+	
 	TARGET_FILE_PATH = getTargetFilePath(FULL_PATH)
-	TARGET_FILE_FULL = os.path.basename(FULL_PATH)
 	TARGET_FILE = getTargetFile(FULL_PATH)
 	TARGET_DEST = TARGET_FILE_PATH
-	OBJ_FILE = os.path.join(TARGET_DEST, TARGET_FILE+".o")
-	BINARY_FILE = os.path.join(TARGET_DEST, TARGET_FILE+".out")
-	BINARY_FILE_NEW = os.path.join(TARGET_DEST, TARGET_FILE+".new.out")
+
+	if ARCH == "x86":
+		BINARY_FILE_NEW = os.path.join(TARGET_DEST, TARGET_FILE+".new.out")
+		BINARY_FILE = os.path.join(TARGET_DEST, TARGET_FILE+".x86.out")
+		OBJ_FILE = os.path.join(TARGET_DEST, TARGET_FILE+".x86.o")
+	elif ARCH == "amd64":
+		BINARY_FILE_NEW = os.path.join(TARGET_DEST, TARGET_FILE+".new.out")
+		BINARY_FILE = os.path.join(TARGET_DEST, TARGET_FILE+".amd64.out")
+		OBJ_FILE = os.path.join(TARGET_DEST, TARGET_FILE+".amd64.o")
+
 	CFG_FILE = os.path.join(TARGET_DEST, TARGET_FILE + ".cfg")
 	BC_FILE = os.path.join(TARGET_DEST, TARGET_FILE + ".bc")
 	LOG_FILE = os.path.join(TARGET_DEST, TARGET_FILE + ".log")
@@ -123,7 +133,11 @@ def main():
 	if "--recompile" in sys.argv[1:]:
 		updateTarget(sys.argv[sys.argv.index("--recompile")+1])
 		os.system(f"mkdir -p {TARGET_DEST}")
-		os.system(f"{compileTool} {BC_FILE} {lifterRuntime} -o {BINARY_FILE_NEW} -target {'-'.join(COMPILE_TARGET)}")
+		if ARCH == "amd64":
+
+			os.system(f"{compileTool} {FULL_PATH} {lifterRuntimeAMD64} -o {BINARY_FILE_NEW} -target {'-'.join(COMPILE_TARGET)}")
+		elif ARCH == "x86":
+			os.system(f"{compileTool} {FULL_PATH} {lifterRuntimeX86} -o {BINARY_FILE_NEW} -target {'-'.join(COMPILE_TARGET)}")
 
 	if "--lift" in sys.argv[1:]:
 		updateTarget(sys.argv[sys.argv.index("--lift")+1])
