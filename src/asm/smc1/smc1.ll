@@ -54,9 +54,18 @@ define dso_local %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3
   %8 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0 ;%8 : i32
   
   %9 = tail call i32 @__remill_read_memory_32(%struct.Memory* %2, i32 24) #3
+  ;%9 = i32
+  ;Send control flow to @__remill_read_memory_32
   %10 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %2, i32 72, i32 %9) #3
+  ;%10 = %struct.Memory*
+  ;Send control flow to @__remill_write_memory_32
   %11 = tail call i32 @__remill_read_memory_32(%struct.Memory* %10, i32 27) #3
+  ;%11 = i32
+  ;Send control flow to @__remill_read_memory_32
   %12 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %10, i32 75, i32 %11) #3
+  ;%12 = %struct.Memory*
+  ;Send control flow to @__remill_write_memory_32
+  `
   store i32 4, i32* %4, align 4, !tbaa !0
   store i32 1, i32* %5, align 4, !tbaa !0
   store i32 0, i32* %6, align 4, !tbaa !0
