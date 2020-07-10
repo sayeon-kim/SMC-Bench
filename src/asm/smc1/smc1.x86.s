@@ -57,5 +57,5 @@ exit:
 	mov ebx, 0 ; ebx <- 0, syscall argument1 (return value) But, never execute.
 	int 0x80; syscall But, never execute.
 
-;nasm -felf32 hello.x86.s -o hello.o
-;ld -m elf_i386 hello.o -o hello.out
+;nasm -felf32 smc1.x86.s -o smc1.x86.o
+;ld -m elf_i386 smc1.x86.o -o smc1.x86.out
