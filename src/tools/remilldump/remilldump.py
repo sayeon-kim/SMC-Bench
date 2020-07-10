@@ -27,9 +27,13 @@ else:
 	raise Exception("Select output. filename")
 
 
-o0 = subprocess.Popen(['readelf', '-S', target], stdout=subprocess.PIPE)
+o0 = subprocess.Popen(['readelf', '-S', target, '--wide'], stdout=subprocess.PIPE)
 o1 = subprocess.Popen(['grep', '\W\.text'], stdin=o0.stdout, stdout=subprocess.PIPE)
 o0.stdout.close()
+#
+#
+# i writed hardcoding. it can be problem in future (but now is okay. anyway it works!)
+
 o2 = subprocess.Popen(['awk', '{print $5"."$6"."$7}'], stdin=o1.stdout, stdout=subprocess.PIPE)
 o1.stdout.close()
 output, err = o2.communicate()
@@ -47,7 +51,6 @@ hex_text_end = hex(text_end)
 o3 = subprocess.Popen(['xxd', '-p', '-s', hex_text_start, '-l',hex_text_size, target], stdout=subprocess.PIPE)
 text_bytes, err = o3.communicate()
 text_bytes = text_bytes.decode("utf-8").replace('\n','')
-print(text_bytes)
 o3.stdout.close()
 
 o4 = subprocess.Popen([remill_lift, "--os", target_os, "--arch", target_arch,"--bytes", text_bytes, "--ir_out", output_file], stdout=subprocess.PIPE)
