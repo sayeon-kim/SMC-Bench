@@ -40,7 +40,10 @@ target triple = "i386-pc-linux-gnu-elf"
 define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
   br label %4
 
-; <label>:4:                                      ; preds = %4, %3
+; <label>:4:                                      ; preds = %4, %3\
+
+<-- ;start, ;xor1 -->
+
   %5 = phi i32 [ 60, %3 ], [ %10, %4 ]
   %6 = phi %struct.Memory* [ %2, %3 ], [ %9, %4 ]
   %7 = tail call i32 @__remill_read_memory_32(%struct.Memory* %6, i32 %5) #2
