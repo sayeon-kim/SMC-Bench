@@ -89,6 +89,8 @@ define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias dereference
 
 ; <label>:37:                                     ; preds = %37, %36
 
+<-- ;halt -->
+
   br label %37
 }
 
