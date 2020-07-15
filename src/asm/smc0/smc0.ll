@@ -42,16 +42,22 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   %5 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0
   %6 = bitcast %union.anon.1* %4 to i8*
   %AH = getelementptr i8, i8* %6, i32 1, !remill_register !0
+  
+  ; mov eax, 1 : 0x b8 01 00 00 00
   %7 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %2, i32 99, i8 zeroext -72) #3
   %8 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %7, i32 100, i8 zeroext 1) #3
   %9 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %8, i32 101, i8 zeroext 0) #3
   %10 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %9, i32 102, i8 zeroext 0) #3
   %11 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %10, i32 103, i8 zeroext 0) #3
+  
+  ; mov ebx, 999 : 0x bb e7 03 00 00
   %12 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %11, i32 104, i8 zeroext -69) #3
   %13 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %12, i32 105, i8 zeroext -25) #3
   %14 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %13, i32 106, i8 zeroext 3) #3
   %15 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %14, i32 107, i8 zeroext 0) #3
   %16 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %15, i32 108, i8 zeroext 0) #3
+  
+  ; int 0x87 : 0x cd 80
   %17 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %16, i32 109, i8 zeroext -51) #3
   store i8 -128, i8* %AH, align 1, !tbaa !1
   %18 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %17, i32 110, i8 zeroext -128) #3
