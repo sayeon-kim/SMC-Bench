@@ -44,10 +44,11 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   %7 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 3, i32 0, i32 0 ;%7 = EBX
   %8 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 9, i32 0, i32 0 
   %9 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 11, i32 0, i32 0 ;%9 = 10을 담는 장소
-  %10 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0 ;%33 = EIP
+  %10 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0 ;%10 = EIP
+  ;EBP, ECX, ESI, EDI ?
 
-  %CL = bitcast %union.anon.1* %4 to i8*, !remill_register !0 ;%union.anon.1 type인 %4, %5를 i8* type으로 바꿈GPR(5)
-  %DL = bitcast %union.anon.1* %5 to i8*, !remill_register !1 ;GPR(7)
+  %CL = bitcast %union.anon.1* %4 to i8*, !remill_register !0 ;%union.anon.1 type인 %4 GPR(5)를 i8* type으로 바꿈
+  %DL = bitcast %union.anon.1* %5 to i8*, !remill_register !1 ;%union.anon.1 type인 %5 GPR(7)를 i8* type으로 바꿈
   store i32 10, i32* %9, align 4, !tbaa !2 ;%9 = 10 
 
   %11 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 1 ;arithflags
@@ -57,12 +58,13 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   %15 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 9
   %16 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 13
 
-  %17 = tail call zeroext i8 @__remill_read_memory_8(%struct.Memory* %2, i32 51) #4 ;memory구조체의 %2에 주소 51에 있는 값을 32비트로 확장해서 %17에 저장
+  ; _start:
+  %17 = tail call zeroext i8 @__remill_read_memory_8(%struct.Memory* %2, i32 51) #4 ;memory구조체의 %2에 주소 51에 있는 값을 32비트로 확장해서 %17에 저장 ;%17 = [51]
   %18 = lshr i8 %17, 7 ;8bit의 %17을 오른쪽을 7번 쉬프트한 값을 %18에 저장
   %19 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 0, i32 2 ;ArcState -> %union.anon
   %20 = bitcast %union.anon* %19 to i32*
   %21 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 0, i32 0 ;ArcState -> i32
-  %22 = tail call zeroext i8 @__remill_read_memory_8(%struct.Memory* %2, i32 8) #4 ;memory에 주소 8에 해당하는 8비트값을 32비트로 확장 후 %22에 저장
+  %22 = tail call zeroext i8 @__remill_read_memory_8(%struct.Memory* %2, i32 8) #4 ;memory에 주소 8에 해당하는 8비트값을 32비트로 확장 후 %22에 저장 ;edi - 2 = 8
   %23 = sub i8 %22, %17 ;%23 = %22 - %17 (8에 해당하는 값 - 51에 해당하는 값)
   %24 = icmp ult i8 %22, %17 ;%22 < %17 이면 %24 = 1
   %25 = zext i1 %24 to i8 ;%25 = %24
@@ -73,9 +75,9 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   %30 = xor i8 %29, 1 ;
   %31 = xor i8 %22, %17
   %32 = xor i8 %31, %23
-  %33 = lshr i8 %32, 4
+  %33 = lshr i8 %32, 4 ;
   %34 = and i8 %33, 1
-  %35 = icmp eq i8 %23, 0
+  %35 = icmp eq i8 %23, 0 ;%22 == %17 이면 %35 = 1
   %36 = zext i1 %35 to i8
   %37 = lshr i8 %23, 7
   %38 = lshr i8 %22, 7
@@ -84,13 +86,14 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   %41 = add nuw nsw i8 %40, %39
   %42 = icmp eq i8 %41, 2
   %43 = zext i1 %42 to i8
-  %44 = select i1 %35, i32 20, i32 22
-  %45 = add i32 %1, 14
+  %44 = select i1 %35, i32 20, i32 22 ; jmp f 같으면 20 다르면 22
+  %45 = add i32 %1, 14 ;함수 2번째 인자에 14를 더해
 
-  store i32 42, i32* %7, align 4, !tbaa !2 ;42 값을 %7에 저장
-  store i8 %22, i8* %CL, align 1, !tbaa !6
-  store i32 43, i32* %8, align 4, !tbaa !2
-  store i8 %17, i8* %DL, align 1, !tbaa !6
+  ; f:
+  store i32 42, i32* %7, align 4, !tbaa !2 ;ebx = 42
+  store i8 %22, i8* %CL, align 1, !tbaa !6 ;cl = %22[edi - 2]
+  store i32 43, i32* %8, align 4, !tbaa !2 ;%8 = 43
+  store i8 %17, i8* %DL, align 1, !tbaa !6 ;dl = %17[51] -> esi = 43;
   store i8 %25, i8* %11, align 1, !tbaa !7
   store i8 %30, i8* %12, align 1, !tbaa !21
   store i8 %34, i8* %13, align 1, !tbaa !22
@@ -98,29 +101,31 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   store i8 %37, i8* %15, align 1, !tbaa !24
   store i8 %43, i8* %16, align 1, !tbaa !25
   %46 = add i32 %45, %44
-  br i1 %35, label %._crit_edge, label %.lr.ph.preheader ;분기문 1
+  br i1 %35, label %._crit_edge, label %.lr.ph.preheader ; jmp f 명령어 다르면 %.lr.ph.preheader로 분기
 
 .lr.ph.preheader:                                 ; preds = %3
   %47 = add nuw nsw i32 %44, 14
   br label %.lr.ph
 
+  ;halt:
 .lr.ph:                                           ; preds = %.lr.ph.preheader, %56
   %48 = phi i32 [ %47, %56 ], [ %46, %.lr.ph.preheader ]
-  store i32 1, i32* %6, align 4, !tbaa !2
-  %49 = add i32 %48, 7
-  store i32 %49, i32* %10, align 4
+  store i32 1, i32* %6, align 4, !tbaa !2 ;eax = 1
+  %49 = add i32 %48, 7 ; %49 = %48 + 7
+  store i32 %49, i32* %10, align 4 ;EIP 주소에 해당하는 값에 %49 저장
   store i32 128, i32* %20, align 8, !tbaa !2
   store i32 4, i32* %21, align 16, !tbaa !26
   %50 = tail call %struct.Memory* @__remill_async_hyper_call(%struct.State* nonnull %0, i32 %49, %struct.Memory* %2)
-  %51 = load i32, i32* %10, align 4
+  %51 = load i32, i32* %10, align 4 ;저장된 %49를 %51에 저장
   %52 = icmp eq i32 %51, 43
   br i1 %52, label %56, label %54 ;분기문 2
 
-._crit_edge.loopexit:                             ; preds = %56
+  
+._crit_edge.loopexit:                             ; preds = %56 ;exit
   br label %._crit_edge
 
 ._crit_edge:                                      ; preds = %._crit_edge.loopexit, %3
-  store i32 10, i32* %10, align 4, !tbaa !2
+  store i32 10, i32* %10, align 4, !tbaa !2 ;[eip(%49 = %48 + 7)] = 10
   %53 = tail call %struct.Memory* @__remill_jump(%struct.State* nonnull %0, i32 10, %struct.Memory* %2)
   ret %struct.Memory* %53
 
@@ -128,9 +133,9 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   %55 = tail call %struct.Memory* @__remill_missing_block(%struct.State* nonnull %0, i32 %51, %struct.Memory* %2)
   ret %struct.Memory* %55
 
-; <label>:56:                                     ; preds = %.lr.ph
+; <label>:56:                                     ; preds = %.lr.ph 
   store i32 10, i32* %9, align 4, !tbaa !2
-  store i32 42, i32* %7, align 4, !tbaa !2
+  store i32 42, i32* %7, align 4, !tbaa !2 ;ebx = 42
   store i8 %22, i8* %CL, align 1, !tbaa !6
   store i32 43, i32* %8, align 4, !tbaa !2
   store i8 %17, i8* %DL, align 1, !tbaa !6
@@ -140,20 +145,20 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   store i8 %36, i8* %14, align 1, !tbaa !23
   store i8 %37, i8* %15, align 1, !tbaa !24
   store i8 %43, i8* %16, align 1, !tbaa !25
-  br i1 %35, label %._crit_edge.loopexit, label %.lr.ph
+  br i1 %35, label %._crit_edge.loopexit, label %.lr.ph ;%22 == %17 -> loopexit
 }
 
 ; Function Attrs: noduplicate noinline nounwind optnone readnone
-declare zeroext i8 @__remill_read_memory_8(%struct.Memory*, i32) #1
+declare zeroext i8 @__remill_read_memory_8(%struct.Memory*, i32) #1 ;%struct.Memory* type의 memory에서 i32 정수값을 불러오는 함수
 
 ; Function Attrs: nounwind readnone
-declare i32 @llvm.ctpop.i32(i32) #2
+declare i32 @llvm.ctpop.i32(i32) #2 ;ty2의 value의 bit값을 count하는 내장함수?
 
 ; Function Attrs: noduplicate noinline nounwind optnone
 declare %struct.Memory* @__remill_async_hyper_call(%struct.State* dereferenceable(3376), i32, %struct.Memory*) #3
 
 ; Function Attrs: noduplicate noinline nounwind optnone
-declare %struct.Memory* @__remill_jump(%struct.State* dereferenceable(3376), i32, %struct.Memory*) #3
+declare %struct.Memory* @__remill_jump(%struct.State* dereferenceable(3376), i32, %struct.Memory*) #3 ;jump 함수
 
 ; Function Attrs: noduplicate noinline nounwind optnone
 declare %struct.Memory* @__remill_missing_block(%struct.State* dereferenceable(3376), i32, %struct.Memory*) #3
