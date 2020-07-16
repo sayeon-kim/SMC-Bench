@@ -26,7 +26,7 @@ _start:
 	mov ah, 0xcd
 	mov [_modified+10], ah
 	mov ah, 0x80
-	mov [_modified+11], ah ; int 0x87 : 0x cd 80
+	mov [_modified+11], ah ; int 0x80 : 0x cd 80
 
 _break:
 	nop;
