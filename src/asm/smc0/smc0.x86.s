@@ -21,7 +21,7 @@ _start:
 	mov ah, 0x00
 	mov [_modified+8], ah
 	mov ah, 0x00
-	mov [_modified+9], ah ; mov ebx, 999 : 0x b8 01 00 00 00
+	mov [_modified+9], ah ; mov ebx, 999 : 0x bb e7 03 00 00
 
 	mov ah, 0xcd
 	mov [_modified+10], ah
