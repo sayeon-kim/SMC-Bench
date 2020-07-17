@@ -84,10 +84,10 @@ define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias dereference
   %35 = xor i1 %34, %33
   br i1 %35, label %21, label %36
 
-; <label>:36:                                     ; preds = %21
+ <label>:36:                                     ; preds = %21
   br label %37
 
-; <label>:37:                                     ; preds = %37, %36
+ <label>:37:                                     ; preds = %37, %36
 
 <-- ;halt -->
 
