@@ -39,98 +39,48 @@ target triple = "i386-pc-linux-gnu-elf"
 ; Function Attrs: noinline nounwind
 define dso_local %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
   %4 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 1, i32 0, i32 0
-  ;struct.state -> 7th argument of struct.state(%struct.GPR) -> 2th argument of struct.GPR(%struct.Reg) -> 1st argument of struct.Reg(%union.anon.1) -> 1st argument of union.anon.1(i32)indexing
-   ;define i32* @foo(%struct.State* %0) nounwind uwtable readnone optsize ssp
-  ;{
-  ;entry:
-    ;%4 = getelementptr inbounds %struct.state, %struct.state* %0, i64 0, i32 6, i32 3, i32 0
-
-    ;ret i32* %4
-  ;}
-  ;%4 : i32
-  %5 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 3, i32 0, i32 0 ;%5 : i32
-  %6 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 5, i32 0, i32 0 ;%6 : i32
-  %7 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 7, i32 0, i32 0 ;%7 : i32
-  %8 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0 ;%8 : i32
-  
-  %9 = tail call i32 @__remill_read_memory_32(%struct.Memory* %2, i32 24) #3
-  ;%9 : i32
-  ;Send control flow to @__remill_read_memory_32
-  %10 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %2, i32 72, i32 %9) #3
-  ;%10 : %struct.Memory*
-  ;Send control flow to @__remill_write_memory_32
-  %11 = tail call i32 @__remill_read_memory_32(%struct.Memory* %10, i32 27) #3
-  ;%11 : i32
-  ;Send control flow to @__remill_read_memory_32
-  %12 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %10, i32 75, i32 %11) #3
-  ;%12 : %struct.Memory*
-  ;Send control flow to @__remill_write_memory_32
-  
-  store i32 4, i32* %4, align 4, !tbaa !0
-  ;store 4 into %4, alignment 4byte(if store type < alignment -> data can be stored in memory without trapping in the defalult address space)
-  store i32 1, i32* %5, align 4, !tbaa !0
-  ;store 1 into %5
-  store i32 0, i32* %6, align 4, !tbaa !0
-  ;store 0 into %6
-  store i32 15, i32* %7, align 4, !tbaa !0
-  ;store 15 into %7
-  %13 = add i32 %1, 100 ;%13 = %1 + 100
-  store i32 %13, i32* %8, align 4 
-  ;store %13 into %8
-  %14 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 0, i32 2
-  ;%14 : %union.anon
-  %15 = bitcast %union.anon* %14 to i32* ;%15 = read %14 of i32* type
-  store i32 128, i32* %15, align 8, !tbaa !4
-  ;store 128 into %15
-  %16 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 0, i32 0
-  ;%16 : int32
-  store i32 4, i32* %16, align 16, !tbaa !5
-  ;store 4 into %16
-  %17 = tail call %struct.Memory* @__remill_async_hyper_call(%struct.State* nonnull %0, i32 %13, %struct.Memory* %12)
-  ;%17 : %struct.Memory*
-  ;Send control flow to @__remill_async_hyper_call
-  %18 = load i32, i32* %8, align 4
-  ;load %8 to %18
-  %19 = icmp eq i32 %18, 100
-  br i1 %19, label %22, label %20
-  ;if (%18 == 100) -> jump to %22 / else jump to %20
-
-20:                                               ; preds = %3
-  %21 = tail call %struct.Memory* @__remill_missing_block(%struct.State* nonnull %0, i32 %18, %struct.Memory* %12)
-  ;%21 : %struct.Memory*
-  ;Send control flow to @__remill_missing_block
-  ret %struct.Memory* %21
-
-22:                                               ; preds = %3
-  store i32 1, i32* %4, align 4, !tbaa !0
-  ;store 1 into %4
-  store i32 0, i32* %5, align 4, !tbaa !0
-  ;store 0 into %5
-  store i32 112, i32* %8, align 4
-  ;store 112 into %8
-  store i32 128, i32* %15, align 8, !tbaa !4
-  ;store 128 into %15
-  store i32 4, i32* %16, align 16, !tbaa !5
-  ;store 4 into %16
-  %23 = tail call %struct.Memory* @__remill_async_hyper_call(%struct.State* nonnull %0, i32 112, %struct.Memory* %12)
-  ;%23 : %struct.Memory*
-  ;Send control flow to @__remill_async_hyper_call
-  %24 = load i32, i32* %8, align 4
-  ;load %8 to %24
-  %25 = tail call %struct.Memory* @__remill_missing_block(%struct.State* nonnull %0, i32 %24, %struct.Memory* %12)
-  ;%25 : %struct.Memory*
-  ;Send control flow to @__remill_missing_block
-  ret %struct.Memory* %25
+  %5 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0
+  %6 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 13, i32 0, i32 0
+  %7 = load i32, i32* %6, align 8, !tbaa !0
+  %8 = add i32 %7, -4
+  %9 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 5, i32 1, i32 0, i32 0
+  %10 = load i32, i32* %9, align 8, !tbaa !0
+  %11 = add i32 %10, %8
+  %12 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %2, i32 %11, i32 1111) #3
+  %13 = add i32 %7, -8
+  %14 = add i32 %10, %13
+  %15 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %12, i32 %14, i32 2222) #3
+  %16 = add i32 %7, -12
+  %17 = add i32 %10, %16
+  %18 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %15, i32 %17, i32 3333) #3
+  %19 = add i32 %7, -16
+  %20 = add i32 %10, %19
+  %21 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %18, i32 %20, i32 4444) #3
+  %22 = add i32 %7, -20
+  %23 = add i32 %10, %22
+  %24 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %21, i32 %23, i32 5555) #3
+  %25 = add i32 %7, -24
+  %26 = add i32 %10, %25
+  %27 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %24, i32 %26, i32 6666) #3
+  %28 = add i32 %7, -28
+  %29 = add i32 %10, %28
+  %30 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %27, i32 %29, i32 7777) #3
+  %31 = add i32 %7, -32
+  %32 = add i32 %10, %31
+  %33 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %30, i32 %32, i32 8888) #3
+  store i32 9999, i32* %4, align 4, !tbaa !3
+  %34 = add i32 %1, 54
+  store i32 %34, i32* %5, align 4
+  %35 = add i32 %7, -36
+  %36 = add i32 %10, %35
+  %37 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %33, i32 %36, i32 9999) #3
+  store i32 %35, i32* %6, align 4, !tbaa !3
+  %38 = tail call %struct.Memory* @__remill_missing_block(%struct.State* nonnull %0, i32 %34, %struct.Memory* %37)
+  ret %struct.Memory* %38
 }
 
 ; Function Attrs: noduplicate noinline nounwind optnone readnone
-declare dso_local i32 @__remill_read_memory_32(%struct.Memory*, i32) #1
-
-; Function Attrs: noduplicate noinline nounwind optnone readnone
 declare dso_local %struct.Memory* @__remill_write_memory_32(%struct.Memory*, i32, i32) #1
-
-; Function Attrs: noduplicate noinline nounwind optnone
-declare dso_local %struct.Memory* @__remill_async_hyper_call(%struct.State* dereferenceable(3376), i32, %struct.Memory*) #2
 
 ; Function Attrs: noduplicate noinline nounwind optnone
 declare dso_local %struct.Memory* @__remill_missing_block(%struct.State* dereferenceable(3376), i32, %struct.Memory*) #2
@@ -141,10 +91,7 @@ attributes #2 = { noduplicate noinline nounwind optnone "correctly-rounded-divid
 attributes #3 = { nobuiltin nounwind readnone }
 
 !0 = !{!1, !1, i64 0}
-!1 = !{!"int", !2, i64 0}
-!2 = !{!"omnipotent char", !3, i64 0}
-!3 = !{!"Simple C++ TBAA"}
-!4 = !{!2, !2, i64 0}
-!5 = !{!6, !7, i64 0}
-!6 = !{!"_ZTS9ArchState", !7, i64 0, !1, i64 4, !2, i64 8}
-!7 = !{!"_ZTSN14AsyncHyperCall4NameE", !2, i64 0}
+!1 = !{!"omnipotent char", !2, i64 0}
+!2 = !{!"Simple C++ TBAA"}
+!3 = !{!4, !4, i64 0}
+!4 = !{!"int", !1, i64 0}
