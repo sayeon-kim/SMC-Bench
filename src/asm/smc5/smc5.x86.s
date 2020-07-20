@@ -6,7 +6,6 @@
 ; $12 => (edx 복사작업시 소스 주소)
 ; $13 => (ebp 벡터의 인덱스)
 
-section .data
 section .text
 _vec1 dd 22, 0, 25
 _vec2 dd 7, 429, 6

@@ -1,11 +1,9 @@
 section .text
-
 global _start
 
 _start:
     mov eax, body           ; eax <- load address of body
 
-;명령어 길이가 3byte이기 때문에 nop을 추가해서 4byte로 만들어줌.
 body:
     mov ebx, [eax + 12]      ; ebx <- load instruction [eax + 12] (add esi, 10)
     nop

@@ -1,3 +1,5 @@
+section .text
+global _start
 _start:
 	mov edi, _start		; edi <- addr of _start
 	add edi, 10		; edi += 10 (mov ebp, ebx instruction address)
