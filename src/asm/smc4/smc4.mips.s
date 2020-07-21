@@ -1,5 +1,5 @@
-	.text
-main:	jal f	 	#다음 실행할 명령어 주소(move $2, $8)를 $ra에 저장하고 f로 분기
+.text
+main:	jal f
 	move $2, $8
 	j halt
 	
