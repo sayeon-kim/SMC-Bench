@@ -11,6 +11,7 @@ int main(){
 
 	smcInit(main);
 	uint8_t mcode[] = {'\xe9','\x00','\x00','\x00','\x00'}; // relative jmp 8
+	printf("Start Modyfing.");
 	memcpy(&&_branch, mcode, 5);
 
 _branch:

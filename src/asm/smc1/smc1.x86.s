@@ -1,61 +1,64 @@
-section .data
-exit_string db "Exit Program,", 0x0d, 0x0a
-exit_string_len equ $ - exit_string
-smc_string db "This code is modified", 0x0d, 0x0a
-smc_string_len equ $ - smc_string
-
-;sys_nanosleep use struct timespec
-;timespec structure has two members
-timeval:
-	tv_sec dd 1 ; 32 bit seconds
-	tv_nsec dd 0 ; 32 bit nanoseconds
-
 section .text
 global _start
-
 _start:
-	jmp modify
-modify:
-	;write 7byte instructions to target.
-	mov eax, [new] ; eax <- (new+0, new+1, new+2, new+3)
-	mov [target], eax ; eax(new+0, new+1, new+2, new+3) -> target(target+0, target+1, target+2, target+3)
-	mov eax, [new+3] ; eax <- (new+3, new+4, new+5, new+6)
-	mov [target+3], eax ; eax(new+3, new+4, new+5, new+6) -> target+3(target+3, target+4, target+5, target+6)
-	
-	jmp target
-new:
-	mov eax, halt ; 5byte instruction
-	jmp eax    	  ; 2byte instruction, absolute jump.
-halt:
-	mov eax, 4 ; eax <- 4, syscall number (print)
-	mov ebx, 1 ; ebx <- 1, syscall argument1 (stdout)
-	mov ecx, smc_string ; ecx <- smc_string, syscall argument2 (string ptr)
-	mov edx, smc_string_len ; edx <- smc_string_len, syscall argument3 (string len)
-	int 0x80; ; syscall
+	mov ah, 0xb8
+	mov [_modified], ah
+	mov ah, 0x01
+	mov [_modified+1], ah
+	mov ah, 0x00
+	mov [_modified+2], ah
+	mov ah, 0x00
+	mov [_modified+3], ah
+	mov ah, 0x00
+	mov [_modified+4], ah ; mov eax, 1 : 0x b8 01 00 00 00
 
-	mov eax, 162; eax <- 162, syscall number (sleep)
-	mov ebx, timeval ; ebx <- 1, syscall argument1 (sleep second)
-	mov ecx, 1000 ; ecx <- 0, syscall argument2 (sleep nanosecond)
-	int 0x80; syscall
+	mov ah, 0xbb
+	mov [_modified+5], ah
+	mov ah, 0xe7
+	mov [_modified+6], ah
+	mov ah, 0x03
+	mov [_modified+7], ah
+	mov ah, 0x00
+	mov [_modified+8], ah
+	mov ah, 0x00
+	mov [_modified+9], ah ; mov ebx, 999 : 0x bb e7 03 00 00
 
-	jmp halt ; infinity loop
-target:
-	nop ;place holder
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-exit:
-	mov eax, 4 ; eax <- 4, syscall number (print) But, never execute.
-	mov ebx, 1 ; ebx <- 1, syscall argument1 (stdout) But, never execute.
-	mov ecx, exit_string ; ecx <- exit_string, syscall argument2 (string ptr) But, never execute.
-	mov edx, exit_string_len ; edx <- exit_string_len, syscall argument3 (string len) But, never execute.
-	int 0x80; ; syscall But, never execute.
-	mov eax, 1 ; eax <- 1, syscall number (exit) But, never execute.
-	mov ebx, 0 ; ebx <- 0, syscall argument1 (return value) But, never execute.
-	int 0x80; syscall But, never execute.
+	mov ah, 0xcd
+	mov [_modified+10], ah
+	mov ah, 0x80
+	mov [_modified+11], ah ; int 0x80 : 0x cd 80
 
-;nasm -felf32 smc1.x86.s -o smc1.x86.o
-;ld -m elf_i386 smc1.x86.o -o smc1.x86.out
+_break:
+	nop;
+
+_modified:
+;mov eax, 1
+	nop ;
+	nop ;
+	nop ;
+	nop ;
+	nop ;
+;mov ebx, 999
+	nop ;
+	nop ;
+	nop ;
+	nop ;
+	nop ;
+;int 0x80
+	nop;
+	nop;
+
+;https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md#x86-32_bit
+; echo "section .text" > test.x86.s && echo "_start:" >> test.x86.s &&  echo "mov eax, 1" >> test.x86.s && nasm -felf32 test.x86.s -o test.o && objdump -d test.o
+; nasm -felf32 smc0.x86.s -o smc0.x86.o && objdump -d smc0.x86.o
+; ld -m elf_i386 smc0.x86.o -o smc0.x86.out --omagic
+; gdb smc0.x86.out
+
+;echo "section .text" > test.x86.s && echo "_start:" >> test.x86.s &&  echo "mov eax, 1" >> test.x86.s && nasm -felf32 test.x86.s -o test.o && objdump -d test.o
+
+;nasm -felf32 smc0.x86.s -o smc0.x86.o && objdump -d smc0.x86.o && ld -m elf_i386 smc0.x86.o -o smc0.x86.out --omagic && gdb smc0.x86.out
+
+;readelf -S smc0.x86.o
+;xxd -p -s 0x130 -l 0x70 smc0.x86.o
+
+;b4b8882563000000b401882564000000b400882565000000b400882566000000b400882567000000b4bb882568000000b4e7882569000000b40388256a000000b40088256b000000b40088256c000000b4cd88256d000000b48088256e000000eb019090909090909090909090909090
