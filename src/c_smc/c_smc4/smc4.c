@@ -17,6 +17,7 @@ int main(void){
     
     void *foo_addr = (void *)foo;
     
+    foo();
     modify(foo_addr);
     foo();
     
