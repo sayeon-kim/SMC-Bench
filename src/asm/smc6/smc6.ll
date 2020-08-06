@@ -38,35 +38,60 @@ target triple = "i386-pc-linux-gnu-elf"
 
 ; Function Attrs: noinline nounwind
 define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
-  %4 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 1, i32 0, i32 0
+  %4 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 1, i32 0, i32 0 
+  ;%4 = eax
   %5 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 3, i32 0, i32 0
+  ;%5 = ebx
   %6 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 5, i32 0, i32 0
   %7 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 7, i32 0, i32 0
   %8 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0
+  ;%8 = eip
   %9 = tail call i32 @__remill_read_memory_32(%struct.Memory* %2, i32 134512791) #3
+  ;%9 = 134512791 (copy1)
   %10 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %2, i32 47, i32 %9) #3
+  ; 47 = copy1(mov eax, ggen)
   %11 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 1
+  ;%union.VectorReg
   store i8 0, i8* %11, align 1, !tbaa !0
+  ; %11= 0
   %12 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 3
   store i8 1, i8* %12, align 1, !tbaa !17
+  ;%12 = 1
   %13 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 5
   store i8 1, i8* %13, align 1, !tbaa !18
+  ;%13 = 1
   %14 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 7
   store i8 0, i8* %14, align 1, !tbaa !19
+  ;%14 = 0
   %15 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 9
   store i8 0, i8* %15, align 1, !tbaa !20
+  ;%15 = 0
   %16 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 13
   store i8 0, i8* %16, align 1, !tbaa !21
+  ;%16 = 0
   %17 = tail call i32 @__remill_read_memory_32(%struct.Memory* %10, i32 134512793) #3
   %18 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %10, i32 51, i32 %17) #3
+  ;gen = 51
+  ;gen에 %10(mov eax, ggen)을 push(write)
   store i32 51, i32* %6, align 4, !tbaa !22
+  ;%6 = 51(gen)
   store i32 0, i32* %4, align 4, !tbaa !22
+  ;%4 = eax = 0
   %19 = tail call i32 @__remill_read_memory_32(%struct.Memory* %18, i32 134512795) #3
+  ;%18 = 1234512795 (copy1+3)
+  ;mov ebx, [copy1+3]
   store i32 %19, i32* %7, align 4, !tbaa !22
+  ;%7 = %19
   store i32 %19, i32* %5, align 4, !tbaa !22
+  ;%5 = ebx = %19
+  ;mov ebx, [copy1+3]
   %20 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %18, i32 51, i32 %19) #3
+  ;%18(1234512795)을 %19에 push(write)
   store i32 51, i32* %8, align 4, !tbaa !22
+  ;eip = 51
   %21 = tail call %struct.Memory* @__remill_jump(%struct.State* nonnull %0, i32 51, %struct.Memory* %20)
+  ;jmp gen
+  ;gen = 51
   ret %struct.Memory* %21
 }
 

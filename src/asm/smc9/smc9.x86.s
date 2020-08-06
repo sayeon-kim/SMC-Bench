@@ -1,5 +1,4 @@
 section .text
-
 global _start
 
 halt:
@@ -15,7 +14,7 @@ _start:
 loop:
     mov edx, [eax] ; edx <- instruction of loop
     mov [ebx], edx ; [ebx] <- store instruction of loop in pointer of ebx
-    add eax, esi ; eax += 4, instruction length is 2byte 2ÁÙ¾¿ º¹»ç
+    add eax, esi ; eax += 4, instruction length is 2byte 2ï¿½Ù¾ï¿½ ï¿½ï¿½ï¿½ï¿½
     add ebx, esi ; ebx += 4
     cmp eax, ecx ; comparison about eax and ecx
     jne loop ; if not equal, than jump to the loop.

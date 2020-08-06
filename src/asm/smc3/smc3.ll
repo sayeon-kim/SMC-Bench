@@ -63,7 +63,7 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   store i32 1, i32* %8, align 4, !tbaa !2
   br label %23
 
-; <label>:23:                                     ; preds = %40, %3
+ <label>:23:                                     ; preds = %40, %3
   %24 = phi i32 [ 1, %3 ], [ %41, %40 ]
   %25 = phi i32 [ %22, %3 ], [ %43, %40 ]
   %26 = phi %struct.Memory* [ %15, %3 ], [ %42, %40 ]
@@ -73,7 +73,7 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   %30 = add i32 %25, %29
   br i1 %28, label %31, label %40
 
-; <label>:31:                                     ; preds = %23
+ <label>:31:                                     ; preds = %23
   %32 = getelementptr inbounds %union.anon.1, %union.anon.1* %5, i32 0, i32 0
   store i32 1, i32* %6, align 4, !tbaa !2
   store i32 0, i32* %32, align 4, !tbaa !2
@@ -95,7 +95,7 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   %39 = tail call %struct.Memory* @__remill_missing_block(%struct.State* nonnull %0, i32 %38, %struct.Memory* %26)
   ret %struct.Memory* %39
 
-; <label>:40:                                     ; preds = %23
+ <label>:40:                                     ; preds = %23
   %41 = add i32 %24, 1
   store i32 %41, i32* %7, align 4, !tbaa !2
   %42 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %26, i32 34, i8 zeroext 1) #3

@@ -1,4 +1,4 @@
-# smc1
+# smc2
 
 #### The Self Modification Code Replacing Instruction
 

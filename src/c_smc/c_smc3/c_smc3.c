@@ -54,7 +54,7 @@ void foo(void)
 int change_page_permissions_of_address(void *addr)
 {
 	// Move the pointer to the page boundary
-	int page_size = getpagesize();
+	int page_size = 4096;
 	addr -= (unsigned long)addr % page_size;
 
 	if (mprotect(addr, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == -1)
