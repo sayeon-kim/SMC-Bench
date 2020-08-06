@@ -38,16 +38,9 @@ target triple = "i386-pc-linux-gnu-elf"
 
 ; Function Attrs: noinline nounwind
 define dso_local %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
-  %4 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 1, i32 0, i32 0
+  %4 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 1, i32 0, i32 0 ;%4 = EAX
   ;struct.state -> 7th argument of struct.state(%struct.GPR) -> 2th argument of struct.GPR(%struct.Reg) -> 1st argument of struct.Reg(%union.anon.1) -> 1st argument of union.anon.1(i32)indexing
-   ;define i32* @foo(%struct.State* %0) nounwind uwtable readnone optsize ssp
-  ;{
-  ;entry:
-    ;%4 = getelementptr inbounds %struct.state, %struct.state* %0, i64 0, i32 6, i32 3, i32 0
 
-    ;ret i32* %4
-  ;}
-  ;%4 : i32
   %5 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 3, i32 0, i32 0 ;%5 : i32
   %6 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 5, i32 0, i32 0 ;%6 : i32
   %7 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 7, i32 0, i32 0 ;%7 : i32
