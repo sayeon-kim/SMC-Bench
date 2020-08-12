@@ -39,20 +39,32 @@ target triple = "i386-pc-linux-gnu-elf"
 ; Function Attrs: noinline nounwind
 define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
   %4 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 1, i32 0, i32 0
+  ;%4 = eax
   %5 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0
+  ;%5 = eip
   %6 = load i32, i32* %4, align 4
+  ;%6 = eax 
   %7 = add i32 %1, 1
+  ; %1 + 1
   store i32 %7, i32* %5, align 4
+  ;eip = %1 + 1
   %8 = add i32 %6, 1
+  ;%8 = eax + 1
   store i32 %8, i32* %4, align 4, !tbaa !0
+  ;eax = eax+1
   %9 = and i32 %8, 255
+  ; %9 = eax & 255
   %10 = tail call i32 @llvm.ctpop.i32(i32 %9) #3
+  ;  @llvm.ctpop 함수는 -> llvm.ctpop을 모든 정수 비트 너비 또는 정수 요소가있는 벡터에서 사용할 수 있습니다. 
+  ;                     -> 변수 또는 벡터의 각 요소 내에서 1을 계산합니다.
   %11 = trunc i32 %10 to i8
   %12 = and i8 %11, 1
   %13 = xor i8 %12, 1
   %14 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 3
   store i8 %13, i8* %14, align 1, !tbaa !4
+  ; %14 = %13의 값
   %15 = xor i32 %8, %6
+  ; eax | eax + 1
   %16 = lshr i32 %15, 4
   %17 = trunc i32 %16 to i8
   %18 = and i8 %17, 1
