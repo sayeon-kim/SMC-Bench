@@ -6,7 +6,7 @@
 #include <sys/mman.h>
 
 int change_page_permissions_of_address(void *addr);
-void get_permission(void *main);
+void get_permission(void *foo_addr);
 void foo();
 void modify();
 
@@ -17,14 +17,14 @@ char add[] = "restart";
 int main(void)
 {
 	get_permission(main);
-	goto FOO;
+	goto START;
 
 MODIFY:
 	modify();
 	memcpy(modify, smc_string, sizeof(smc_string) - 1);
 
-FOO:
-	printf("It's foo() \n");
+START:
+	printf("It's main \n");
 	goto MODIFY;
 
 }
