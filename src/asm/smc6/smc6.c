@@ -6,7 +6,7 @@
 #include <sys/mman.h>
 
 int change_page_permissions_of_address(void *addr);
-void get_permission(void *foo_addr);
+void get_permission(void *main);
 void foo();
 void modify();
 
