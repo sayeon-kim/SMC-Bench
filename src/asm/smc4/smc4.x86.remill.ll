@@ -40,7 +40,7 @@ target triple = "i386-pc-linux-gnu-elf"
 define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
   %4 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 1, i32 0, i32 0 ;%4 == eax
   %5 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 3, i32 0, i32 0 ;%5 == ebx
-  %6 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 11, i32 0, i32 0 ;%6 == edi
+  %6 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 11, i32 0, i32 0 ;%6 == edi?
   %7 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0 ;%7 == eip
   store i32 134512748, i32* %4, align 4, !tbaa !0 ;eax = 134512748 /13452748(10) == 804806c(16)
   %8 = add i32 %1, 8 ;%8 = PC + 8
