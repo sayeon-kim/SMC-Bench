@@ -59,7 +59,7 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   store i32 %17, i32* %5, align 4, !tbaa !0 ;ebx = %6
   store i32 1, i32* %4, align 4, !tbaa !0 ;eax = 1
   %19 = add i32 %18, 38 ;%19 = 134512748 + 38
-  store i32 %19, i32* %7, align 4 ;eip = 134512748 + 38
+  store i32 %19, i32* %7, align 4 ;eip = 134512748 + 38 /0x8048092 -> addr call eax
   %20 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 0, i32 2 ;%20 = ArithFlags
   %21 = bitcast %union.anon* %20 to i32*
   store i32 128, i32* %21, align 8, !tbaa !0 ;int 0x80 systemcall
