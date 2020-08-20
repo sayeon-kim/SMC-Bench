@@ -40,35 +40,57 @@ target triple = "i386-pc-linux-gnu-elf"
 define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
   br label %4
 
- <label>:4:                                      ; preds = %4, %3\
-
-<-- ;start, ;xor1 -->
-
+ <label>:4: 
+;start
+;xor1                                     ; preds = %4, %3
   %5 = phi i32 [ 60, %3 ], [ %10, %4 ]
+  ;%5 = %3 의 60이라는 값  ->아마 pg의 주소
+  ;%5 = %4 의 %10의 값 
   %6 = phi %struct.Memory* [ %2, %3 ], [ %9, %4 ]
+
   %7 = tail call i32 @__remill_read_memory_32(%struct.Memory* %6, i32 %5) #2
+  ; %7 = %6에있는 주소 60의 값(pg의 주소)을 넣는다.
   %8 = xor i32 %7, -1
+  ; xor edx, ecx 
   %9 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %6, i32 %5, i32 %8) #2
+  ;push %8
+  ;%2에 %5에다가 %8을 push한다.
+  ;즉, -> mov [eax], edx
+  ;eax = %5, edx = %8
+
   %10 = add i32 %5, 4
+  ; add eax, 4 
+
+  ;cmp eax, ebx 부분 아래 
+
+
   %11 = add i32 %5, -68
   %12 = lshr i32 %11, 31
+  ;lshr = (logical shift right)의 축약
+  ;첫번째 피연산자에서 지정된 숫자만큼 비트를 오른쪽으로 밀어내고 0으로 채운 값을 반환.
   %13 = trunc i32 %12 to i8
+  ;%12값을 i32 타입-> i8 타입으로 비트변환
   %14 = lshr i32 %10, 31
   %15 = xor i32 %12, %14
   %16 = add nuw nsw i32 %15, %14
+  ;nuw = No Unsigned Wrap
+  ;nsw = No Signed Wrap
+  ;이 두개가 있으면 overflow 발생하면 결과값 반환 no
   %17 = icmp eq i32 %16, 2
   %18 = icmp ne i8 %13, 0
   %19 = xor i1 %18, %17
+  
   br i1 %19, label %4, label %20
+  ;jl xor1  
 
  <label>:20:                                     ; preds = %4
   br label %21
 
- <label>:21:                                     ; preds = %21, %20
- 
- <-- ;decr, ;xor2 -->
- 
+ <label>:21:  
+;decr 
+;xor2                                  ; preds = %21, %20
   %22 = phi i32 [ 60, %20 ], [ %27, %21 ]
+  ;%22 = %20 의 60이라는 값 
   %23 = phi %struct.Memory* [ %9, %20 ], [ %26, %21 ]
   %24 = tail call i32 @__remill_read_memory_32(%struct.Memory* %23, i32 %22) #2
   %25 = xor i32 %24, -1
@@ -88,10 +110,9 @@ define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias dereference
   br label %37
 
  <label>:37:                                     ; preds = %37, %36
-
-<-- ;halt -->
-
   br label %37
+  ; jmp halt  
+
 }
 
 ; Function Attrs: noduplicate noinline nounwind optnone readnone

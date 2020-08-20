@@ -53,6 +53,7 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   %11 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 1
   ;%union.VectorReg
   store i8 0, i8* %11, align 1, !tbaa !0
+  ;!tbaa = nontemporal로 메타데이터가 존재한다면, 최적화 수행기와 코드 생성기에 이 데이터를 load할 때는 캐시의 재사용을 하지 않는다,
   ; %11= 0
   %12 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 3
   store i8 1, i8* %12, align 1, !tbaa !17
@@ -69,6 +70,7 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   %16 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 13
   store i8 0, i8* %16, align 1, !tbaa !21
   ;%16 = 0
+  
   %17 = tail call i32 @__remill_read_memory_32(%struct.Memory* %10, i32 134512793) #3
   %18 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %10, i32 51, i32 %17) #3
   ;gen = 51
