@@ -17,14 +17,14 @@ char add[] = "restart";
 int main(void)
 {
 	get_permission(main);
-	goto FOO;
+	goto START;
 
 MODIFY:
 	modify();
 	memcpy(modify, smc_string, sizeof(smc_string) - 1);
 
-FOO:
-	printf("It's foo() \n");
+START:
+	printf("It's main \n");
 	goto MODIFY;
 
 }
