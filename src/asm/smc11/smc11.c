@@ -6,26 +6,37 @@
 #include <sys/mman.h>
 
 int change_page_permissions_of_address(void *addr);
+void foo();
 void get_permission(void *foo_addr);
 char *err_string = "Error while changing page permissions of foo()\n";
 
 int main(void)
 {
-	unsigned char *temp_instrutcion = (unsigned char *)malloc(sizeof(char) * 4);
-	void *first_instruction = (void *)main + 101;
-	void *second_instruction = (void *)main + 127;
-	get_permission(main);
+	get_permission(foo);
+
+	unsigned char *foo_code = (unsigned char *)malloc(sizeof(unsigned char) * 55);
+	memcpy(foo_code, foo, 55);
+	for (int i = 0; i < 55; i++)
+	{
+		foo_code[i] = foo_code[i] ^ -1;
+	}
+	memcpy(foo, foo_code, 55);
+
+	for (int i = 0; i < 55; i++)
+	{
+		foo_code[i] = foo_code[i] ^ -1;
+	}
+	memcpy(foo, foo_code, 55);
+
+	foo();
+}
+
+void foo()
+{
 	int num = 0;
-	goto MAIN;
-BODY:
-	memcpy(temp_instrutcion, first_instruction, 4);
-	memcpy(first_instruction, second_instruction, 4);
-	memcpy(second_instruction, temp_instrutcion, 4);
-MAIN:
-	num += 5;
-	printf("%d\n", num);
-	num -= 5;
-	goto BODY;
+	printf("This is Foo Function\n");
+	num += 10;
+	printf("num = %d\n", num);
 }
 
 void get_permission(void *foo_addr)
