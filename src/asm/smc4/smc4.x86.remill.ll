@@ -38,32 +38,32 @@ target triple = "i386-pc-linux-gnu-elf"
 
 ; Function Attrs: noinline nounwind
 define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
-  %4 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 1, i32 0, i32 0
-  %5 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 3, i32 0, i32 0
-  %6 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 11, i32 0, i32 0
-  %7 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0
-  store i32 134512748, i32* %4, align 4, !tbaa !0
-  %8 = add i32 %1, 8
-  %9 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 13, i32 0, i32 0
-  %10 = load i32, i32* %9, align 8, !tbaa !0
-  %11 = add i32 %10, -4
-  %12 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 5, i32 1, i32 0, i32 0
-  %13 = load i32, i32* %12, align 8, !tbaa !0
-  %14 = add i32 %13, %11
-  %15 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %2, i32 %14, i32 %8) #3
-  store i32 %11, i32* %9, align 4, !tbaa !0
-  store i32 134512748, i32* %7, align 4, !tbaa !0
+  %4 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 1, i32 0, i32 0 ;%4 == eax
+  %5 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 3, i32 0, i32 0 ;%5 == ebx
+  %6 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 11, i32 0, i32 0 ;%6 == edi
+  %7 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0 ;%7 == eip
+  store i32 134512748, i32* %4, align 4, !tbaa !0 ;eax = 134512748 /13452748(10) == 804806c(16)
+  %8 = add i32 %1, 8 ;%8 = PC + 8
+  %9 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 13, i32 0, i32 0 ;%9 == esp
+  %10 = load i32, i32* %9, align 8, !tbaa !0 ;esp에 있는 값을 %10에 불러옴
+  %11 = add i32 %10, -4 ;%11 = esp 불러온 값에 -4
+  %12 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 5, i32 1, i32 0, i32 0 ;%12 <- AddressSpace
+  %13 = load i32, i32* %12, align 8, !tbaa !0 ;%13 = AddressSpace
+  %14 = add i32 %13, %11 ;%14 = AddressSpace + esp - 4
+  %15 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %2, i32 %14, i32 %8) #3 ;PC + 8의 주소에 있는 값을 AddressSpace + esp - 4에 집어넣음
+  store i32 %11, i32* %9, align 4, !tbaa !0 ;esp <- esp - 4
+  store i32 134512748, i32* %7, align 4, !tbaa !0 ;eip = 134512748
   %16 = tail call %struct.Memory* @__remill_function_call(%struct.State* nonnull %0, i32 134512748, %struct.Memory* %15)
-  %17 = load i32, i32* %6, align 4
-  %18 = load i32, i32* %7, align 4
-  store i32 %17, i32* %5, align 4, !tbaa !0
-  store i32 1, i32* %4, align 4, !tbaa !0
-  %19 = add i32 %18, 38
-  store i32 %19, i32* %7, align 4
-  %20 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 0, i32 2
+  %17 = load i32, i32* %6, align 4 ;%17 = %6
+  %18 = load i32, i32* %7, align 4 ;%18 = 134512748
+  store i32 %17, i32* %5, align 4, !tbaa !0 ;ebx = %6
+  store i32 1, i32* %4, align 4, !tbaa !0 ;eax = 1
+  %19 = add i32 %18, 38 ;%19 = 134512748 + 38
+  store i32 %19, i32* %7, align 4 ;eip = 134512748 + 38
+  %20 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 0, i32 2 ;%20 = ArithFlags
   %21 = bitcast %union.anon* %20 to i32*
-  store i32 128, i32* %21, align 8, !tbaa !0
-  %22 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 0, i32 0
+  store i32 128, i32* %21, align 8, !tbaa !0 ;int 0x80 systemcall
+  %22 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 0, i32 0 ;%22 = ArchState
   store i32 4, i32* %22, align 16, !tbaa !4
   %23 = tail call %struct.Memory* @__remill_async_hyper_call(%struct.State* nonnull %0, i32 %19, %struct.Memory* %15)
   %24 = load i32, i32* %7, align 4
