@@ -48,3 +48,5 @@ int change_page_permissions_of_address(void *addr)
 
 	return 0;
 }
+
+// clang-9 -c -emit-llvm -S -target i386-pc-linux-gnu

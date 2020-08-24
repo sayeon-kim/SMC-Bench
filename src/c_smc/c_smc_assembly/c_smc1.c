@@ -53,3 +53,5 @@ int getMemoryPermission(void *addr){
 void smcInit(void *addr){
 	if(getMemoryPermission(addr)==-1){printf("Faield!\n");}
 }
+
+// clang-9 -c -emit-llvm -S -target x86_64-pc-linux-gnu
