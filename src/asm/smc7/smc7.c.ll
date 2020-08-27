@@ -5,7 +5,8 @@ target triple = "x86_64-pc-linux-gnu"
 
 @.str = private unnamed_addr constant [48 x i8] c"Error while changing page permissions of foo()\0A\00", align 1
 @err_string = global i8* getelementptr inbounds ([48 x i8], [48 x i8]* @.str, i32 0, i32 0), align 8
-@.str.1 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+@.str.1 = private unnamed_addr constant [11 x i8] c"origin %d\0A\00", align 1
+@.str.2 = private unnamed_addr constant [13 x i8] c"modifing %d\0A\00", align 1
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define i32 @main() #0 {
@@ -18,8 +19,8 @@ define i32 @main() #0 {
   store i32 0, i32* %1, align 4
   %7 = call noalias i8* @malloc(i64 4) #6
   store i8* %7, i8** %2, align 8
-  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 142), i8** %3, align 8
-  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 151), i8** %4, align 8
+  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 162), i8** %3, align 8
+  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 184), i8** %4, align 8
   call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
   store i32 0, i32* %5, align 4
   store i32 1, i32* %6, align 4
@@ -39,15 +40,15 @@ define i32 @main() #0 {
 
 ; <label>:15:                                     ; preds = %8, %0
   %16 = load i32, i32* %5, align 4
-  %17 = add nsw i32 %16, 0
-  store i32 %17, i32* %5, align 4
-  %18 = load i32, i32* %6, align 4
+  %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str.1, i32 0, i32 0), i32 %16)
+  %18 = load i32, i32* %5, align 4
   %19 = add nsw i32 %18, 1
-  store i32 %19, i32* %6, align 4
+  store i32 %19, i32* %5, align 4
   %20 = load i32, i32* %5, align 4
-  %21 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i32 0, i32 0), i32 %20)
-  %22 = load i32, i32* %6, align 4
-  %23 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i32 0, i32 0), i32 %22)
+  %21 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @.str.2, i32 0, i32 0), i32 %20)
+  %22 = load i32, i32* %5, align 4
+  %23 = sub nsw i32 %22, 1
+  store i32 %23, i32* %5, align 4
   br label %8
                                                   ; No predecessors!
   %25 = load i32, i32* %1, align 4
