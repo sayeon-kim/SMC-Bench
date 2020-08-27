@@ -13,22 +13,21 @@ char *err_string = "Error while changing page permissions of foo()\n";
 int main(void)
 {
 	unsigned char *modify_1 =( unsigned char *)malloc(sizeof(char) * 4);
-	void *instruction1 = (void *)main + 142 ;
-	void *instruction2 = (void *)main + 151 ;	
+	void *instruction1 = (void *)main + 162 ;
+	void *instruction2 = (void *)main + 184 ;	
 	get_permission(main);
 	int origin=0 ;
-	int modifing=1 ;	
+	int modifing=1;	
 	goto MAIN;
 MODIFY:
 	memcpy(modify_1, instruction1, 4);
 	memcpy(instruction1, instruction2, 4);
 	memcpy(instruction2, modify_1, 4);
 MAIN:
-	
-	origin += 0;
-	modifing += 1;
-	printf("%d\n",origin);
-	printf("%d\n",modifing);
+	printf("origin %d\n",origin);
+	origin += 1;
+	printf("modifing %d\n",origin);
+	origin -= 1;
 	goto MODIFY;
 }
 
