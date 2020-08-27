@@ -9,20 +9,26 @@ int change_page_permissions_of_address(void *addr);
 void get_permission(void *main);
 char *err_string = "Error while changing page permissions of foo()\n";
 
+
 int main(void)
 {
 	unsigned char *modify_1 =( unsigned char *)malloc(sizeof(char) * 4);
-	void *instruction1 = (void *)main + 121 ;
-	void *instruction2 = (void *)main + 141 ;	
+	void *instruction1 = (void *)main + 142 ;
+	void *instruction2 = (void *)main + 151 ;	
 	get_permission(main);
+	int origin=0 ;
+	int modifing=1 ;	
 	goto MAIN;
 MODIFY:
 	memcpy(modify_1, instruction1, 4);
 	memcpy(instruction1, instruction2, 4);
 	memcpy(instruction2, modify_1, 4);
 MAIN:
-	printf("main start\n");
-	printf("start main\n");
+	
+	origin += 0;
+	modifing += 1;
+	printf("%d\n",origin);
+	printf("%d\n",modifing);
 	goto MODIFY;
 }
 
