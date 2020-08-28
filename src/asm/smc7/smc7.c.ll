@@ -12,43 +12,66 @@ target triple = "x86_64-pc-linux-gnu"
 define i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i8*, align 8
+  ; *modify_1
   %3 = alloca i8*, align 8
+  ; *instruction1
   %4 = alloca i8*, align 8
+  ; *instruction2
   %5 = alloca i32, align 4
+  ; origin
   %6 = alloca i32, align 4
   store i32 0, i32* %1, align 4
   %7 = call noalias i8* @malloc(i64 4) #6
   store i8* %7, i8** %2, align 8
   store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 162), i8** %3, align 8
+  ; void *instruction1 = (void *)main + 162 
   store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 184), i8** %4, align 8
+  ; void *instruction2 = (void *)main + 184 
   call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
+  ; get_permission(main)
   store i32 0, i32* %5, align 4
+  ; int origin=0 
   store i32 1, i32* %6, align 4
+  ; int modifing=1
   br label %15
 
-; <label>:8:                                      ; preds = %15
+;MODIFY
+ <label>:8:                                      ; preds = %15
   %9 = load i8*, i8** %2, align 8
+  ; %9 = modify_1
   %10 = load i8*, i8** %3, align 8
+  ; %10 = instruction1
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* %9, i8* %10, i64 4, i32 1, i1 false)
+  ; memcpy(modify_1, instruction1, 4)
   %11 = load i8*, i8** %3, align 8
   %12 = load i8*, i8** %4, align 8
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* %11, i8* %12, i64 4, i32 1, i1 false)
+  ; memcpy(instruction1, instruction2, 4)
   %13 = load i8*, i8** %4, align 8
   %14 = load i8*, i8** %2, align 8
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* %13, i8* %14, i64 4, i32 1, i1 false)
+  ; memcpy(instruction2, modify_1, 4)
   br label %15
 
-; <label>:15:                                     ; preds = %8, %0
+;MAIN
+ <label>:15:                                     ; preds = %8, %0
   %16 = load i32, i32* %5, align 4
   %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str.1, i32 0, i32 0), i32 %16)
+  ; printf("origin %d\n",origin);
   %18 = load i32, i32* %5, align 4
   %19 = add nsw i32 %18, 1
+  ; origin + 1
   store i32 %19, i32* %5, align 4
+  ; origin += 1
   %20 = load i32, i32* %5, align 4
+  ; %20 = %5(origin)
   %21 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @.str.2, i32 0, i32 0), i32 %20)
+  ; printf("modifing %d\n",origin)
   %22 = load i32, i32* %5, align 4
   %23 = sub nsw i32 %22, 1
+  ; origin - 1
   store i32 %23, i32* %5, align 4
+  ; origin -= 1
   br label %8
                                                   ; No predecessors!
   %25 = load i32, i32* %1, align 4
@@ -67,7 +90,7 @@ define void @get_permission(i8*) #0 {
   %5 = icmp eq i32 %4, -1
   br i1 %5, label %6, label %12
 
-; <label>:6:                                      ; preds = %1
+ <label>:6:                                      ; preds = %1
   %7 = load i8*, i8** @err_string, align 8
   %8 = load i8*, i8** @err_string, align 8
   %9 = call i64 @strlen(i8* %8) #7
@@ -76,7 +99,7 @@ define void @get_permission(i8*) #0 {
   call void @exit(i32 1) #8
   unreachable
 
-; <label>:12:                                     ; preds = %1
+ <label>:12:                                     ; preds = %1
   ret void
 }
 
@@ -108,15 +131,15 @@ define i32 @change_page_permissions_of_address(i8*) #0 {
   %17 = icmp eq i32 %16, -1
   br i1 %17, label %18, label %19
 
-; <label>:18:                                     ; preds = %1
+ <label>:18:                                     ; preds = %1
   store i32 -1, i32* %2, align 4
   br label %20
 
-; <label>:19:                                     ; preds = %1
+ <label>:19:                                     ; preds = %1
   store i32 0, i32* %2, align 4
   br label %20
 
-; <label>:20:                                     ; preds = %19, %18
+ <label>:20:                                     ; preds = %19, %18
   %21 = load i32, i32* %2, align 4
   ret i32 %21
 }
@@ -147,3 +170,10 @@ attributes #8 = { noreturn nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{!"clang version 6.0.0-1ubuntu2 (tags/RELEASE_600/final)"}
+
+
+
+
+
+
+clang-9 -c -emit-llvm -S -target x86_64-pc-linux-gnu smc7.c
