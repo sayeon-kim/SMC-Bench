@@ -48,3 +48,5 @@ int change_page_permissions_of_address(void *addr)
 	}
 	return 0;
 }
+
+//clang-9 smc1.c -c -emit-llvm -S -target x86_64-pc-linux-gnu
