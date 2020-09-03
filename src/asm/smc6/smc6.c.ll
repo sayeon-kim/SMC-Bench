@@ -3,32 +3,54 @@ source_filename = "smc6.c"
 target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
+@num = dso_local global i32 1, align 4
 @.str = private unnamed_addr constant [7 x i8] c"start\0A\00", align 1
 @start_string = dso_local global i8* getelementptr inbounds ([7 x i8], [7 x i8]* @.str, i32 0, i32 0), align 8
-@smc_string = dso_local global [30 x i8] c"H1\D2H1\C0H\BB/bin/sh\00SH\89\E7PWH\89\E6\B0;\0F\05\00", align 16
-@add = dso_local global [8 x i8] c"restart\00", align 1
 @.str.1 = private unnamed_addr constant [12 x i8] c"It's main \0A\00", align 1
-@.str.2 = private unnamed_addr constant [15 x i8] c"It's modify()\0A\00", align 1
+@.str.2 = private unnamed_addr constant [11 x i8] c"num is %d\0A\00", align 1
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
+  %2 = alloca i8*, align 8
+  %3 = alloca i8*, align 8
   store i32 0, i32* %1, align 4
+  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 169), i8** %2, align 8
+  ;void *instruction = (void *)main + 169
+  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 138), i8** %3, align 8
+  ;void *instruction2 = (void *)main + 138
   call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
-  br label %3
+  br label %7
 
 ;modify
-2:                                                ; preds = %3
-  call void @modify()
-  ; modify();
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 bitcast (void ()* @modify to i8*), i8* align 16 getelementptr inbounds ([30 x i8], [30 x i8]* @smc_string, i64 0, i64 0), i64 29, i1 false)
-  ; memcpy(modify, smc_string, sizeof(smc_string) - 1);
-  br label %3
+4:                                                ; preds = %7
+  %5 = load i8*, i8** %2, align 8
+  ;%5 = instrunction
+  %6 = load i8*, i8** %3, align 8
+  ;%6 = instrunction2
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %5, i8* align 1 %6, i64 7, i1 false)
+  ;memcpy(instruction, instruction2, sizeof(instruction2) - 1)
+  br label %9
 
 ;start
-3:                                                ; preds = %2, %0
-  %4 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @.str.1, i64 0, i64 0))
-  br label %2
+7:                                                ; preds = %9, %0
+  %8 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @.str.1, i64 0, i64 0))
+  br label %4
+
+;gen
+9:                                                ; preds = %4
+  %10 = load i32, i32* @num, align 4
+  %11 = add nsw i32 %10, 2
+  store i32 %11, i32* @num, align 4
+  ;num+=2
+  %12 = load i32, i32* @num, align 4
+  %13 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str.2, i64 0, i64 0), i32 %12)
+  ;printf("num is %d\n", num)
+  %14 = load i32, i32* @num, align 4
+  %15 = sub nsw i32 %14, 1
+  store i32 %15, i32* @num, align 4
+  ;num-=1
+  br label %7
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable
@@ -57,12 +79,6 @@ define dso_local void @get_permission(i8*) #0 {
 declare void @llvm.memcpy.p0i8.p0i8.i64(i8* nocapture writeonly, i8* nocapture readonly, i64, i1 immarg) #1
 
 declare dso_local i32 @printf(i8*, ...) #2
-
-; Function Attrs: noinline nounwind optnone uwtable
-define dso_local void @modify() #0 {
-  %1 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @.str.2, i64 0, i64 0))
-  ret void
-}
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define dso_local i32 @change_page_permissions_of_address(i8*) #0 {
@@ -126,10 +142,3 @@ attributes #8 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{!"clang version 9.0.0-2~ubuntu18.04.2 (tags/RELEASE_900/final)"}
-
-
-
-
-
-
-clang-9 -c -emit-llvm -S -target x86_64-pc-linux-gnu smc6.c
