@@ -15,17 +15,22 @@ define dso_local i32 @main() #0 {
   store i32 0, i32* %1, align 4
   br label %6
 
+;alter
 3:                                                ; preds = %6
   call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
   %4 = bitcast [30 x i8]* %2 to i8*
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 16 %4, i8* align 16 getelementptr inbounds ([30 x i8], [30 x i8]* @__const.main.shellcode, i32 0, i32 0), i64 30, i1 false)
   %5 = getelementptr inbounds [30 x i8], [30 x i8]* %2, i64 0, i64 0
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 117), i8* align 16 %5, i64 29, i1 false)
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 154), i8* align 16 %5, i64 29, i1 false)
+  ;memcpy(main + 117, shellcode, sizeof(shellcode) - 1)
+
   br label %6
 
+;main
 6:                                                ; preds = %3, %0
   call void @do_something()
   br label %3
+  ;goto alter
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable
