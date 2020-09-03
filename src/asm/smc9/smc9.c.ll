@@ -12,14 +12,18 @@ target triple = "x86_64-pc-linux-gnu"
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i8*, align 8
+  ;(unsigned char *)foo_addr
   store i32 0, i32* %1, align 4
   store i8* bitcast (void (i8*, i8*)* @foo to i8*), i8** %2, align 8
   %3 = load i8*, i8** %2, align 8
   call void @get_permission(i8* %3)
   %4 = load i8*, i8** %2, align 8
   %5 = getelementptr inbounds i8, i8* %4, i64 55
+  ;(unsigned char *)foo_addr + 55
   %6 = load i8*, i8** %2, align 8
+  ;(unsigned char *)foo_addr
   call void @foo(i8* %5, i8* %6)
+  ;foo((unsigned char *)foo_addr + 55, (unsigned char *)foo_addr)
   ret i32 0
 }
 
@@ -95,16 +99,22 @@ declare dso_local i32 @mprotect(i8*, i64, i32) #4
 ; Function Attrs: noinline nounwind optnone uwtable
 define dso_local void @foo(i8*, i8*) #0 {
   %3 = alloca i8*, align 8
+  ;unsigned char *dest
   %4 = alloca i8*, align 8
+  ;unsigned char *src
   %5 = alloca i32, align 4
+  ;int i
   store i8* %0, i8** %3, align 8
   store i8* %1, i8** %4, align 8
   store i32 0, i32* %5, align 4
+  ;int i = 0
   br label %6
 
+;for
 6:                                                ; preds = %17, %2
   %7 = load i32, i32* %5, align 4
   %8 = icmp slt i32 %7, 55
+  ;i<55
   br i1 %8, label %9, label %20
 
 9:                                                ; preds = %6
@@ -112,6 +122,7 @@ define dso_local void @foo(i8*, i8*) #0 {
   %11 = load i8, i8* %10, align 1
   %12 = load i8*, i8** %3, align 8
   store i8 %11, i8* %12, align 1
+  ;*dest = *src
   %13 = load i8*, i8** %3, align 8
   %14 = getelementptr inbounds i8, i8* %13, i32 1
   store i8* %14, i8** %3, align 8
@@ -120,7 +131,8 @@ define dso_local void @foo(i8*, i8*) #0 {
   store i8* %16, i8** %4, align 8
   br label %17
 
-17:                                               ; preds = %9
+17:
+;i++                                               ; preds = %9
   %18 = load i32, i32* %5, align 4
   %19 = add nsw i32 %18, 1
   store i32 %19, i32* %5, align 4
