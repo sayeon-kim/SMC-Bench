@@ -11,8 +11,8 @@ char *err_string = "Error while changing page permissions of foo()\n";
 
 int main(void)
 {
-	void *first_instruction = (void *)main + 61;
-	void *second_instruction = (void *)main + 90; 
+	void *first_instruction = (void *)main + 61; //num = 0 을 가리킴
+	void *second_instruction = (void *)main + 90; //num = 1 을 가리킴
 	get_permission(main);
 	int num = 0;
 	
@@ -24,6 +24,7 @@ TARGET:
 	printf("%d\n", num);
     num = 1;
 }
+// modifying 시 num = 1, 아니면 num = 0 출력
 
 void get_permission(void *foo_addr)
 {
