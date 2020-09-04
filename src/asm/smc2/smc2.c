@@ -1,57 +1,53 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <sys/mman.h>
 
 int change_page_permissions_of_address(void *addr);
-void testing();
+void foo();
+void modify();
 
-int main()
-{
-	void *modifing_addr = (void *)testing;
-	if (change_page_permissions_of_address(modifing_addr) == -1)
-	{
-		printf("Error!");
-	}
-	testing();
+char* exit_string = "EXIT\n";
+char* smc_string = "SMC\n";
+char* err_string = "Error while changing page permissions of foo()\n";
+
+int main(void){
+    
+    void *foo_addr = (void *)foo;
+    
+    foo();
+    modify(foo_addr);
+    foo();
+    
+    return 0;
 }
 
-void testing()
-{
-	__asm__(
-		"test_start:					\n\t"
-		"   jmp test_modify				\n\t"
-		"test_modify:					\n\t"
-		"   movl test_new, %eax			\n\t"
-		"   movl %eax, (test_target)	\n\t"
-		"   jmp test_target				\n\t"
-		"test_new:						\n\t"
-		"   jmp test_halt-16			\n\t"
-		"	nop							\n\t"
-		"	nop							\n\t"
-		"test_halt:						\n\t"
-		"   movl $1, %eax				\n\t"
-		"   movl $1, %ebx				\n\t"
-		"   int $0x80					\n\t"
-		"test_target :					\n\t"
-		"	nop							\n\t"
-		"	nop							\n\t"
-		"	nop							\n\t"
-		"	nop							\n\t"
-		"test_exit : 					\n\t"
-		"	movl $1, %eax				\n\t"
-		"	movl $0, %ebx				\n\t"
-		"   int $0x80					\n\t");
+void modify(void* foo_addr) {
+    if(change_page_permissions_of_address(foo_addr) == -1) {
+        write(STDERR_FILENO, err_string, strlen(err_string) + 1);
+        exit(1);
+    }
+    
+    unsigned char* instruction = (unsigned char*)foo_addr + 11;
+    *instruction += 8;
 }
 
-int change_page_permissions_of_address(void *addr)
-{
-	// Move the pointer to the page boundary
-	int page_size = 4096;
-	addr -= (unsigned long)addr % page_size;
+void foo() {
+    char *str = exit_string; 
+    write(STDOUT_FILENO, str, strlen(str) + 1);
+}
 
-	if (mprotect(addr, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == -1)
-	{
-		return -1;
-	}
+int change_page_permissions_of_address(void *addr){
+    
+    int page_size = 4096;
 
-	return 0;
+    addr -= (unsigned long)addr % page_size;
+
+    if(mprotect(addr, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == -1){
+        return -1;
+    }
+
+    return 0;
 }
