@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 
 int change_page_permissions_of_address(void *addr);
+void* _memcpy(void *dest, const void *src, size_t n);
 void get_permission(void *foo_addr);
 void foo();
 
@@ -14,13 +15,15 @@ char *smc_string = "Self Growing Code\n";
 
 int main(void)
 {
+    get_permission(foo);
 
-    void *foo_addr = (void *)foo;
+    int (*fp_printf)(const char*, ...);
+    void* (*fp_memcpy)(void *, const void* , size_t );
+    
+    fp_memcpy = memcpy;
+    fp_printf = printf;
 
-    get_permission(foo_addr);
-    foo((unsigned char *)foo_addr + 55, (unsigned char *)foo_addr);
-
-    return 0;
+    foo(fp_memcpy, fp_printf);
 }
 
 void get_permission(void *foo_addr)
@@ -31,7 +34,6 @@ void get_permission(void *foo_addr)
         exit(1);
     }
 }
-
 int change_page_permissions_of_address(void *addr)
 {
 
@@ -47,12 +49,9 @@ int change_page_permissions_of_address(void *addr)
     return 0;
 }
 
-void foo(unsigned char *dest, unsigned char *src)
-{
-    for (int i = 0; i < 55; i++)
-    {
-        *dest = *src;
-        dest++;
-        src++;
-    }
+void foo(void* (*fp_memcpy)(void *, const void*, size_t), int (*fp_printf)(const char*, ...)) {
+    int num = 89;
+    fp_memcpy(foo + num, foo + 23, 66);
+    fp_printf("%d\n", num);
+    num += 66;
 }
