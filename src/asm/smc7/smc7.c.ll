@@ -5,79 +5,36 @@ target triple = "x86_64-pc-linux-gnu"
 
 @.str = private unnamed_addr constant [48 x i8] c"Error while changing page permissions of foo()\0A\00", align 1
 @err_string = dso_local global i8* getelementptr inbounds ([48 x i8], [48 x i8]* @.str, i32 0, i32 0), align 8
-@.str.1 = private unnamed_addr constant [11 x i8] c"origin %d\0A\00", align 1
-@.str.2 = private unnamed_addr constant [13 x i8] c"modifing %d\0A\00", align 1
+@.str.1 = private unnamed_addr constant [6 x i8] c"\90\90\90\90\90\00", align 1
+@.str.2 = private unnamed_addr constant [24 x i8] c"Not Printed this string\00", align 1
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i8*, align 8
-  ; *modify_1
   %3 = alloca i8*, align 8
-  ; *instruction1
-  %4 = alloca i8*, align 8
-  ; *instruction2
-  %5 = alloca i32, align 4
-  ; origin
-  %6 = alloca i32, align 4
   store i32 0, i32* %1, align 4
-  %7 = call noalias i8* @malloc(i64 4) #6
-  store i8* %7, i8** %2, align 8
-  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 162), i8** %3, align 8
-  ; void *instruction1 = (void *)main + 162  
-  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 184), i8** %4, align 8
-  ; void *instruction2 = (void *)main + 184 
   call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
-  ; get_permission(main)
-  store i32 0, i32* %5, align 4
-  ; int origin=0 
-  store i32 1, i32* %6, align 4
-  ; int modifing=1
-  br label %15
+  %4 = call noalias i8* @malloc(i64 5) #6
+  store i8* %4, i8** %2, align 8
+  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 105), i8** %3, align 8
+  %5 = load i8*, i8** %2, align 8
+  %6 = load i8*, i8** %3, align 8
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %5, i8* align 1 %6, i64 5, i1 false)
+  br label %7
 
+7:                                                ; preds = %9, %0
+  %8 = load i8*, i8** %3, align 8
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %8, i8* align 1 getelementptr inbounds ([6 x i8], [6 x i8]* @.str.1, i64 0, i64 0), i64 5, i1 false)
+  br label %9
 
-;MODIFY
-8:                                                ; preds = %15
-  %9 = load i8*, i8** %2, align 8
-  ; %9 = modify_1
-  %10 = load i8*, i8** %3, align 8
-  ; %10 = instruction1
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %9, i8* align 1 %10, i64 4, i1 false)
-  ; memcpy(modify_1, instruction1, 4)
+9:                                                ; preds = %7
+  %10 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.2, i64 0, i64 0))
   %11 = load i8*, i8** %3, align 8
-  %12 = load i8*, i8** %4, align 8
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %11, i8* align 1 %12, i64 4, i1 false)
-  ; memcpy(instruction1, instruction2, 4)
-  %13 = load i8*, i8** %4, align 8
-  %14 = load i8*, i8** %2, align 8
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %13, i8* align 1 %14, i64 4, i1 false)
-  ; memcpy(instruction2, modify_1, 4)
-  br label %15
-
-;MAIN
-15:                                               ; preds = %8, %0
-  %16 = load i32, i32* %5, align 4
-  %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str.1, i64 0, i64 0), i32 %16)
-  ; printf("origin %d\n",origin);
-  %18 = load i32, i32* %5, align 4
-  %19 = add nsw i32 %18, 1
-  ; origin + 1
-  store i32 %19, i32* %5, align 4
-  ; origin += 1
-  %20 = load i32, i32* %5, align 4
-  ; %20 = %5(origin)
-  %21 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @.str.2, i64 0, i64 0), i32 %20)
-  ; printf("modifing %d\n",origin)
-  %22 = load i32, i32* %5, align 4
-  %23 = sub nsw i32 %22, 1
-  ; origin - 1
-  store i32 %23, i32* %5, align 4
-  ; origin -= 1
-  br label %8
+  %12 = load i8*, i8** %2, align 8
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %11, i8* align 1 %12, i64 5, i1 false)
+  br label %7
 }
-
-; Function Attrs: nounwind
-declare dso_local noalias i8* @malloc(i64) #1
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define dso_local void @get_permission(i8*) #0 {
@@ -100,6 +57,9 @@ define dso_local void @get_permission(i8*) #0 {
 12:                                               ; preds = %1
   ret void
 }
+
+; Function Attrs: nounwind
+declare dso_local noalias i8* @malloc(i64) #1
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.memcpy.p0i8.p0i8.i64(i8* nocapture writeonly, i8* nocapture readonly, i64, i1 immarg) #2
@@ -168,10 +128,3 @@ attributes #8 = { noreturn nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{!"clang version 9.0.0-2~ubuntu18.04.2 (tags/RELEASE_900/final)"}
-
-
-
-
-
-
-clang-9 -c -emit-llvm -S -target x86_64-pc-linux-gnu smc7.c
