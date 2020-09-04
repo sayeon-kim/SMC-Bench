@@ -5,32 +5,33 @@ target triple = "x86_64-pc-linux-gnu"
 
 @.str = private unnamed_addr constant [48 x i8] c"Error while changing page permissions of foo()\0A\00", align 1
 @err_string = dso_local global i8* getelementptr inbounds ([48 x i8], [48 x i8]* @.str, i32 0, i32 0), align 8
-@__const.main.shellcode = private unnamed_addr constant [30 x i8] c"H1\D2H1\C0H\BB/bin/sh\00SH\89\E7PWH\89\E6\B0;\0F\05\00", align 16
-@.str.1 = private unnamed_addr constant [14 x i8] c"do something\0A\00", align 1
+@.str.1 = private unnamed_addr constant [4 x i8] c"NOP\00", align 1
+@.str.2 = private unnamed_addr constant [6 x i8] c"NOPE\0A\00", align 1
+@.str.3 = private unnamed_addr constant [2 x i8] c"\8C\00", align 1
+@.str.4 = private unnamed_addr constant [7 x i8] c"Alter\0A\00", align 1
+@.str.5 = private unnamed_addr constant [11 x i8] c"\BF\00\00\00\00\E8\BC\FE\FF\FF\00", align 1
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
-  %2 = alloca [30 x i8], align 16
   store i32 0, i32* %1, align 4
-  br label %6
-
-;alter
-3:                                                ; preds = %6
   call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
-  %4 = bitcast [30 x i8]* %2 to i8*
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 16 %4, i8* align 16 getelementptr inbounds ([30 x i8], [30 x i8]* @__const.main.shellcode, i32 0, i32 0), i64 30, i1 false)
-  %5 = getelementptr inbounds [30 x i8], [30 x i8]* %2, i64 0, i64 0
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 154), i8* align 16 %5, i64 29, i1 false)
-  ;memcpy(main + 117, shellcode, sizeof(shellcode) - 1)
+  br label %2
 
-  br label %6
+2:                                                ; preds = %0
+  %3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i64 0, i64 0))
+  %4 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i64 0, i64 0))
+  br label %7
 
-;main
-6:                                                ; preds = %3, %0
-  call void @do_something()
-  br label %3
-  ;goto alter
+5:                                                ; preds = %7
+  %6 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str.2, i64 0, i64 0))
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 131), i8* align 1 getelementptr inbounds ([2 x i8], [2 x i8]* @.str.3, i64 0, i64 0), i64 1, i1 false)
+  br label %7
+
+7:                                                ; preds = %5, %2
+  %8 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @.str.4, i64 0, i64 0))
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 16), i8* align 1 getelementptr inbounds ([11 x i8], [11 x i8]* @.str.5, i64 0, i64 0), i64 10, i1 false)
+  br label %5
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable
@@ -55,16 +56,10 @@ define dso_local void @get_permission(i8*) #0 {
   ret void
 }
 
+declare dso_local i32 @printf(i8*, ...) #1
+
 ; Function Attrs: argmemonly nounwind
-declare void @llvm.memcpy.p0i8.p0i8.i64(i8* nocapture writeonly, i8* nocapture readonly, i64, i1 immarg) #1
-
-; Function Attrs: noinline nounwind optnone uwtable
-define dso_local void @do_something() #0 {
-  %1 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str.1, i64 0, i64 0))
-  ret void
-}
-
-declare dso_local i32 @printf(i8*, ...) #2
+declare void @llvm.memcpy.p0i8.p0i8.i64(i8* nocapture writeonly, i8* nocapture readonly, i64, i1 immarg) #2
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define dso_local i32 @change_page_permissions_of_address(i8*) #0 {
@@ -102,7 +97,7 @@ define dso_local i32 @change_page_permissions_of_address(i8*) #0 {
   ret i32 %21
 }
 
-declare dso_local i64 @write(i32, i8*, i64) #2
+declare dso_local i64 @write(i32, i8*, i64) #1
 
 ; Function Attrs: nounwind readonly
 declare dso_local i64 @strlen(i8*) #3
@@ -114,8 +109,8 @@ declare dso_local void @exit(i32) #4
 declare dso_local i32 @mprotect(i8*, i64, i32) #5
 
 attributes #0 = { noinline nounwind optnone uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #1 = { argmemonly nounwind }
-attributes #2 = { "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #1 = { "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #2 = { argmemonly nounwind }
 attributes #3 = { nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #4 = { noreturn nounwind "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #5 = { nounwind "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }

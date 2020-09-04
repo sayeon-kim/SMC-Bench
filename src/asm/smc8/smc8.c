@@ -13,33 +13,21 @@ char *err_string = "Error while changing page permissions of foo()\n";
 
 int main(void)
 {
-	goto MAIN;
-
-ALTER:
 	get_permission(main);
-	char shellcode[] =
-		"\x48\x31\xd2"							   // xor    %rdx, %rdx
-		"\x48\x31\xc0"							   // xor    %rax, %rax
-		"\x48\xbb\x2f\x62\x69\x6e\x2f\x73\x68\x00" // mov    $0x68732f6e69622f2f, %rbx
-		"\x53"									   // push   %rbx
-		"\x48\x89\xe7"							   // mov    %rsp, %rdi
-		"\x50"									   // push   %rax
-		"\x57"									   // push   %rdi
-		"\x48\x89\xe6"							   // mov    %rsp, %rsi
-		"\xb0\x3b"								   // mov    $0x3b, %al
-		"\x0f\x05";								   // syscall
-	memcpy(main + 117, shellcode, sizeof(shellcode) - 1);
-
-MAIN:
-	do_something();
+START:
+	printf("NOP");
+	printf("NOP");
 	goto ALTER;
-	return 0;
+START2:
+	printf("NOPE\n");
+	memcpy(main + 131, "\x8c", 1);
+ALTER:
+	printf("Alter\n");
+	memcpy(main + 16, "\xbf\x00\x00\x00\x00\xe8\xbc\xfe\xff\xff", 10);
+	goto START2;
 }
 
-void do_something()
-{
-	printf("do something\n");
-}
+
 
 void get_permission(void *foo_addr)
 {
