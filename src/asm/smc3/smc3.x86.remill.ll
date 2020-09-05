@@ -39,44 +39,67 @@ target triple = "i386-pc-linux-gnu-elf"
 ; Function Attrs: noinline nounwind
 define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
   %4 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 1, i32 0
+  ;%4 = eax
   %5 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 3, i32 0
+  ;%5 = ebx
   %6 = getelementptr inbounds %union.anon.1, %union.anon.1* %4, i32 0, i32 0
+  ;%6 = %struct.ArchState = type { i32, i32, %union.anon }
   %7 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 5, i32 0, i32 0
   %8 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 7, i32 0, i32 0
   %9 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 15, i32 0, i32 0
+  ;ebpppp
   %10 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0
+  ;%10 = eip
   %BL = bitcast %union.anon.1* %5 to i8*, !remill_register !0
+  ;%union.anon.1 = type { i32 }
+  ;%5를 i8로 bitcast
   %BH = getelementptr i8, i8* %BL, i32 1, !remill_register !1
+  ;bl의 1
   %11 = load i32, i32* %9, align 4
+  ;%11= %9
   %12 = load i8, i8* %BH, align 1
+  ;%12 = %bh = 1 = ecx
   %13 = tail call zeroext i8 @__remill_read_memory_8(%struct.Memory* %2, i32 %11) #3
   %14 = or i8 %13, %12
+  ; %12 or %13
   %15 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %2, i32 %11, i8 zeroext %14) #3
   %16 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 1
+  ;%union.anon = type { i64 }
   %17 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 3
   %18 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 7
   %19 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 9
   %20 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 13
   %21 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 5
   store i32 1, i32* %7, align 4, !tbaa !2
+  ;%7 = 1
   %22 = add i32 %1, 16
+  ;%22 = %1 +16
   store i32 1, i32* %8, align 4, !tbaa !2
+  ;%8 = 1
   br label %23
 
  <label>:23:                                     ; preds = %40, %3
+ ;loop
+ 
   %24 = phi i32 [ 1, %3 ], [ %41, %40 ]
   %25 = phi i32 [ %22, %3 ], [ %43, %40 ]
   %26 = phi %struct.Memory* [ %15, %3 ], [ %42, %40 ]
+  ;%15 = ebpppp
   %27 = tail call i32 @__remill_read_memory_32(%struct.Memory* %26, i32 %11) #3
+  ;%27 = %9
   %28 = icmp eq i32 %24, %27
+  ; cmp ecx, [ebp]	
   %29 = select i1 %28, i32 29, i32 5
+  ;select true --> 29, false --> 5
   %30 = add i32 %25, %29
   br i1 %28, label %31, label %40
 
  <label>:31:                                     ; preds = %23
   %32 = getelementptr inbounds %union.anon.1, %union.anon.1* %5, i32 0, i32 0
+  ;%32 = ebx
   store i32 1, i32* %6, align 4, !tbaa !2
   store i32 0, i32* %32, align 4, !tbaa !2
+  ;%32 = ebx =  0
   store i8 0, i8* %16, align 1, !tbaa !6
   store i8 1, i8* %17, align 1, !tbaa !20
   store i8 1, i8* %18, align 1, !tbaa !21
@@ -84,23 +107,38 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
   store i8 0, i8* %20, align 1, !tbaa !23
   store i8 0, i8* %21, align 1, !tbaa !24
   %33 = add i32 %30, 9
+  ; %30+9
   store i32 %33, i32* %10, align 4
+  ;eip = %33
   %34 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 0, i32 2
   %35 = bitcast %union.anon* %34 to i32*
+
+  ;halt:			; exit
+	; mov eax, 1
+	; xor ebx, ebx
+	; int 0x80
   store i32 128, i32* %35, align 8, !tbaa !2
+  ;%35 = 128,
   %36 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 0, i32 0
   store i32 4, i32* %36, align 16, !tbaa !25
+  ;%36 = 4,
   %37 = tail call %struct.Memory* @__remill_async_hyper_call(%struct.State* nonnull %0, i32 %33, %struct.Memory* %26)
   %38 = load i32, i32* %10, align 4
+  ;%38 = eip
   %39 = tail call %struct.Memory* @__remill_missing_block(%struct.State* nonnull %0, i32 %38, %struct.Memory* %26)
   ret %struct.Memory* %39
 
  <label>:40:                                     ; preds = %23
+;
+
   %41 = add i32 %24, 1
+  ;%24+1
   store i32 %41, i32* %7, align 4, !tbaa !2
+  ;%7 = %41
   %42 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %26, i32 34, i8 zeroext 1) #3
   %43 = add i32 %30, -5
   br label %23
+  ; jmp loop
 }
 
 ; Function Attrs: noduplicate noinline nounwind optnone readnone
