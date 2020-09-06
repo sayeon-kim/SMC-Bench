@@ -1,3 +1,7 @@
+# SMC 코드 3번
+
+#### Runtime Code Generation
+
 ```assembly
 	.data                  # Data declaration section
 vec1:   .word 22, 0, 25
