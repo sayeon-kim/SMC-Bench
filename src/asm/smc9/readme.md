@@ -1,6 +1,6 @@
-# SMC 코드 11번
+# SMC 코드 9번
 
- **encrypt.s: Code and speciﬁcation**
+ #### encrypt.s: Code and speciﬁcation
 
 ```asm
 main: la $8, pg
