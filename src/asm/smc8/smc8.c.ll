@@ -11,54 +11,39 @@ target triple = "x86_64-pc-linux-gnu"
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i8*, align 8
-  ;unsigned char *temp_instrutcion
   %3 = alloca i8*, align 8
-  ;void *first_instruction
   %4 = alloca i8*, align 8
-  ;void *second_instruction
   %5 = alloca i32, align 4
-  ;int num
   store i32 0, i32* %1, align 4
   %6 = call noalias i8* @malloc(i64 4) #6
   store i8* %6, i8** %2, align 8
-  ;unsigned char *temp_instrutcion = (unsigned char *)malloc(sizeof(char) * 4)
   store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 101), i8** %3, align 8
-  ;void *first_instruction = (void *)main + 101
   store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 127), i8** %4, align 8
-  ;void *second_instruction = (void *)main + 127
   call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
   store i32 0, i32* %5, align 4
-  ;num=0
   br label %14
 
-;body
 7:                                                ; preds = %14
   %8 = load i8*, i8** %2, align 8
   %9 = load i8*, i8** %3, align 8
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %8, i8* align 1 %9, i64 4, i1 false)
-  ;memcpy(temp_instrutcion, first_instruction, 4)
   %10 = load i8*, i8** %3, align 8
   %11 = load i8*, i8** %4, align 8
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %10, i8* align 1 %11, i64 4, i1 false)
-  ;memcpy(first_instruction, second_instruction, 4
   %12 = load i8*, i8** %4, align 8
   %13 = load i8*, i8** %2, align 8
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %12, i8* align 1 %13, i64 4, i1 false)
-  ;memcpy(second_instruction, temp_instrutcion, 4)
   br label %14
 
-;main
 14:                                               ; preds = %7, %0
   %15 = load i32, i32* %5, align 4
   %16 = add nsw i32 %15, 5
   store i32 %16, i32* %5, align 4
-  ;num += 5
   %17 = load i32, i32* %5, align 4
   %18 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i64 0, i64 0), i32 %17)
   %19 = load i32, i32* %5, align 4
   %20 = sub nsw i32 %19, 5
   store i32 %20, i32* %5, align 4
-  ;num -= 5
   br label %7
 }
 
