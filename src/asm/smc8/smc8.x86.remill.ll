@@ -37,7 +37,7 @@ target triple = "i386-pc-linux-gnu-elf"
 %struct.Memory = type opaque
 
 ; Function Attrs: noinline noreturn nounwind
-define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias nocapture dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
+define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
   br label %4
 
 ; <label>:4:                                      ; preds = %4, %3

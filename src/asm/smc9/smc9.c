@@ -6,52 +6,58 @@
 #include <sys/mman.h>
 
 int change_page_permissions_of_address(void *addr);
-void* _memcpy(void *dest, const void *src, size_t n);
-void get_permission(void *foo_addr);
 void foo();
-
+void get_permission(void *foo_addr);
 char *err_string = "Error while changing page permissions of foo()\n";
-char *smc_string = "Self Growing Code\n";
 
 int main(void)
 {
-    get_permission(foo);
+	get_permission(foo);
 
-    int (*fp_printf)(const char*, ...);
-    void* (*fp_memcpy)(void *, const void* , size_t );
-    
-    fp_memcpy = memcpy;
-    fp_printf = printf;
+	unsigned char *foo_code = (unsigned char *)malloc(sizeof(unsigned char) * 55);
+	memcpy(foo_code, foo, 55);
+	for (int i = 0; i < 55; i++)
+	{
+		foo_code[i] = foo_code[i] ^ -1;
+	}
+	memcpy(foo, foo_code, 55);
 
-    foo(fp_memcpy, fp_printf);
+	for (int i = 0; i < 55; i++)
+	{
+		foo_code[i] = foo_code[i] ^ -1;
+	}
+	memcpy(foo, foo_code, 55);
+
+	foo();
+}
+
+void foo()
+{
+	int num = 0;
+	printf("This is Foo Function\n");
+	num += 10;
+	printf("num = %d\n", num);
 }
 
 void get_permission(void *foo_addr)
 {
-    if (change_page_permissions_of_address(foo_addr) == -1)
-    {
-        write(STDERR_FILENO, err_string, strlen(err_string) + 1);
-        exit(1);
-    }
+	if (change_page_permissions_of_address(foo_addr) == -1)
+	{
+		write(STDERR_FILENO, err_string, strlen(err_string) + 1);
+		exit(1);
+	}
 }
+
 int change_page_permissions_of_address(void *addr)
 {
 
-    int page_size = 4096;
+	int page_size = 4096;
 
-    addr -= (unsigned long)addr % page_size;
+	addr -= (unsigned long)addr % page_size;
 
-    if (mprotect(addr, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == -1)
-    {
-        return -1;
-    }
-
-    return 0;
-}
-
-void foo(void* (*fp_memcpy)(void *, const void*, size_t), int (*fp_printf)(const char*, ...)) {
-    int num = 89;
-    fp_memcpy(foo + num, foo + 23, 66);
-    fp_printf("%d\n", num);
-    num += 66;
+	if (mprotect(addr, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == -1)
+	{
+		return -1;
+	}
+	return 0;
 }

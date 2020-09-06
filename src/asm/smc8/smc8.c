@@ -7,27 +7,26 @@
 
 int change_page_permissions_of_address(void *addr);
 void get_permission(void *foo_addr);
-void do_something();
-void alter();
 char *err_string = "Error while changing page permissions of foo()\n";
 
 int main(void)
 {
+	unsigned char *temp_instrutcion = (unsigned char *)malloc(sizeof(char) * 4);
+	void *first_instruction = (void *)main + 101;
+	void *second_instruction = (void *)main + 127;
 	get_permission(main);
-START:
-	printf("NOP");
-	printf("NOP");
-	goto ALTER;
-START2:
-	printf("NOPE\n");
-	memcpy(main + 131, "\x8c", 1);
-ALTER:
-	printf("Alter\n");
-	memcpy(main + 16, "\xbf\x00\x00\x00\x00\xe8\xbc\xfe\xff\xff", 10);
-	goto START2;
+	int num = 0;
+	goto MAIN;
+BODY:
+	memcpy(temp_instrutcion, first_instruction, 4);
+	memcpy(first_instruction, second_instruction, 4);
+	memcpy(second_instruction, temp_instrutcion, 4);
+MAIN:
+	num += 5;
+	printf("%d\n", num);
+	num -= 5;
+	goto BODY;
 }
-
-
 
 void get_permission(void *foo_addr)
 {

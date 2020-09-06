@@ -1,38 +1,33 @@
-# smc 코드 8번
+# SMC 코드 10번
 
-**Mutual-modifying Modules - mutual modification**
+**Polymorphic Code - Mutual Modiﬁcation**
 
 ```asm
-	.text
-main:  j alter
-	sw $8, alter
-alter: lw $8, main
-       li $9, 0
-       sw $9, main
-       j main
+main: la $10, body	#load $10에  body주소 즉, 0x20420003이 들어간다
+
+body: lw $8, 12($10) 	# $10에 12가 더해진 즉, 3줄 다음인 (addi $2,$2, 21) 								0x20420015가 $8에 load
+      lw $9, 16($10)   	# $10에 16가 더해진 즉, 4줄 다음인  두번째(addi $2,$2, 21) 							0x20420015가 $9에 load
+      sw $9, 12($10)                     
+      addi $2,$2, 21       
+      addi $2,$2, 21   
+      sw $8, 16($10)        
+      lw $9, 8($10)        
+      lw $8, 20($10)        
+      sw $9, 20($10)        
+      sw $8, 8($10)         
+      j body  
+                   
 
 ```
 
 
 
-먼저 alter로 분기한다.
 
-$8에 main 의 포인터를 load 한다. 그리고 $9에 0을 immediate load한다.
 
-$9의 값을 main에 store 한다.
-
-이때 main 부분의 code 값이 바뀐것을 볼 수 있다.
-
-다시 main으로 분기한다. 
-
-```asm
-main:  j alter
-	sw $8, alter
-```
-
-이때, 이미 main의 첫번째 부분이  ( j alter)가 아닌 아무 문장이 없으므로, 아까 j분기로 건너뛰게 되었던, ( sw $8, alter ) 문장이 실행된다.
-
- ( sw $8, alter ) 문장이 실행된 결과로 이렇게 바뀌게 된다.  그리고 프로그램이 끝나게 된다.
+전체적으로 이 코드는 $8과 $9에 서로 포인터를 저장해서 덮어 씌운후 다시 body 문을 돌면서 원래대로 보여지는 코드이다.
 
 
 
+$9에는 body+2번째 줄을, $8에는 body + 5번째 줄을  load 한후
+
+바꿔서 sw 한 후에 반복하는 과정에 다시 바뀌어 원래 자리애 sw 된다.

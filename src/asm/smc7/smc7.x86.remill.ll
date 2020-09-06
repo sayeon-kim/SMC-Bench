@@ -36,12 +36,12 @@ target triple = "i386-pc-linux-gnu-elf"
 %struct.SegmentShadow = type { %union.anon, i32, i32 }
 %struct.Memory = type opaque
 
-; Function Attrs: noinline noreturn nounwind
-define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias nocapture dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
+; Function Attrs: noinline norecurse noreturn nounwind
+define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias nocapture dereferenceable(3376), i32, %struct.Memory* noalias nocapture readnone) local_unnamed_addr #0 {
   br label %4
 
 ; <label>:4:                                      ; preds = %4, %3
   br label %4
 }
 
-attributes #0 = { noinline noreturn nounwind "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #0 = { noinline norecurse noreturn nounwind "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
