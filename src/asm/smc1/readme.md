@@ -1,4 +1,4 @@
-# SMC 코드 3번
+# SMC 코드 1번
 
 Unbounded code rewriting
 
