@@ -36,12 +36,15 @@ define dso_local i32 @main() #0 {
   %8 = load i8*, i8** %2, align 8
   %9 = load i8*, i8** %3, align 8
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %8, i8* align 1 %9, i64 4, i1 false)
+  ;memcpy(temp_instrutcion, first_instruction, 4)
   %10 = load i8*, i8** %3, align 8
   %11 = load i8*, i8** %4, align 8
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %10, i8* align 1 %11, i64 4, i1 false)
+  ;memcpy(first_instruction, second_instruction, 4
   %12 = load i8*, i8** %4, align 8
   %13 = load i8*, i8** %2, align 8
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %12, i8* align 1 %13, i64 4, i1 false)
+  ;memcpy(second_instruction, temp_instrutcion, 4)
   br label %14
 
 ;main
