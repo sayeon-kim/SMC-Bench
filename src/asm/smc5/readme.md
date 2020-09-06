@@ -1,4 +1,4 @@
-# SMC 7번
+# SMC 5번
 
 ##### self-mutating code block
 
