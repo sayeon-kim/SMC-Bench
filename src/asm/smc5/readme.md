@@ -1,6 +1,6 @@
 # SMC 5번
 
-##### self-mutating code block
+#### Self-mutating Code Block
 
 ```assembly
 	.text
