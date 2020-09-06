@@ -1,4 +1,4 @@
-# SMC 코드 9번
+# SMC 코드 7번
 
 #### Self Growing Code
 
