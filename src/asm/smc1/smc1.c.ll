@@ -13,9 +13,9 @@ define dso_local i32 @main() #0 {
   %1 = alloca i8*, align 8
   %2 = alloca i8*, align 8
   %3 = alloca i32, align 4
-  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 61), i8** %1, align 8
-  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 90), i8** %2, align 8
-  call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
+  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 61), i8** %1, align 8 ; num = 0
+  store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 90), i8** %2, align 8 ; num = 1
+  call void @get_permission(i8* bitcast (i32 ()* @main to i8*)) ; permission 획득
   store i32 0, i32* %3, align 4 ; %3 = num
   br label %4
 
@@ -26,6 +26,7 @@ define dso_local i32 @main() #0 {
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %5, i8* align 1 %6, i64 4, i1 false)
   br label %7
   ; memcpy(first_instruction, second_instruction, 4);
+  ; second instruction을 first instruction 위치에 overwriting
 
 ; TARGET:
 7:                                                ; preds = %4
