@@ -11,24 +11,16 @@ target triple = "x86_64-pc-linux-gnu"
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i8*, align 8
-  ;unsigned char *temp_instrutcion
   %3 = alloca i8*, align 8
-  ;void *first_instruction
   %4 = alloca i8*, align 8
-  ;void *second_instruction
   %5 = alloca i32, align 4
-  ;int num
   store i32 0, i32* %1, align 4
   %6 = call noalias i8* @malloc(i64 4) #6
   store i8* %6, i8** %2, align 8
-  ;unsigned char *temp_instrutcion = (unsigned char *)malloc(sizeof(char) * 4)
   store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 101), i8** %3, align 8
-  ;void *first_instruction = (void *)main + 101
   store i8* getelementptr (i8, i8* bitcast (i32 ()* @main to i8*), i64 127), i8** %4, align 8
-  ;void *second_instruction = (void *)main + 127
   call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
   store i32 0, i32* %5, align 4
-  ;num=0
   br label %14
 
 ;body
