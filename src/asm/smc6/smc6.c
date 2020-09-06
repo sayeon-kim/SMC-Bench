@@ -7,40 +7,23 @@
 
 int change_page_permissions_of_address(void *addr);
 void get_permission(void *foo_addr);
-void foo();
 
-int num =1;
-char *start_string = "start\n";
-								   
+char *err_string = "Error while changing page permissions of foo()\n";
+char *call_string = "Call\n";
+
 int main(void)
 {
-	void *instruction = (void *)main + 169;
-	void *instruction2 = (void *)main + 138;
-	get_permission(main);
-	goto START;
-
-MODIFY:
-	memcpy(instruction, instruction2, sizeof(instruction2) - 1);
-	goto GEN;
-
-START:
-	printf("It's main \n");
-	goto MODIFY;
-
-GEN:
-	num+=2;
-	printf("num is %d\n", num);
-	num-=1;
-	goto START;
-
+    get_permission(main);
+    void (*fp_exit)(int) = exit;
+	void* (*fp_memcpy)(void *, const void*, size_t) = memcpy;
+    fp_memcpy(main + 76, "\x48\x8b\x45\xf0\xbf\x0a\x00\x00\x00\xff\xd0", 11);
 }
-
 
 void get_permission(void *foo_addr)
 {
     if (change_page_permissions_of_address(foo_addr) == -1)
     {
-        write(STDERR_FILENO, start_string, strlen(start_string) + 1);
+        write(STDERR_FILENO, err_string, strlen(err_string) + 1);
         exit(1);
     }
 }
@@ -52,8 +35,7 @@ int change_page_permissions_of_address(void *addr)
 
     addr -= (unsigned long)addr % page_size;
 
-    if (mprotect(addr, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == -1)
-    {
+    if (mprotect(addr, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == -1){
         return -1;
     }
 
