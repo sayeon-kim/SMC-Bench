@@ -1,4 +1,4 @@
-# SMC 코드 4번
+# SMC 코드 2번
 
 #### Runtime Code Checking
 
