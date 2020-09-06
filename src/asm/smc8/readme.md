@@ -1,6 +1,6 @@
-# SMC 코드 10번
+# SMC 코드 8번
 
-**Polymorphic Code - Mutual Modiﬁcation**
+#### Polymorphic Code - Mutual Modiﬁcation
 
 ```asm
 main: la $10, body	#load $10에  body주소 즉, 0x20420003이 들어간다
