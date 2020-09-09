@@ -5,6 +5,9 @@
 #include <errno.h>
 #include <sys/mman.h>
 
+#define NUM 8       // fib(8) !!!
+
+
 int change_page_permissions_of_address(void *addr);
 void get_permission(void* foo_addr);
 
@@ -12,7 +15,7 @@ char* err_string = "Error while changing page permissions of foo()\n";
 
 int main(void){
     // code ptr to key
-    const unsigned char* ptr_key = (unsigned char*)main + 0;
+    unsigned char* ptr_key = (unsigned char*)main + 107;  // objdump로 확인!!!
 
     int cnt;
     unsigned char instr9[4];
@@ -26,7 +29,7 @@ int main(void){
     // SMC1
 
     // lw $4, num
-    cnt = 8;
+    cnt = NUM;
 
     // lw $9, key
     memcpy( instr9, ptr_key, 4);
@@ -46,14 +49,17 @@ loop:
 
     // add $10, $9, $2
     memcpy( instr10, instr9, 4);
-    instr10[3] = instr10[3] + fib_index ;
+    instr10[3] = instr10[3] + fib_index  - 1;  // difference!!
 
 key:
     // addi $2, $2, 0 
-    fib_index = fib_index + 0;
+    fib_index = fib_index + 1;   // difference!!
 
     // sw $10, key
     memcpy(ptr_key, instr10, 4);
+
+    // for debugging
+    // printf("fib(%d)=%d\n", index, fib_index);
 
     // j loop
     goto loop;
