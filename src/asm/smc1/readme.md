@@ -67,7 +67,7 @@ loop:
 key:
       $2  <- 1     // fib 2 = 1
 
-key:  addi $2 $2 1
+      key :=  addi $2 $2 1
 
 
 loop: 
@@ -76,7 +76,7 @@ loop:
 key:
       $2  <- 2     // fib 3 = 2
 
-key:  addi $2 $2 1
+      key :=  addi $2 $2 1
 
 
 loop: 
@@ -85,7 +85,7 @@ loop:
 key:
       $2  <- 3     // fib 4 = 3
 
-key:  addi $2 $2 2
+     key :=  addi $2 $2 2
 
 
 loop: 
@@ -94,7 +94,7 @@ loop:
 key:
       $2  <- 5     // fib 5 = 5
 
-key:  addi $2 $2 3
+     key :=  addi $2 $2 3
 
 
 loop: 
@@ -103,7 +103,7 @@ loop:
 key:
       $2  <- 8     // fib 6 = 8
 
-key:  addi $2 $2 5
+      key := addi $2 $2 5
 
 
 loop: 
@@ -112,7 +112,7 @@ loop:
 key:
       $2  <- 13     // fib 7 = 13
 
-key:  addi $2 $2 8
+      key := addi $2 $2 8
 
 
 loop: 
@@ -121,7 +121,7 @@ loop:
 key:
       $2  <- 21     // fib 8 = 21
 
-key:  addi $2 $2 13
+      key := addi $2 $2 13
 
 
 halt: j halt
