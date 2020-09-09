@@ -42,9 +42,6 @@ start:
         instr10[3] = instr10[3] + SIZE_G;
 
 g:
-
-        printf("hello world\n");
-
         // sw $9, 0($8)
         for (i=0; i<SIZE_G; i++) ptr_g[i] = instr9[i];  // for루프의 크기가 SIZE_G !!
 
