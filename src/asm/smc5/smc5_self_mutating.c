@@ -5,9 +5,9 @@
 #include <errno.h>
 #include <sys/mman.h>
 
-#define OFFSET_G 427
-#define OFFSET_H 482
-#define SIZE_G   65        // g: 라벨 명령어의 크기
+#define OFFSET_G 412
+#define OFFSET_H 467
+#define SIZE_G   54        // g: 라벨 명령어의 크기
 #define SIZE_H   54
 #define NEXT_INST 8
 #define BEFORE_INST -8
