@@ -32,9 +32,9 @@ int main(void)
         // Initialize
         num = 1;
 
-        ptr_goto_alter = (unsigned char*)main + 180;
-        ptr_main = (unsigned char*)main + 182;
-        ptr_alter = (unsigned char*)main + 273;
+        ptr_goto_alter = (unsigned char*)main + 192; // 180
+        ptr_main = (unsigned char*)main + 194; // 182
+        ptr_alter = (unsigned char*)main + 288; // 273
 
         // goto alter ~ 마지막 num*+2
         for(i=0; i<SIZE_GOTO_ALTER; i++) instr_j_alter[i] = ptr_goto_alter[i];  
@@ -69,7 +69,7 @@ alter:
         /*  } */
         /* printf("\n"); */
 
-        instr8[13] = '\xfe';  // jmp to 자기 자신!  eb fe !!
+        instr8[1] = '\xfe';  // jmp to 자기 자신!  eb fe !!
 
         // li $9, 0
         for(i=0; i<SIZE_MAIN; i++) instr9[i] = '\x90';    // 0x90: x86 NOP instruction
