@@ -5,8 +5,8 @@
 #include <errno.h>
 #include <sys/mman.h>
 
-#define OFFSET_G 412
-#define OFFSET_H 467
+#define OFFSET_G 343
+#define OFFSET_H 398
 #define SIZE_G   54        // g: 라벨 명령어의 크기
 #define SIZE_H   54
 #define NEXT_INST 8
@@ -37,11 +37,6 @@ start:
 
         // la $8, g
         ptr_g = (unsigned char*)main + OFFSET_G;
-
-        // initialize instruction array to value of nop ('\x90')
-        memset(instr9, '\x90', SIZE_G);
-        memset(instr10, '\x90', SIZE_G);
-        memset(instr11, '\x90', SIZE_G);
 
         // lw $9, 0($8)
         for (i=0; i< SIZE_G; i++) instr9[i] = ptr_g[i];
