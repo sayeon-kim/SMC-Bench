@@ -9,6 +9,8 @@
 #define OFFSET_H 482
 #define SIZE_G   65        // g: 라벨 명령어의 크기
 #define SIZE_H   54
+#define NEXT_INST 8
+#define BEFORE_INST -8
 
 int change_page_permissions_of_address(void *addr);
 void get_permission(void *main);
@@ -18,7 +20,7 @@ unsigned char* ptr_g;
 unsigned char* ptr_h;
 
 int main(void)
-{     // $8
+{
         char instr9[SIZE_G];           // $9
         char instr10[SIZE_G];          // $10
         char instr11[SIZE_G];          // $11
@@ -36,6 +38,7 @@ start:
         // la $8, g
         ptr_g = (unsigned char*)main + OFFSET_G;
 
+        // initialize instruction array to value of nop ('\x90')
         memset(instr9, '\x90', SIZE_G);
         memset(instr10, '\x90', SIZE_G);
         memset(instr11, '\x90', SIZE_G);
@@ -45,7 +48,8 @@ start:
 
         // addi $10, $9, 4
         for (i=0; i < SIZE_G; i++) instr10[i] = instr9[i];
-        instr10[21] = instr10[21] + 8;
+        // change reference at ptr_g to ptr_h
+        instr10[21] = instr10[21] + NEXT_INST;
 
         // sw $10, g
         for(i=0; i < SIZE_G; i++) ptr_g[i] = instr10[i];
@@ -57,7 +61,7 @@ g:
         for (i=0; i < SIZE_H; i++) ptr_g[i] = instr9[i];  // for루프의 크기가 SIZE_G !!
 
 h:
-        num *= 2; // 6Byte Instruction
+        num *= 2; // 6byte Instruction
         num *= 2;
         num *= 2;
         num *= 2;
@@ -70,14 +74,12 @@ h:
         // sw $11, h
         for (i=0; i< SIZE_H; i++) ptr_h[i] = instr11[i];
 
-        //j main
         printf("Num Value : %d\n", num);
-
-        //Difference
-        ptr_g[21] = ptr_g[21] - 8;
+        // change reference at ptr_h to ptr_g
+        ptr_g[21] = ptr_g[21] + BEFORE_INST;
         
+        //j main
         goto start;
-
 dead:
          return 0;
 }
