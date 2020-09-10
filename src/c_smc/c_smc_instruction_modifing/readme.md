@@ -1,4 +1,4 @@
-# SMC 코드 1번
+# SMC 코드 c_smc_instruction_modifing
 
 Unbounded code rewriting
 
