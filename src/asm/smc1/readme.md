@@ -1,4 +1,4 @@
-# SMC 코드 smc1.c
+# SMC 코드 1번
 
 Unbounded code rewriting
 
