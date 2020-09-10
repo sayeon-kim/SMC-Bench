@@ -36,3 +36,14 @@ main:  j alter
 
 
 
+실행 과정
+
+```
+  $8 <- "j alter"
+  $9 <- 0       // MIPS에서 nop 명령어
+
+  alter := "j alter"
+```
+위 실행 후 alter에서 무한 루프를 수행한다.
+
+
