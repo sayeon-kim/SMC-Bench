@@ -63,7 +63,13 @@ main_start:
 alter:
         // lw $8, main
         for(i=0; i<SIZE_MAIN; i++) instr8[i] = ptr_goto_alter[i];
-        instr8[1] = '\xfe';  // jmp to 자기 자신!  eb fe !!
+
+        /* for(i=0; i<SIZE_MAIN; i++) { */
+        /*   printf("%x%x ", ((unsigned) (instr8[i] & 0xf0)) >> 4, instr8[i] & 0x0f ); */
+        /*  } */
+        /* printf("\n"); */
+
+        instr8[13] = '\xfe';  // jmp to 자기 자신!  eb fe !!
 
         // li $9, 0
         for(i=0; i<SIZE_MAIN; i++) instr9[i] = '\x90';    // 0x90: x86 NOP instruction
