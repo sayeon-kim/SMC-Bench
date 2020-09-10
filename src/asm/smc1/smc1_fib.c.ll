@@ -5,72 +5,108 @@ target triple = "x86_64-pc-linux-gnu"
 
 @.str = private unnamed_addr constant [48 x i8] c"Error while changing page permissions of foo()\0A\00", align 1
 @err_string = dso_local global i8* getelementptr inbounds ([48 x i8], [48 x i8]* @.str, i32 0, i32 0), align 8
+; global변수 define NUM 8
 @.str.1 = private unnamed_addr constant [12 x i8] c"fib(%d)=%d\0A\00", align 1
 
 ; Function Attrs: noinline nounwind optnone uwtable
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i8*, align 8
+  ; unsigned char* ptr_key
   %3 = alloca i32, align 4
+  ; int cnt
   %4 = alloca [4 x i8], align 1
+  ; unsigned char instr9[4]
   %5 = alloca [4 x i8], align 1
+  ; unsigned char instr10[4]
   %6 = alloca i32, align 4
+  ;int index
   %7 = alloca i8, align 1
+  ;unsigned char fib_index
   store i32 0, i32* %1, align 4
   store i8* getelementptr inbounds (i8, i8* bitcast (i32 ()* @main to i8*), i64 107), i8** %2, align 8
+  ; unsigned char* ptr_key = (unsigned char*)main + 107
   call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
   store i32 8, i32* %3, align 4
+  ; cnt = NUM 
+  ; (lw $4, num)
   %8 = getelementptr inbounds [4 x i8], [4 x i8]* %4, i64 0, i64 0
   %9 = load i8*, i8** %2, align 8
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %8, i8* align 1 %9, i64 4, i1 false)
+  ; memcpy( instr9, ptr_key, 4)
+  ; (lw $9, key)
   store i32 1, i32* %6, align 4
+  ;index = 1
   store i8 1, i8* %7, align 1
+  ;fib_index  = 1
   br label %10
 
+
+;loop:
 10:                                               ; preds = %29, %0
   %11 = load i32, i32* %6, align 4
+  ; %11 = index의 값
   %12 = load i32, i32* %3, align 4
+  ; %12 = fib_index의 값
   %13 = icmp eq i32 %11, %12
+  ; if (index == cnt)
   br i1 %13, label %14, label %15
+  ; %13이 1이면 %14, 0이면 %15
 
 14:                                               ; preds = %10
   br label %36
+  ; goto halt(%36)
 
 15:                                               ; preds = %10
   %16 = load i32, i32* %6, align 4
+  ; %16 => %6 = index의 값
   %17 = add nsw i32 %16, 1
   store i32 %17, i32* %6, align 4
+  ; index = index + 1
   %18 = getelementptr inbounds [4 x i8], [4 x i8]* %5, i64 0, i64 0
   %19 = getelementptr inbounds [4 x i8], [4 x i8]* %4, i64 0, i64 0
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %18, i8* align 1 %19, i64 4, i1 false)
+  ; memcpy( instr10, instr9, 4)
   %20 = getelementptr inbounds [4 x i8], [4 x i8]* %5, i64 0, i64 3
+  ; %20 = *instr10[3] 
   %21 = load i8, i8* %20, align 1
+  ; %21 = instr10[3]의 값
   %22 = zext i8 %21 to i32
   %23 = load i8, i8* %7, align 1
+  ; %23 = %7(fib_index) 값
   %24 = zext i8 %23 to i32
   %25 = add nsw i32 %22, %24
   %26 = sub nsw i32 %25, 1
   %27 = trunc i32 %26 to i8
   %28 = getelementptr inbounds [4 x i8], [4 x i8]* %5, i64 0, i64 3
   store i8 %27, i8* %28, align 1
+  ; instr10[3] = instr10[3] + fib_index  - 1
   br label %29
 
+
+;key
 29:                                               ; preds = %15
   %30 = load i8, i8* %7, align 1
+  ; %30 = fib_index 값
   %31 = zext i8 %30 to i32
   %32 = add nsw i32 %31, 1
   %33 = trunc i32 %32 to i8
   store i8 %33, i8* %7, align 1
+  ; fib_index = fib_index + 1
   %34 = load i8*, i8** %2, align 8
   %35 = getelementptr inbounds [4 x i8], [4 x i8]* %5, i64 0, i64 0
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 1 %34, i8* align 1 %35, i64 4, i1 false)
+  ; memcpy(ptr_key, instr10, 4)                 -->%34 =  ptr_key,  %35 = instr10
   br label %10
 
+
+;halt
 36:                                               ; preds = %14
   %37 = load i32, i32* %3, align 4
   %38 = load i8, i8* %7, align 1
   %39 = zext i8 %38 to i32
   %40 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([12 x i8], [12 x i8]* @.str.1, i64 0, i64 0), i32 %37, i32 %39)
+  ;printf("fib(%d)=%d\n", cnt, fib_index)
   ret i32 0
 }
 
@@ -163,3 +199,6 @@ attributes #8 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{!"clang version 9.0.0-2~ubuntu18.04.2 (tags/RELEASE_900/final)"}
+
+
+clang-9 -c -emit-llvm -S -target x86_64-pc-linux-gnu smc3.c
