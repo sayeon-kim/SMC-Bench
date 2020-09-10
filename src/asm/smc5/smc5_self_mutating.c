@@ -5,67 +5,81 @@
 #include <errno.h>
 #include <sys/mman.h>
 
+#define OFFSET_G 427
+#define OFFSET_H 482
+#define SIZE_G   65        // g: 라벨 명령어의 크기
+#define SIZE_H   54
+
 int change_page_permissions_of_address(void *addr);
 void get_permission(void *main);
 char *err_string = "Error while changing page permissions of foo()\n";
 
+unsigned char* ptr_g;
+unsigned char* ptr_h;
 
 int main(void)
-{
-        unsigned char* ptr_h;     // h
-        unsigned char* ptr_g;     // $8
-        char instr9[4];           // $9
-        char instr10[4];          // $10
-        char instr11[4];          // $11
-
+{     // $8
+        char instr9[SIZE_G];           // $9
+        char instr10[SIZE_G];          // $10
+        char instr11[SIZE_G];          // $11
+        
         int i;
-
+        int num = 1;
+        
         // Initialize
 	get_permission(main);
 
-        ptr_h = (unsigned char*)main + 0;
-
-        // SMC5
+        // SMC 5
 start:
-
-#define OFFSET_G 0
-#define SIZE_G   32        // g: 라벨 명령어의 크기
+        ptr_h = (unsigned char*)main + OFFSET_H;
 
         // la $8, g
         ptr_g = (unsigned char*)main + OFFSET_G;
 
+        memset(instr9, '\x90', SIZE_G);
+        memset(instr10, '\x90', SIZE_G);
+        memset(instr11, '\x90', SIZE_G);
+
         // lw $9, 0($8)
-        for (i=0; i<SIZE_G; i++) instr9[i] = ptr_g[i];
+        for (i=0; i< SIZE_G; i++) instr9[i] = ptr_g[i];
 
         // addi $10, $9, 4
-        for (i=0; i<SIZE_G; i++) instr10[i] = instr9[i];
-        instr10[3] = instr10[3] + SIZE_G;
+        for (i=0; i < SIZE_G; i++) instr10[i] = instr9[i];
+        instr10[21] = instr10[21] + 8;
 
+        // sw $10, g
+        for(i=0; i < SIZE_G; i++) ptr_g[i] = instr10[i];
+        
+        // lw $11, h
+        for(i=0; i < SIZE_H; i++) instr11[i] = ptr_h[i];
 g:
-
-        printf("hello world\n");
-
         // sw $9, 0($8)
-        for (i=0; i<SIZE_G; i++) ptr_g[i] = instr9[i];  // for루프의 크기가 SIZE_G !!
+        for (i=0; i < SIZE_H; i++) ptr_g[i] = instr9[i];  // for루프의 크기가 SIZE_G !!
 
 h:
-        // j dead
-        goto dead; // SIZE_G 만큼 명령어 영역 확보 !!
-        goto dead;
-        goto dead;
-        goto dead;
-        goto dead;
-        goto dead;
+        num *= 2; // 6Byte Instruction
+        num *= 2;
+        num *= 2;
+        num *= 2;
+        num *= 2;
+        num *= 2;
+        num *= 2;
+        num *= 2;
+        num *= 2; // so size of all instructions is 54byte
 
         // sw $11, h
-        for (i=0; i<SIZE_G; i++) ptr_h[i] = instr11[i];
+        for (i=0; i< SIZE_H; i++) ptr_h[i] = instr11[i];
 
-        // j main
+        //j main
+        printf("Num Value : %d\n", num);
+
+        //Difference
+        ptr_g[21] = ptr_g[21] - 8;
+        
         goto start;
 
 dead:
-
-        return 0;
+         return 0;
 }
 
 
