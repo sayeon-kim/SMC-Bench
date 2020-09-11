@@ -11,6 +11,7 @@
 
 ## Instructions related to Static Pointer Analysis
 - numbers : 8
+
 Opcode               | Instruction | Syntax | Constration | Remarks
 :------:             | :---------: | :----: | :---------: | :-----:
 31 | Alloca         | <result\> = alloca <type\> | alloca-i ∈ [[ result ]]] | Allocates memory on stack frame
@@ -24,6 +25,7 @@ Opcode               | Instruction | Syntax | Constration | Remarks
 
 ## I don't know
 - numbers : 17
+
 Opcode               | Instruction | Syntax | Constration | Remarks
 :------:             | :---------: | :----: | :---------: | :-----:
 6  | Resume      | resume <type\> <value\> | ? | Exception Handling Instruction
