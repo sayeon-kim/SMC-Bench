@@ -14,6 +14,7 @@ void get_permission(void* foo_addr);
 char* err_string = "Error while changing page permissions of foo()\n";
 
 //
+int main();
 void f(int*);
 void halt(int);
 
@@ -23,14 +24,62 @@ void f(int* ptr_reg8) {
   unsigned char* reg31;   // $31 or $ra
   unsigned char reg9[SIZE_CALL];
   int i;
+  int j;
+  unsigned char* ret_addr;
+  unsigned char* call_addr;
+  long int i_ret_addr;  // 포인터 변수에 bit 연산자를 적용할 수 없어 int 변수를 도입!
 
   // li $8, 42
   *ptr_reg8 = 42;
 
   // lw $9, -4($31)
-  reg31 = (unsigned char*)&ptr_reg8 - 16;  // hard-coding: 스택 리턴 주소의 주소
+  reg31 = (unsigned char*)&ptr_reg8 + 8 + 71;  // hard-coding: 스택 리턴 주소의 주소
 
-  for(i=0; i<SIZE_CALL; i++) reg9[i] = reg31[i];
+  ///////////////////////////////////////////////////////////////
+  // 포인터 변수 ret_addr을 계산해야하는데                     //
+  // C언어에서 ret_addr에 bit 연산을 적용할 수 없어            //
+  // 먼저 i_ret_addr에 주소를 int로 계산한 다음                //
+  // ret_addr로 주소를 옮김!                                   //
+  ///////////////////////////////////////////////////////////////
+  i_ret_addr = 0;
+
+  for(i=8; i>0 ;i--) {
+    char ch = reg31[i];
+
+    printf("%x%x ", ((unsigned) (ch & 0xf0)) >> 4, ch & 0x0f );
+
+    i_ret_addr = i_ret_addr | ((unsigned) (ch & 0xf0) >> 4);
+    i_ret_addr = i_ret_addr << 4;
+
+    i_ret_addr = i_ret_addr | (ch & 0x0f);
+
+    if (i > 1) {
+      i_ret_addr = i_ret_addr << 4;
+    }
+  }
+  ///////////////////////////////////////////////////////////////
+
+  ret_addr = (unsigned char*)i_ret_addr;
+  call_addr = ret_addr - 5; // callq의 크기가 5 bytes
+
+  printf("\nmain: %p\n", (unsigned char*)main + 44 + 5);
+  printf("ret_addr: %p\n", (unsigned char*)ret_addr);
+
+/*   reg31 = (unsigned char*)&ptr_reg8;  // hard-coding: 스택 리턴 주소의 주소 */
+
+/* for(j=0; j<=80; j++) { printf("-%d(%p) ", j, reg31); */
+
+/*   for(i=8; i>0 ;i--) { */
+/*     char ch = reg31[i]; */
+/*     printf("%x%x ", ((unsigned) (ch & 0xf0)) >> 4, ch & 0x0f ); */
+/*   } */
+
+/*   printf("\n"); */
+
+/*   reg31 = reg31 + 1; */
+/* } */
+
+  for(i=0; i<SIZE_CALL; i++) reg9[i] = call_addr[i];
 
   // bne $9, $10, halt
   for(i=0; i<SIZE_CALL; i++) {
