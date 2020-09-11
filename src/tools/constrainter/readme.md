@@ -10,6 +10,7 @@
 - Number of Instructions :  67 (llvm/include/llvm/IR/Instruction.def)
 
 ## Instructions related to Static Pointer Analysis
+- numbers : 8
 Opcode               | Instruction | Syntax | Constration | Remarks
 :------:             | :---------: | :----: | :---------: | :-----:
 31 | Alloca         | <result\> = alloca <type\> | alloca-i ∈ [[ result ]]] | Allocates memory on stack frame
@@ -22,6 +23,7 @@ Opcode               | Instruction | Syntax | Constration | Remarks
 64 | ExtractValue   | <result\> extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| if aggregate type is pointer type => [[result]]   | get a value from aggregate data type by index. (cf. getelement ptr)
 
 ## I don't know
+- numbers : 17
 Opcode               | Instruction | Syntax | Constration | Remarks
 :------:             | :---------: | :----: | :---------: | :-----:
 6  | Resume      | resume <type\> <value\> | ? | Exception Handling Instruction
@@ -36,6 +38,8 @@ Opcode               | Instruction | Syntax | Constration | Remarks
 60 | VAArg          | <resultval\> = va_arg <va_list*\> <arglist\>, <argty\> | ? | it is used to access arguments passed through the variable argument
 63 | ShuffleVector  | | ? | make a new vector from two input vector.
 65 | InsertValue    | <result\> = insertvalue <aggregate type\> <val\>, <ty\> <elt\>, <idx\>{, <idx\>}*| ? | insert value into aggregate type (cf. insertelement)
+66 | LandingPad     | | ? | Exception Handling Instruction
+67 | Freeze         | | ? | ?
 
 ---
 ---
