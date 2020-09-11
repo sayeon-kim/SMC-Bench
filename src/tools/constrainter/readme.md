@@ -24,7 +24,7 @@ Opcode               | Instruction | Syntax | Constration | Remarks
 64 | ExtractValue   | <result\> extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| if aggregate type is pointer type => [[result]]   | get a value from aggregate data type by index. (cf. getelement ptr)
 
 ## I don't know
-- numbers : 17
+- numbers : 14
 
 Opcode               | Instruction | Syntax | Constration | Remarks
 :------:             | :---------: | :----: | :---------: | :-----:
