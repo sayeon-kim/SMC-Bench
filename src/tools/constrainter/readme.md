@@ -5,6 +5,47 @@
 - [nlohmann/json package](https://github.com/nlohmann/json)
 - LLVM 10.0
 
+# Constraint
+
+```c++
+/**
+ * Constraint Type.
+ * 1 => operand1 ∈ [[ operand2 ]]
+ * 2 => [[ operand1 ]] ⊆ [[ operand2 ]]
+ * 3 => for each c in [[ operand1 ]], c ∈ [[ operand2 ]]
+ */
+class Constraint{
+  public:
+    int Type;
+    Operand* operand1;
+    Operand* operand2;
+    Operand* operand3;
+    Operand* operand4;
+  public:
+    Constraint();
+    Constraint(int Type, Operand* operand1=nullptr, Operand* operand2=nullptr, Operand* operand3=nullptr, Operand* operand4=nullptr);
+    bool operator<(const Constraint& e) const;
+};
+ ```
+
+ # Operand
+ ```c++
+ /**
+  * Operand Type.
+  * Token => std::string("Token")
+  * Variable => std::string("Variable")
+  */
+ class Operand{
+  public:
+    std::string Type;
+    std::string name;
+  public:
+    Operand();
+    bool operator<(const Operand& e) const;
+    virtual std::string toString();
+};
+ ```
+
 # Instruction List
 
 - Number of Instructions :  67 (llvm/include/llvm/IR/Instruction.def)

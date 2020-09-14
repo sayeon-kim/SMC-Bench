@@ -23,6 +23,12 @@ namespace analysis{
 // Operand is Interface for expression.
 Operand::Operand(){}
 
+bool Operand::operator<(const Operand& e) const{
+	if( !(this->Type.compare(e.Type) == 0) ) return false;
+	if( !(this->name.compare(e.name) == 0) ) return false;
+	return true;
+}
+
 std::string Operand::toString(){
 	return "Operand";
 }
@@ -93,6 +99,29 @@ std::string Variable::toStringTokens(){
 //===----------------------------------------------------------------------===//
 // Constrations
 //===----------------------------------------------------------------------===//
+// Constraint
+// Constraint is interface for constraints
+
+Constraint::Constraint(){}
+
+Constraint::Constraint(int Type, Operand* operand1=nullptr, Operand* operand2=nullptr, Operand* operand3=nullptr, Operand* operand4=nullptr){
+	this->Type = Type;
+	this->operand1 = operand1;
+	this->operand2 = operand2;
+	this->operand3 = operand3;
+	this->operand4 = operand4;
+}
+
+bool Constraint::operator<(const Constraint& e) const{
+	if( !(this->Type == e.Type) ) return false;
+	if( !(this->operand1 == e.operand1) ) return false;
+	if( !(this->operand2 == e.operand2) ) return false;
+	if( !(this->operand3 == e.operand3) ) return false;
+	if( !(this->operand4 == e.operand4) ) return false;
+	return true;
+};
+
+
 // Constration
 // Constration is interface for expression.
 std::set<Constration*> Constration::Constrations = std::set<Constration*>();

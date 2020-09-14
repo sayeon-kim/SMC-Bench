@@ -28,3 +28,5 @@ add_llvm_executable(Constration
   main.cpp
   include/Analysis.cpp
 )
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/test)
