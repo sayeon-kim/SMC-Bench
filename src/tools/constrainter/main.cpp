@@ -52,6 +52,12 @@ void makeContraint(int Instruction){
     {
 
     }
+<<<<<<< HEAD
+=======
+    case Instruction::Store :{
+
+    }
+>>>>>>> db475d8fb4741f390df6ca6e57acd1d9a19a648b
     case Instruction::GetElementPtr : 
     {
 
@@ -64,10 +70,13 @@ void makeContraint(int Instruction){
     {
 
     }
+<<<<<<< HEAD
     case Instruction::AddrSpaceCast : 
     {
 
     }
+=======
+>>>>>>> db475d8fb4741f390df6ca6e57acd1d9a19a648b
     case Instruction::Call : 
     {
 
