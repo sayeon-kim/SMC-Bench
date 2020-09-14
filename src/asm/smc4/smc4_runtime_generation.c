@@ -13,13 +13,14 @@
 
 #define SIZE_OF_SW 44
 #define SIZE_OF_JR 2
+#define SIZE_OF_JMPQ 5
 
 int change_page_permissions_of_address(void *addr);
 void get_permission(void* foo_addr);
 
 char* err_string = "Error while changing page permissions of foo()\n";
 
-// for (i = 0; i < SIZE_OF_SW; i+=) ptr_reg4[i] = reg8[i];
+// for (i = 0; i < SIZE_OF_JMPQ; i++) ptr_reg4[i] = reg8[i];
 unsigned char   store_instruction[SIZE_OF_SW] = {
     "\xc7\x45\xa8\x00\x00\x00\x00"      //mov DWORD PTR[rbp-0x58], 0x0
     "\xeb\x1d"                          //jmp 0x885
@@ -32,7 +33,7 @@ unsigned char   store_instruction[SIZE_OF_SW] = {
     "\x0f\xb6\x44\x05\xc0"              //movzx eax, BYTE PTR [rbp+rax*1-0x40]
     "\x88\x02"                          //mov BYTE PTR [rdx],al
     "\x83\x45\xa8\x01"                  //add DWORD PTR [rbp-0x58],0x1
-    "\x83\x7d\xa8\x2b"                  //cmp DWORD PTR [rbp-0x58],0x2b
+    "\x83\x7d\xa8\x04"                  //cmp DWORD PTR [rbp-0x58],0x2b
     "\x7e\xdd"                          //jle 0x868
 };
 
@@ -58,7 +59,7 @@ start:
     
     // li $8, 0xac880000 (sw $8, 0($4))
     memcpy(reg8, store_instruction, SIZE_OF_SW);
-    
+
     // sw $8, 0($9)
     for(i = 0; i < SIZE_OF_SW; i++) ptr_reg9[i] = reg8[i];
     
@@ -76,8 +77,8 @@ start:
 
     // li $8, 0x01200008 (jr $9)
     // 이게 Main으로 가도록만 하면 될것 같습니다.
-    memcpy(reg8, "\xeb\x00", SIZE_OF_JR);
-
+    memcpy(reg8, "\xe9\x38\xff\xff\xff", SIZE_OF_JMPQ);
+    
     // j gen
     goto gen;
 
