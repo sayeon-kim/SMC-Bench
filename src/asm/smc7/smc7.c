@@ -5,40 +5,32 @@
 #include <errno.h>
 #include <sys/mman.h>
 
+#define LOOP 49
+#define NEW 112
+
 int change_page_permissions_of_address(void *addr);
 void get_permission(void *foo_addr);
 
 char *err_string = "Error while changing page permissions of foo()\n";
 char *smc_string = "Self Growing Code\n";
 
-#define SIZE_LOOP  68   //
+#define SIZE_LOOP  63   //
 
 int main(void)
 {
   unsigned char* ptr_loop;
   unsigned char* ptr_new;
 
-  unsigned char* ptr_$8;
-  unsigned char* ptr_$9;
-  unsigned char* ptr_$10;
-
   int i;
+  int offset;
 
   get_permission(main);
 
-  // Initialize
-  ptr_loop = (unsigned char*) main + 66;  //
-  ptr_new  = (unsigned char*) main + 134;  //
-
 start:
-  // la $8, loop
-  ptr_$8 = ptr_loop;
-
-  // la $9, new
-  ptr_$9 = ptr_new;
-
-  // move $10, $9
-  ptr_$10 = ptr_$9;
+  // Initialize
+  offset = 0;
+  ptr_loop = (unsigned char*) main + LOOP;  //
+  ptr_new  = (unsigned char*) main + NEW;  //
 
 loop:
 
@@ -49,15 +41,12 @@ loop:
   // addi $9, $9, 4
   // bne $8, $10, loop
   for(i=0; i<SIZE_LOOP; i++)
-    ptr_new[i] = ptr_loop[i];
-
-  ptr_$8 = ptr_$8 + SIZE_LOOP;
-  ptr_$9 = ptr_$9 + SIZE_LOOP;
-
-  ptr_$10 = ptr_$9;
+    (ptr_new + offset)[i] = ptr_loop[i];
+  
+  offset += SIZE_LOOP;
 
 new:
-
+  
   return 0;
 
 }
