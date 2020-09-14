@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <set>
 
 #include <llvm/IR/Module.h>
 #include <llvm/IRReader/IRReader.h>
@@ -34,33 +35,78 @@ Operand makeVariable(string name){
   return v;
 }
 
-void makeConstration(int Instruction){
+int alloca_number = 0;
+
+std::set<Operand*>* tokens = new std::set<Operand*>();
+std::set<Operand*>* variables = new std::set<Operand*>();
+std::set<Constration*>* contraint = new std::set<Constration*>();
+
+void makeContraint(int Instruction){
   switch(Instruction){
-    case 0:{}
-    default:{}
+    case Instruction::Alloca :
+    {
+
+      alloca_number += 1;
+    }
+    case Instruction::Load : 
+    {
+
+    }
+    case Instruction::Store :{
+
+    }
+    case Instruction::GetElementPtr : 
+    {
+
+    }
+    case Instruction::IntToPtr : 
+    {
+
+    }
+    case Instruction::BitCast : 
+    {
+
+    }
+    case Instruction::Call : 
+    {
+
+    }
+    case Instruction::ExtractValue : 
+    {
+
+    }
+    default:
+    {
+
+    }
   }
 }
 
 int main(){
   LLVMContext context;
   SMDiagnostic error;
-  unique_ptr<Module> module = parseIRFile("test.ll", error, context);
-  if(!module){
+  unique_ptr<Module> module = parseIRFile("HelloWorld.ll", error, context);
+  if(!module)
+  {
     errs() << "Can't read file\n";
     return 1;
   }
   // module -> dump();
 
   // loop Function
-  for (auto F = module->begin(); F != module->end(); F++){
+  for (auto F = module->begin(); F != module->end(); F++)
+  {
     // loop Basicblock
-    for (auto B = F->begin(); B != F->end(); B++){
+    for (auto B = F->begin(); B != F->end(); B++)
+    {
       // loop Instruction
-      for (auto I = B->begin(); I != B->end(); I++){
+      for (auto I = B->begin(); I != B->end(); I++)
+      {
         int InstructionCode = I->getOpcode();
-        makeConstration(InstructionCode);
+        makeContraint(InstructionCode);
         // loop Operands
-        for (auto O = I->op_begin(); O != I->op_end(); O++){
+        for (auto O = I->op_begin(); O != I->op_end(); O++)
+        {
         }
       }
     }
@@ -68,7 +114,3 @@ int main(){
 
   return 0;
 }
-
-// cmake . -B./dest
-// cmake --build ./dest
-// ./dest/Constrainter
