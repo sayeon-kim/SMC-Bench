@@ -15,13 +15,12 @@
 Opcode               | Instruction | Syntax | Constration | Remarks
 :------:             | :---------: | :----: | :---------: | :-----:
 31 | Alloca         | <result\> = alloca <type\> | alloca-i ∈ [[ result ]]] | Allocates memory on stack frame
-32 | Load           | <result\> = load <ty\>, <ty\>* <pointer\> | if ty is pointer type => [[result]] ⊆ [[pointer]] | Read data from pointer
-34 | GetElementPtr  | <result\> = getelementptr <ty1\> <ty1\>* <ptrval\>{ <tyN\> <idx\>}*|  ptrval{[tyN_idx]}+ ∈ [[ result ]] | Get pointer pointing a index element
-48 | IntToPtr       |<result\> = <ty\> <value\> to <ty2\> | value ∈ [[result]] | Intger Value Cast Into Pointer
-49 | BitCast        | <result\> = <ty\> <value\> to <ty2\>| if ty2 is pointer => value ∈ [[result]] | Same bit width, just change type.
-50 | AddrSpaceCast  | <result\> = addrespacecast <pty\> <ptrval\> to <pty2\> | for [[ptrval]] each memory cell e => m_e ∈ [[result]] | change address space of pointer. n to m. default is addresspace(0)*
-56 | Call           | <result\> = call <ty\>\|<fnty> <fnptrval\> (<function args\>) | if ty or fnptrval is pointer type =><br>fnptrval(function args) ∈ [[result]] ?| Function Call
-64 | ExtractValue   | <result\> extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| if aggregate type is pointer type => [[result]]   | get a value from aggregate data type by index. (cf. getelement ptr)
+32 | Load           | <result\> = load <ty\>, <ty\>* <pointer\> | 　for each c in [[pointer]], => [[c]]　⊆　[[result]]   | Read data from pointer
+34 | GetElementPtr  | <result\> = getelementptr <ty1\> <ty1\>* <ptrval\>{ <tyN\> <idx\>}*|  ptrval ∈ [[ result ]] | Get pointer pointing all elements. Tag(cell) or Pointer?
+48 | IntToPtr       |<result\> = <ty\> <value\> to <ty2\> | if value is const　=>　value ∈ [[result]], <br> if value is var => [[value]] ⊆ [[result]] | Intger Value Cast Into Pointer
+49 | BitCast        | <result\> = <ty\> <value\> to <ty2\>| value ∈ [[result]] | Same bit width, just change type.
+56 | Call           | <result\> = call <ty\>\|<fnty> <fnptrval\> (<function args\>) | if ty or fnptrval is pointer type =><br>fnptrval(function args) ∈ [[result]] ?| Function Call <br> 09.12 spa_10.txt 312번째 줄. (잘 준비.)
+64 | ExtractValue   | <result\> = extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| [[val]] ⊆ [[result]]   | get a value from aggregate data type by index. (cf. getelement ptr)
 
 ## I don't know
 - numbers : 14
@@ -35,11 +34,11 @@ Opcode               | Instruction | Syntax | Constration | Remarks
 10 | CatchSwitch |                         | ? |Exception Handling Instruction
 36 | AtomicCmpXchg, AtomicCmpXchgInst | ? | ? | ?
 37 | AtomicRMW      | ? | ? | ?
-55 | PHI            | | ? | SSA Instruction 
-57 | Select         | <result\> = select selty <cond\>, <ty1\> <val1\>, <ty2\> <val2\> | ? | selty is i1 or < N x i1> => if true result <= value1, else result <= val2
+55 | PHI            | <result> = phi <ty\> [ <val0\>, <label0\>, ... <valK\>, <labelK\>], | [[val0]] ⊆ ... , [[valK]] ⊆ [[result]]  | SSA Instruction  보수적으로.
+57 | Select         | <result\> = select selty <cond\>, <ty1\> <val1\>, <ty2\> <val2\> | [[val1] ⊆ [[result]], [[val2]]⊆ [[result]] | selty is i1 or < N x i1> => if true result <= value1, else result <= val2
 60 | VAArg          | <resultval\> = va_arg <va_list*\> <arglist\>, <argty\> | ? | it is used to access arguments passed through the variable argument
 63 | ShuffleVector  | | ? | make a new vector from two input vector.
-65 | InsertValue    | <result\> = insertvalue <aggregate type\> <val\>, <ty\> <elt\>, <idx\>{, <idx\>}*| ? | insert value into aggregate type (cf. insertelement)
+65 | InsertValue    | <result\> = insertvalue <aggregate type\> <val\>, <ty\> <elt\>, <idx\>{, <idx\>}*| ? | insert value into aggregate type (cf. insertelement) 09.12 해야함.
 66 | LandingPad     | | ? | Exception Handling Instruction
 67 | Freeze         | | ? | ?
 
@@ -99,7 +98,7 @@ Opcode              | Instruction | Syntax | Constration | Remarks
 :------:            | :---------: | :----: | :--------:  | :-----:
 31 | Alloca         | <result\> = alloca <type\> | alloca-i ∈ [[ result ]]] | Allocates memory on stack frame
 32 | Load           | <result\> = load <ty\>, <ty\>* <pointer\> | if ty is pointer type => [[result]] ⊆ [[pointer]] | Read data from pointer
-33 | Store          | | None | Store data to pointer
+33 | Store          | store <ty\> <value\>, <ty\>* <pointer\> | for each c in [[value]] => [[c]] ⊆ [[pointer]] | Store data to pointer
 34 | GetElementPtr  | <result\> = getelementptr <ty1\> <ty1\>* <ptrval\>{ <tyN\> <idx\>}*|  ptrval{[tyN_idx]}+ ∈ [[ result ]] | Get pointer pointing a index element
 35 | Fence          | | None | happens-before edge instruction
 36 | AtomicCmpXchg, AtomicCmpXchgInst | ? | ? | ?
@@ -120,7 +119,7 @@ Opcode              | Instruction | Syntax | Constration | Remarks
 47 | PtrToInt       | | None | Get Integer Type Instruction
 48 | IntToPtr       |<result\> = <ty\> <value\> to <ty2\> | value ∈ [[result]] | Intger Value Cast Into Pointer
 49 | BitCast        | <result\> = <ty\> <value\> to <ty2\>| if ty2 is pointer => value ∈ [[result]] | Same bit width, just change type.
-50 | AddrSpaceCast  | <result\> = addrespacecast <pty\> <ptrval\> to <pty2\> | for [[ptrval]] each memory cell e => m_e ∈ [[result]] | change address space of pointer. n to m. default is addresspace(0)*
+50 | AddrSpaceCast  | <result\> = addrespacecast <pty\> <ptrval\> to <pty2\> | for [[ptrval]] each memory cell e => m_e ∈ [[result]] | change address space of pointer. n to m. default is addresspace(0)* 09.12 이런 명령어들은 로그로 출력.
 
 Opcode              | Instruction | Syntax | Constration | Remarks
 :------:            | :---------: | :----: | :---------: | :-----:
@@ -142,7 +141,7 @@ Opcode              | Instruction | Syntax | Constration | Remarks
 62 | InsertElement  | | None | insert sclar type into vector
 63 | ShuffleVector  | | ? | make a new vector from two input vector.
 64 | ExtractValue   | <result\> extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| if aggregate type is pointer type => [[result]]   | get a value from aggregate data type by index. (cf. getelement ptr)
-65 | InsertValue    | <result\> = insertvalue <aggregate type\> <val\>, <ty\> <elt\>, <idx\>{, <idx\>}*| ? | insert value into aggregate type (cf. insertelement)
+65 | InsertValue    | <result\> = insertvalue <aggregate type\> <val\>, <ty\> <elt\>, <idx\>{, <idx\>}*| ? | insert value into aggregate type (cf. insertelement) &
 66 | LandingPad     | | ? | Exception Handling Instruction
 67 | Freeze         | | ? | ?
 

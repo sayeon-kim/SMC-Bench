@@ -6,3 +6,4 @@
 *.cfg
 *.temp.md
 .gdbhistory
+.vscode
