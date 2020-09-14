@@ -18,6 +18,7 @@ Opcode               | Instruction | Syntax | Constration | Remarks
 32 | Load           | <result\> = load <ty\>, <ty\>* <pointer\> | 　for each c in [[pointer]], => [[c]]　⊆　[[result]]   | Read data from pointer
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 33 | Store          | store <ty\> <value\>, <ty\>* <pointer\> | for each c in [[value]] => [[c]] ⊆ [[pointer]] | Store data to pointer
 >>>>>>> db475d8fb4741f390df6ca6e57acd1d9a19a648b
@@ -30,6 +31,11 @@ Opcode               | Instruction | Syntax | Constration | Remarks
 48 | IntToPtr       |<result\> = <ty\> <value\> to <ty2\> | if value is const　=>　value ∈ [[result]], <br> if value is var => [[value]] ⊆ [[result]] | Intger Value Cast Into Pointer
 49 | BitCast        | <result\> = <ty\> <value\> to <ty2\>| value ∈ [[result]] | Same bit width, just change type.
 >>>>>>> a42c536a733b5bf75ee1665d5b974af9850452e5
+=======
+34 | GetElementPtr  | <result\> = getelementptr <ty1\> <ty1\>* <ptrval\>{ <tyN\> <idx\>}*|  ptrval ∈ [[ result ]] | Get pointer pointing all elements. Tag(cell) or Pointer?
+48 | IntToPtr       |<result\> = <ty\> <value\> to <ty2\> | if value is const　=>　value ∈ [[result]], <br> if value is var => [[value]] ⊆ [[result]] | Intger Value Cast Into Pointer
+49 | BitCast        | <result\> = <ty\> <value\> to <ty2\>| value ∈ [[result]] | Same bit width, just change type.
+>>>>>>> 92b8741bcf7755fdef7dbb6c446b4bdd3d9c47ad
 56 | Call           | <result\> = call <ty\>\|<fnty> <fnptrval\> (<function args\>) | if ty or fnptrval is pointer type =><br>fnptrval(function args) ∈ [[result]] ?| Function Call <br> 09.12 spa_10.txt 312번째 줄. (잘 준비.)
 64 | ExtractValue   | <result\> = extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| [[val]] ⊆ [[result]]   | get a value from aggregate data type by index. (cf. getelement ptr)
 
@@ -131,10 +137,14 @@ Opcode              | Instruction | Syntax | Constration | Remarks
 48 | IntToPtr       |<result\> = <ty\> <value\> to <ty2\> | value ∈ [[result]] | Intger Value Cast Into Pointer
 49 | BitCast        | <result\> = <ty\> <value\> to <ty2\>| if ty2 is pointer => value ∈ [[result]] | Same bit width, just change type.
 <<<<<<< HEAD
+<<<<<<< HEAD
 50 | AddrSpaceCast  | <result\> = addrespacecast <pty\> <ptrval\> to <pty2\> | None | change address space of pointer. n to m. default is addresspace(0)*
 =======
 50 | AddrSpaceCast  | <result\> = addrespacecast <pty\> <ptrval\> to <pty2\> | for [[ptrval]] each memory cell e => m_e ∈ [[result]] | change address space of pointer. n to m. default is addresspace(0)* 09.12 이런 명령어들은 로그로 출력.
 >>>>>>> a42c536a733b5bf75ee1665d5b974af9850452e5
+=======
+50 | AddrSpaceCast  | <result\> = addrespacecast <pty\> <ptrval\> to <pty2\> | for [[ptrval]] each memory cell e => m_e ∈ [[result]] | change address space of pointer. n to m. default is addresspace(0)* 09.12 이런 명령어들은 로그로 출력.
+>>>>>>> 92b8741bcf7755fdef7dbb6c446b4bdd3d9c47ad
 
 Opcode              | Instruction | Syntax | Constration | Remarks
 :------:            | :---------: | :----: | :---------: | :-----:
@@ -159,12 +169,15 @@ Opcode              | Instruction | Syntax | Constration | Remarks
 64 | ExtractValue   | <result\> extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| if aggregate type is pointer type => [[result]]   | get a value from aggregate data type by index. (cf. getelement ptr)
 65 | InsertValue    | <result\> = insertvalue <aggregate type\> <val\>, <ty\> <elt\>, <idx\>{, <idx\>}*| ? | insert value into aggregate type (cf. insertelement) &
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 64 | ExtractValue   | <result\> = extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| [[val]] ⊆ [[result]]   | get a value from aggregate data type by index. (cf. getelement ptr)
 65 | InsertValue    | <result\> = insertvalue <aggregate type\> <val\>, <ty\> <elt\>, <idx\>{, <idx\>}*| ? | insert value into aggregate type (cf. insertelement)
 >>>>>>> db475d8fb4741f390df6ca6e57acd1d9a19a648b
 =======
 >>>>>>> a42c536a733b5bf75ee1665d5b974af9850452e5
+=======
+>>>>>>> 92b8741bcf7755fdef7dbb6c446b4bdd3d9c47ad
 66 | LandingPad     | | ? | Exception Handling Instruction
 67 | Freeze         | | ? | ?
 
