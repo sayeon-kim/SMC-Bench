@@ -30,7 +30,6 @@ int main(void)
   ptr_loop = (unsigned char*) main + 66;  //
   ptr_new  = (unsigned char*) main + 134;  //
 
-
 start:
   // la $8, loop
   ptr_$8 = ptr_loop;
