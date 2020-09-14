@@ -7,38 +7,25 @@
 
 int change_page_permissions_of_address(void *addr);
 void get_permission(void *foo_addr);
-void do_something();
-void alter();
 char *err_string = "Error while changing page permissions of foo()\n";
 
 int main(void)
 {
-	goto MAIN;
-
-ALTER:
+	unsigned char *temp_instrutcion = (unsigned char *)malloc(sizeof(char) * 4);
+	void *first_instruction = (void *)main + 101;
+	void *second_instruction = (void *)main + 127;
 	get_permission(main);
-	char shellcode[] =
-		"\x48\x31\xd2"							   // xor    %rdx, %rdx
-		"\x48\x31\xc0"							   // xor    %rax, %rax
-		"\x48\xbb\x2f\x62\x69\x6e\x2f\x73\x68\x00" // mov    $0x68732f6e69622f2f, %rbx
-		"\x53"									   // push   %rbx
-		"\x48\x89\xe7"							   // mov    %rsp, %rdi
-		"\x50"									   // push   %rax
-		"\x57"									   // push   %rdi
-		"\x48\x89\xe6"							   // mov    %rsp, %rsi
-		"\xb0\x3b"								   // mov    $0x3b, %al
-		"\x0f\x05";								   // syscall
-	memcpy(main + 117, shellcode, sizeof(shellcode) - 1);
-
+	int num = 0;
+	goto MAIN;
+BODY:
+	memcpy(temp_instrutcion, first_instruction, 4);
+	memcpy(first_instruction, second_instruction, 4);
+	memcpy(second_instruction, temp_instrutcion, 4);
 MAIN:
-	do_something();
-	goto ALTER;
-	return 0;
-}
-
-void do_something()
-{
-	printf("do something\n");
+	num += 5;
+	printf("%d\n", num);
+	num -= 5;
+	goto BODY;
 }
 
 void get_permission(void *foo_addr)

@@ -1,8 +1,8 @@
 .dest
-*.ll
 *.bc
 *.log
 *.out
 *.o
 *.cfg
 *.temp.md
+.gdbhistory

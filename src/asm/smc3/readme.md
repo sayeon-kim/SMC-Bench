@@ -1,50 +1,72 @@
 # SMC 코드 3번
 
-Unbounded code rewriting
+#### Runtime Code Generation
 
 ```assembly
-	.data
-num:	.byte 8
-	.text
-main:	
-	lw $4, num # Set Argument
-     	lw $9, key # $9 = Ec(add $2 $2 0)
-     	li $8, 1   # counter
-     	li $2, 1   # accumulator
-      
-loop:	
-	beq $8, $4, halt  # check if done
-     	addi $8, $8, 1    # inc counter
-     	add $10, $9, $2   # new instr to put
-      
-key: 	
-	addi $2, $2, 0
-     	sw $10, key    	     # store new instr
-     	j loop		     # next round
-      
-halt: 	
-	j halt
+	.data                  # Data declaration section
+vec1:   .word 22, 0, 25
+vec2:   .word 7, 429, 6
+result: .word 0
+        
+    	.text                  # Code section
+main:   
+	li $4, 3           
+        li $8, 0           
+        la $9, gen         
+        la $11, tpl        
+        lw $12, 0($11)	   
+        sw $12, 0($9)      
+        addi $9, $9, 4     
+
+loop:   
+	beq $8, $4, post   
+        li $13, 4	   
+        mul $13, $13, $8   
+        lw $10, vec1($13)  
+        beqz $10, next     
+        lw $12, 4($11)	   
+        add $12, $12, $13  
+        sw $12, 0($9)	   
+        lw $12, 8($11)     
+        add $12, $12, $10  
+        sw $12, 4($9)	   
+        lw $12, 12($11)	   
+        sw $12, 8($9) 	   
+        lw $12, 16($11)	   
+        sw $12, 12($9)	   
+        addi $9, $9, 16    
+
+next:   
+	addi $8, $8, 1
+        j loop
+
+post:   
+	lw $12, 20($11)
+        sw $12, 0($9)
+        la $4, vec2
+        jal gen
+
+        sw $2, result
+        j main
+
+tpl:    
+	li $2, 0
+        lw $13, 0($4)
+        li $12, 0
+        mul $12, $12, $13
+        add $2, $2, $12
+        jr $31	
+
+gen:	
+	li $2, 0           # int gen(int *v)
+	lw $13, 0($4)      # {
+	li $12, 22         # int res = 0;
+	mul $12, $12, $13  # res += 22 * v[0];
+	add $2, $2, $12    # res += 25 * v[2];
+	lw $13, 8($4)      # return res;
+	li $12, 25         # }
+	mul $12, $12, $13
+	add $2, $2, $12
+	jr $31
 ```
-
-
-
-Fibonacci를 계산하는 Self Modifing Code이다.
-
-addi $2 $2 0  		=> 이게 한 word인데		기계어로 0x20420000 이다.
-
-addi $2 $2 5		  => 이건 기계어로 0x20420005이다.	즉 맨뒤의 값이 immediate값이 된다.
-
-```assembly
-lw $9, key
-```
-
-여기서 key에 해당하는 포인터를 가져오고, 이값이 맨처음에는 0x20420000인데
-
-$9에는 그럼 0x20420000이 저장되고 해당 주소에 $2를 더한다. $2는 누산기로써, Fibonacci를 계산하기 위한 레지스터이다.
-
-그럼 기계어 명령은 점차적으로
-
-0x20420000 -> 0x20420001 -> 0x20420001 -> 0x20420002 -> 0x20420003 -> 0x20420005 -> 0x20420008
-
-이런식으로 진행된다. 맨뒤의 값이 피보나치 수열이 됨.
 

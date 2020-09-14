@@ -36,12 +36,91 @@ target triple = "i386-pc-linux-gnu-elf"
 %struct.SegmentShadow = type { %union.anon, i32, i32 }
 %struct.Memory = type opaque
 
-; Function Attrs: noinline norecurse noreturn nounwind
-define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias nocapture dereferenceable(3376), i32, %struct.Memory* noalias nocapture readnone) local_unnamed_addr #0 {
+; Function Attrs: noinline noreturn nounwind
+define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
   br label %4
 
-; <label>:4:                                      ; preds = %4, %3
-  br label %4
+ <label>:4: 
+;start
+;xor1                                     ; preds = %4, %3
+  %5 = phi i32 [ 60, %3 ], [ %10, %4 ]
+  ;%5 = %3 의 60이라는 값  ->아마 pg의 주소
+  ;%5 = %4 의 %10의 값 
+  %6 = phi %struct.Memory* [ %2, %3 ], [ %9, %4 ]
+
+  %7 = tail call i32 @__remill_read_memory_32(%struct.Memory* %6, i32 %5) #2
+  ; %7 = %6에있는 주소 60의 값(pg의 주소)을 넣는다.
+  %8 = xor i32 %7, -1
+  ; xor edx, ecx 
+  %9 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %6, i32 %5, i32 %8) #2
+  ;push %8
+  ;%2에 %5에다가 %8을 push한다.
+  ;즉, -> mov [eax], edx
+  ;eax = %5, edx = %8
+
+  %10 = add i32 %5, 4
+  ; add eax, 4 
+
+  ;cmp eax, ebx 부분 아래 
+
+
+  %11 = add i32 %5, -68
+  %12 = lshr i32 %11, 31
+  ;lshr = (logical shift right)의 축약
+  ;첫번째 피연산자에서 지정된 숫자만큼 비트를 오른쪽으로 밀어내고 0으로 채운 값을 반환.
+  %13 = trunc i32 %12 to i8
+  ;%12값을 i32 타입-> i8 타입으로 비트변환
+  %14 = lshr i32 %10, 31
+  %15 = xor i32 %12, %14
+  %16 = add nuw nsw i32 %15, %14
+  ;nuw = No Unsigned Wrap
+  ;nsw = No Signed Wrap
+  ;이 두개가 있으면 overflow 발생하면 결과값 반환 no
+  %17 = icmp eq i32 %16, 2
+  %18 = icmp ne i8 %13, 0
+  %19 = xor i1 %18, %17
+  
+  br i1 %19, label %4, label %20
+  ;jl xor1  
+
+ <label>:20:                                     ; preds = %4
+  br label %21
+
+ <label>:21:  
+;decr 
+;xor2                                  ; preds = %21, %20
+  %22 = phi i32 [ 60, %20 ], [ %27, %21 ]
+  ;%22 = %20 의 60이라는 값 
+  %23 = phi %struct.Memory* [ %9, %20 ], [ %26, %21 ]
+  %24 = tail call i32 @__remill_read_memory_32(%struct.Memory* %23, i32 %22) #2
+  %25 = xor i32 %24, -1
+  %26 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %23, i32 %22, i32 %25) #2
+  %27 = add i32 %22, 4
+  %28 = add i32 %22, -68
+  %29 = lshr i32 %28, 31
+  %30 = lshr i32 %27, 31
+  %31 = xor i32 %29, %30
+  %32 = add nuw nsw i32 %31, %30
+  %33 = icmp eq i32 %32, 2
+  %34 = icmp ne i32 %29, 0
+  %35 = xor i1 %34, %33
+  br i1 %35, label %21, label %36
+
+ <label>:36:                                     ; preds = %21
+  br label %37
+
+ <label>:37:                                     ; preds = %37, %36
+  br label %37
+  ; jmp halt  
+
 }
 
-attributes #0 = { noinline norecurse noreturn nounwind "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
+; Function Attrs: noduplicate noinline nounwind optnone readnone
+declare i32 @__remill_read_memory_32(%struct.Memory*, i32) #1
+
+; Function Attrs: noduplicate noinline nounwind optnone readnone
+declare %struct.Memory* @__remill_write_memory_32(%struct.Memory*, i32, i32) #1
+
+attributes #0 = { noinline noreturn nounwind "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #1 = { noduplicate noinline nounwind optnone readnone "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #2 = { nobuiltin nounwind readnone }

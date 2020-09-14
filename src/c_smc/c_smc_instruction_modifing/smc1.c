@@ -6,38 +6,25 @@
 #include <sys/mman.h>
 
 int change_page_permissions_of_address(void *addr);
-void foo();
 void get_permission(void *foo_addr);
 char *err_string = "Error while changing page permissions of foo()\n";
 
 int main(void)
 {
-	get_permission(foo);
-
-	unsigned char *foo_code = (unsigned char *)malloc(sizeof(unsigned char) * 55);
-	memcpy(foo_code, foo, 55);
-	for (int i = 0; i < 55; i++)
-	{
-		foo_code[i] = foo_code[i] ^ -1;
-	}
-	memcpy(foo, foo_code, 55);
-
-	for (int i = 0; i < 55; i++)
-	{
-		foo_code[i] = foo_code[i] ^ -1;
-	}
-	memcpy(foo, foo_code, 55);
-
-	foo();
-}
-
-void foo()
-{
+	void *first_instruction = (void *)main + 61; //num = 0 을 가리킴
+	void *second_instruction = (void *)main + 90; //num = 1 을 가리킴
+	get_permission(main);
 	int num = 0;
-	printf("This is Foo Function\n");
-	num += 10;
-	printf("num = %d\n", num);
+	
+MODIFIED:
+	memcpy(first_instruction, second_instruction, 4);
+
+TARGET:
+    num = 0;
+	printf("%d\n", num);
+    num = 1;
 }
+// modifying 시 num = 1, 아니면 num = 0 출력
 
 void get_permission(void *foo_addr)
 {
@@ -61,3 +48,5 @@ int change_page_permissions_of_address(void *addr)
 	}
 	return 0;
 }
+
+//clang-9 smc1.c -c -emit-llvm -S -target x86_64-pc-linux-gnu

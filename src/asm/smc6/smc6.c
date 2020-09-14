@@ -7,54 +7,47 @@
 
 int change_page_permissions_of_address(void *addr);
 void get_permission(void *foo_addr);
-void foo();
-void modify();
-
-char *start_string = "start\n";
-char smc_string[] = "Self Modifing Code\n";
-char add[] = "restart";
+void do_something();
+void alter();
+char *err_string = "Error while changing page permissions of foo()\n";
 
 int main(void)
 {
 	get_permission(main);
-	goto START;
-
-MODIFY:
-	modify();
-	memcpy(modify, smc_string, sizeof(smc_string) - 1);
-
 START:
-	printf("It's main \n");
-	goto MODIFY;
-
+	printf("NOP");
+	printf("NOP");
+	goto ALTER;
+START2:
+	printf("NOPE\n");
+	memcpy(main + 131, "\x8c", 1);
+ALTER:
+	printf("Alter\n");
+	memcpy(main + 16, "\xbf\x00\x00\x00\x00\xe8\xbc\xfe\xff\xff", 10);
+	goto START2;
 }
 
-void modify()
-{
-	printf("It's modify()\n");
-}
+
 
 void get_permission(void *foo_addr)
 {
-    if (change_page_permissions_of_address(foo_addr) == -1)
-    {
-        write(STDERR_FILENO, start_string, strlen(start_string) + 1);
-        exit(1);
-    }
+	if (change_page_permissions_of_address(foo_addr) == -1)
+	{
+		write(STDERR_FILENO, err_string, strlen(err_string) + 1);
+		exit(1);
+	}
 }
 
 int change_page_permissions_of_address(void *addr)
 {
 
-    int page_size = 4096;
+	int page_size = 4096;
 
-    addr -= (unsigned long)addr % page_size;
+	addr -= (unsigned long)addr % page_size;
 
-    if (mprotect(addr, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == -1)
-    {
-        return -1;
-    }
-
-    return 0;
+	if (mprotect(addr, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == -1)
+	{
+		return -1;
+	}
+	return 0;
 }
-

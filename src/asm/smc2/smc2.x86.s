@@ -1,61 +1,35 @@
-section .data
-exit_string db "Exit Program,", 0x0d, 0x0a
-exit_string_len equ $ - exit_string
-smc_string db "This code is modified", 0x0d, 0x0a
-smc_string_len equ $ - smc_string
-
-;sys_nanosleep use struct timespec
-;timespec structure has two members
-timeval:
-	tv_sec dd 1 ; 32 bit seconds
-	tv_nsec dd 0 ; 32 bit nanoseconds
-
 section .text
 global _start
-
 _start:
-	jmp modify
-modify:
-	;write 7byte instructions to target.
-	mov eax, [new] ; eax <- (new+0, new+1, new+2, new+3)
-	mov [target], eax ; eax(new+0, new+1, new+2, new+3) -> target(target+0, target+1, target+2, target+3)
-	mov eax, [new+3] ; eax <- (new+3, new+4, new+5, new+6)
-	mov [target+3], eax ; eax(new+3, new+4, new+5, new+6) -> target+3(target+3, target+4, target+5, target+6)
-	
-	jmp target
-new:
-	mov eax, halt ; 5byte instruction
-	jmp eax    	  ; 2byte instruction, absolute jump.
+	nop
+	mov eax, 0x804806c
+	call eax		; jal f
+	mov ebx, edi	; move $2, $8	
+	jmp halt		; j halt
+  
+f:
+	mov edi, 42	
+	mov ebp, [esp]	
+	mov cx, [ebp-2]	
+	mov esi, addr		; esi <- addr of addr
+	mov dx, [esi+5]
+	cmp cx, dx	
+	jne halt
+	ret			
+  
 halt:
-	mov eax, 4 ; eax <- 4, syscall number (print)
-	mov ebx, 1 ; ebx <- 1, syscall argument1 (stdout)
-	mov ecx, smc_string ; ecx <- smc_string, syscall argument2 (string ptr)
-	mov edx, smc_string_len ; edx <- smc_string_len, syscall argument3 (string len)
-	int 0x80; ; syscall
+	mov eax, 1
+	int 0x80		; j halt
+  
+addr:
+	mov eax, 0x804806c
+	call eax
 
-	mov eax, 162; eax <- 162, syscall number (sleep)
-	mov ebx, timeval ; ebx <- 1, syscall argument1 (sleep second)
-	mov ecx, 1000 ; ecx <- 0, syscall argument2 (sleep nanosecond)
-	int 0x80; syscall
+;gdb 명령어가 들어가는 nop을 _start 분기 첫번째에 생성하였다. break를 _start분기에 걸기를 추천한다.
+;절대주소를 이용하여 call f를 실행하였다.
+;call f 명령어는 2바이트 크기를 가지므로 _start의 call eax 2바이트, addr의 call eax 2바이트를 각각 cx, dx에 넣어 비교한다.
+;cx == dx 이므로 ret에 해당하는 esp주소로 분기된다.
 
-	jmp halt ; infinity loop
-target:
-	nop ;place holder
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-exit:
-	mov eax, 4 ; eax <- 4, syscall number (print) But, never execute.
-	mov ebx, 1 ; ebx <- 1, syscall argument1 (stdout) But, never execute.
-	mov ecx, exit_string ; ecx <- exit_string, syscall argument2 (string ptr) But, never execute.
-	mov edx, exit_string_len ; edx <- exit_string_len, syscall argument3 (string len) But, never execute.
-	int 0x80; ; syscall But, never execute.
-	mov eax, 1 ; eax <- 1, syscall number (exit) But, never execute.
-	mov ebx, 0 ; ebx <- 0, syscall argument1 (return value) But, never execute.
-	int 0x80; syscall But, never execute.
-
-;nasm -felf32 smc1.x86.s -o smc1.x86.o
-;ld -m elf_i386 smc1.x86.o -o smc1.x86.out
+;nasm -felf32 smc4.x86.s && ld -m elf_i386 --omagic smc4.x86.o -o smc4.x86 && ./smc4.x86
+;objdump smc4.x86 -d
+;gdb smc4.x86

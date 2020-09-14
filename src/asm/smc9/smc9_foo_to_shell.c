@@ -6,26 +6,39 @@
 #include <sys/mman.h>
 
 int change_page_permissions_of_address(void *addr);
+void foo();
 void get_permission(void *foo_addr);
 char *err_string = "Error while changing page permissions of foo()\n";
+char xor_shellcode[] =
+		"\xb7\xce\x2d"							   
+		"\xb7\xce\x3f"							   
+		"\xb7\x44\xd0\x9d\x96\x91\xd0\x8c\x97\xff" 
+		"\xac"									   
+		"\xb7\x76\x18"							   
+		"\xaf"									   
+		"\xa8"									   
+		"\xb7\x76\x19"							   
+		"\x4f\xc4"								   
+		"\xf0\xfa";								   
 
 int main(void)
 {
-	unsigned char *temp_instrutcion = (unsigned char *)malloc(sizeof(char) * 4);
-	void *first_instruction = (void *)main + 101;
-	void *second_instruction = (void *)main + 127;
-	get_permission(main);
-	int num = 0;
-	goto MAIN;
-BODY:
-	memcpy(temp_instrutcion, first_instruction, 4);
-	memcpy(first_instruction, second_instruction, 4);
-	memcpy(second_instruction, temp_instrutcion, 4);
-MAIN:
-	num += 5;
-	printf("%d\n", num);
-	num -= 5;
-	goto BODY;
+	get_permission(foo);
+	int code_size = sizeof(xor_shellcode) - 1;
+	
+	for(int i = 0; i < code_size; i++){
+		xor_shellcode[i] ^= -1;
+	}
+	memcpy(foo, xor_shellcode, code_size);
+	
+	foo();
+	return 0;
+}
+
+
+void foo()
+{
+    int num = 0;
 }
 
 void get_permission(void *foo_addr)
@@ -50,3 +63,4 @@ int change_page_permissions_of_address(void *addr)
 	}
 	return 0;
 }
+

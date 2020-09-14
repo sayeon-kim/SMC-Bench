@@ -1,49 +1,82 @@
 # SMC 코드 9번
 
-#### Self Growing Code
+ #### encrypt.s: Code and speciﬁcation
 
-```assembly
-	.text
-main:
-	la $8, loop
-	la $9, new
-	move $10, $9
-	
-loop:
-	lw $11, 0($8)
-	sw $11, 0($9)
-	addi $8, $8, 4 #8번 레지스터에서는 loop에 대한 주소가 들어있다.
-	addi $9, $9, 4 #9번 레지스터에는 loop에 대한 명령어가 들어있다.
-	bne $8, $10, loop
-	move $10, $9
-new:
+```asm
+main: la $8, pg
+      la $9, pgend
+      li $10, 0xffffffff
+      
+xor1: lw $11, 0($8)
+      xor $11, $11, $10 # $11에 xor 한 값 저장
+      sw $11, 0($8) # xor 결과값을 pg에 넣는다.
+      addi $8, $8, 4
+      blt $8, $9, xor1	# blt = branch on less than
+
+decr: la $8, pg
+      la $9, pgend
+      la $10, 0xffffffff
+
+xor2: lw $11, 0($8)
+      xor $11, $11, $10
+      sw $11, 0($8)
+      addi $8, $8, 4
+      blt $8, $9, xor2
+      j pg
+      
+
+halt: j halt
+
+pg:   li $2, 1
+      li $3, 2
+      add $2, $2, $3
+      j halt
+      
+pgend:
 ```
 
 
 
-```assembly
+```asm
 lw $11, 0($8)
 ```
 
-이 명령어를 통해서 loop의 명령어를 가져오고
+이 명령어를 통해 pg의 포인터를 가져온다.
 
-
-
-```assembly
-sw $11, 0($9)
+```asm
+sw $11, 0($8)
 ```
 
-이 명령어를 통해서 new에 loop의 명령어를 저장한다.
+을 통해  pg의 값(pg:   li $2, 1)이 변화되는것을 볼 수 있다.
 
+![image-20200514124643169](C:\Users\SWlab\AppData\Roaming\Typora\typora-user-images\image-20200514124643169.png)
 
+반복으로 한번 더하면 ( li $3, 2) 의 부분이 변화된다.
 
-즉 $8에는 loop의 코드에서 어디를 복사할것인지 $9에는 어디에 저장할것인지에 대한 레지스터다.
+![image-20200514124804521](C:\Users\SWlab\AppData\Roaming\Typora\typora-user-images\image-20200514124804521.png)
 
-$8이 한칸씩 증가하면서 new에 도달하게되면 
+이런식으로 나머지 pg 라벨에 있는 명령어들이  모두 변하게 된다.
 
-```assembly
-move $10, $9
+ 
+
+```asm
+blt $8, $9, xor1
 ```
 
-해당 명령어를 실행해서 $10에 새로운 기준을 담아주게 된다. 그리고 아까 만들었던 new라는 코드를 실행하고 이게 new가 또 new를 만들고 이러한 과정이 계속 반복된다.
+blt = s, t, label 이면 branch if s<t 인 경우 label로 분기하라는 명령어이다.
+
+이 명령어에 따라 xor1의 문을 반복하다가 false가 되면 빠져나온다.
+
+```asm
+xor2: 
+	sw $11, 0($8)
+```
+
+에서, pg의 값에 다시 $11의  즉, pg의 값이 원상복귀된다.
+
+![image-20200514125355730](C:\Users\SWlab\AppData\Roaming\Typora\typora-user-images\image-20200514125355730.png)
+
+이렇게 또 blt가 false 값이 나올때 까지 반복하며, pg 라벨에 있떤 명령어들을 복귀 시킨다.
+
+그리고 나머지 명령어들을 실행하고 종료한다.
 

@@ -1,68 +1,75 @@
+# SMC 5번
+
+#### Self-mutating Code Block
+
 ```assembly
-	.data                  # Data declaration section
-vec1:   .word 22, 0, 25
-vec2:   .word 7, 429, 6
-result: .word 0
-        
-    	.text                  # Code section
-main:   
-	li $4, 3           
-        li $8, 0           
-        la $9, gen         
-        la $11, tpl        
-        lw $12, 0($11)	   
-        sw $12, 0($9)      
-        addi $9, $9, 4     
+	.text
+main:
+	la $8, g	# g의 주소
+	lw $9, 0($8)	# 9번레지스터에 g의 명령어 저장
+	addi $10, $9, 4	# $10번 레지스터에 g의 명령어 + 4를 저장한다. (sw $9, 4($8))
+	sw $10, g	# g의 명령어를 sw $9 4($8)로 바꿈
+	lw $11, h	# h명령어(j dead)를 11번 레지스터에 저장함.
+	
+g:	
+	sw $9, 0($8)
 
-loop:   
-	beq $8, $4, post   
-        li $13, 4	   
-        mul $13, $13, $8   
-        lw $10, vec1($13)  
-        beqz $10, next     
-        lw $12, 4($11)	   
-        add $12, $12, $13  
-        sw $12, 0($9)	   
-        lw $12, 8($11)     
-        add $12, $12, $10  
-        sw $12, 4($9)	   
-        lw $12, 12($11)	   
-        sw $12, 8($9) 	   
-        lw $12, 16($11)	   
-        sw $12, 12($9)	   
-        addi $9, $9, 16    
-
-next:   
-	addi $8, $8, 1
-        j loop
-
-post:   
-	lw $12, 20($11)
-        sw $12, 0($9)
-        la $4, vec2
-        jal gen
-
-        sw $2, result
-        j main
-
-tpl:    
-	li $2, 0
-        lw $13, 0($4)
-        li $12, 0
-        mul $12, $12, $13
-        add $2, $2, $12
-        jr $31	
-
-gen:	
-	li $2, 0           # int gen(int *v)
-	lw $13, 0($4)      # {
-	li $12, 22         # int res = 0;
-	mul $12, $12, $13  # res += 22 * v[0];
-	add $2, $2, $12    # res += 25 * v[2];
-	lw $13, 8($4)      # return res;
-	li $12, 25         # }
-	mul $12, $12, $13
-	add $2, $2, $12
-	jr $31
+h:	
+	j dead		# 실제로는 j dead가 수행되지않고, sw $9, 4($8)이 수행됨.
+	sw $11, h	# h명령어를 다시 복구시킴.
+	j main		# 이과정 계속 반복. 이 코드는 중간에 j dead가 있어서 dead가 실행될것 처럼 보이지만 절				   # 대 실행되지않고 프로그램은 무한루프가 돌게됨.
+	
+dead:
+	j dead
 ```
 
+$8 레지스터에 g의 주소를 저장하고, $9 레지스터에, g의 명령어를 저장한다.
+addi $10, $9, 4는 $10 레지스터에 sw $9, 4($8) 을 저장하는것과 같은 의미다.
+g에서 해당 명령어를 실행하면 g의 다음주소인 h의 j dead가 $9에 저장된 명령어로 바뀌게 된다.
+
+
+실행 과정
+
+```
+main:
+   $8  <- g
+   $9  <- "sw $9, 0($8)"
+   $10 <- "sw $9, 4($8)"
+
+   g = sw $9, 4($8)     // 원래 코드 g: sw $9, 0($8)
+
+   $11 <- "j dead"
+
+g:
+ 
+   h = sw $9, 0($8)     // 원래 코드 h: j dead 
+
+h:
+   g = sw $9, 0($8)     // 원래 코드 g: sw $9, 4($8)
+
+   h = j dead           // 원래 코드 h: sw $9, 0($8)
+
+   j main
+```
+
+
+C 프로그램을 작성할 때 고려할 사항
+
+- ptr_g와 ptr_h를 지역변수로 선언하지 않고 전역변수로 선언한 이유는 명령어 수정이 용이하기 때문이다.
+
+```
+   unsigned char* ptr_g;
+   unsigned char* ptr_h;
+```
+
+ptr_g를 전역변수로 선언할 때 0x20085a(%rip)로 참조하고, ptr_h는 (0x20085a + 8(%rip)을 참조하면 된다.
+```
+ 7bf:	48 89 05 5a 08 20 00 	mov    %rax,0x20085a(%rip)        # 201020 <ptr_g>
+```
+
+그런데 ptr_g를 지역변수로 선언하면 -0xd8(%rbp)로 참조하는데, ptr_h를 참조할 수 있는 방법이 상대적으로 어렵다.
+```
+ 8ca:	c7 85 28 ff ff ff 00 	movl   $0x0,-0xd8(%rbp)
+```
+
+이런 이유로 전역변수를 사용하였다.
