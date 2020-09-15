@@ -143,8 +143,6 @@ Opcode              | Instruction | Syntax | Constration | Remarks
 63 | ShuffleVector  | | ? | make a new vector from two input vector.
 64 | ExtractValue   | <result\> = extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| [[val]] ⊆ [[result]]   | get a value from aggregate data type by index. (cf. getelement ptr)
 65 | InsertValue    | <result\> = insertvalue <aggregate type\> <val\>, <ty\> <elt\>, <idx\>{, <idx\>}*| ? | insert value into aggregate type (cf. insertelement)
-64 | ExtractValue   | <result\> = extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| [[val]] ⊆ [[result]]   | get a value from aggregate data type by index. (cf. getelement ptr)
-65 | InsertValue    | <result\> = insertvalue <aggregate type\> <val\>, <ty\> <elt\>, <idx\>{, <idx\>}*| ? | insert value into aggregate type (cf. insertelement)
 66 | LandingPad     | | ? | Exception Handling Instruction
 67 | Freeze         | | ? | ?
 
