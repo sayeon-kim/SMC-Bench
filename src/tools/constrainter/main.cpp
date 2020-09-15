@@ -52,6 +52,9 @@ void makeContraint(int Instruction){
     {
 
     }
+    case Instruction::Store :{
+
+    }
     case Instruction::GetElementPtr : 
     {
 
