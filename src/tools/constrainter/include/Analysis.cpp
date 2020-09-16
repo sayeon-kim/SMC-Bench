@@ -23,8 +23,17 @@ namespace analysis{
 // Operand is Interface for expression.
 Operand::Operand(){}
 
+bool Operand::operator<(const Operand& e) const{
+	if( !(this->Type.compare(e.Type) == 0) ) return false;
+	if( !(this->name.compare(e.name) == 0) ) return false;
+	return true;
+}
+
 std::string Operand::toString(){
-	return "Operand";
+	if( (this->Type.compare("Token") == 0) ){
+		return this->name;	
+	}
+	return "[[ " + this->name + " ]]";
 }
 
 // Token
@@ -93,6 +102,62 @@ std::string Variable::toStringTokens(){
 //===----------------------------------------------------------------------===//
 // Constrations
 //===----------------------------------------------------------------------===//
+// Constraint
+// Constraint is interface for constraints
+
+Constraint::Constraint(){}
+
+Constraint::Constraint(int Type, std::string instruction, Operand* operand1, Operand* operand2, Operand* operand3, Operand* operand4){
+	this->Type = Type;
+	this->instruction = instruction;
+	this->operand1 = operand1;
+	this->operand2 = operand2;
+	this->operand3 = operand3;
+	this->operand4 = operand4;
+}
+
+std::string Constraint::toString(){
+	std::string result = "";
+	result += "Instruction: " + this->instruction + ", ";
+	result += "Constraint-Type: " + std::to_string(this->Type) +",\t";
+	switch(this->Type){
+		case 1 :
+		{
+			result += this->operand1->toString();
+			result += " ∈ ";
+			result += this->operand2->toString();
+			break;
+		}
+		case 2 :
+		{
+			result += this->operand1->toString();
+			result += " ⊆ ";
+			result += this->operand2->toString();
+			break;
+		}
+		case 3 :
+		{
+			result += "for each c in ";
+			result += this->operand1->toString() +", ";
+			result += "c ∈ ";
+			result += this->operand2->toString();
+			break;
+		}
+	}
+	return result + "\n";
+}
+
+// have to update. it is a little wrong..
+bool Constraint::operator<(const Constraint& e) const{
+	// if( !(this->Type == e.Type) ) return false;
+	// if( !(this->operand1 == e.operand1) ) return false;
+	// if( !(this->operand2 == e.operand2) ) return false;
+	// if( !(this->operand3 == e.operand3) ) return false;
+	// if( !(this->operand4 == e.operand4) ) return false;
+	return true;
+};
+
+
 // Constration
 // Constration is interface for expression.
 std::set<Constration*> Constration::Constrations = std::set<Constration*>();
