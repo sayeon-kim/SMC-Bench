@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.4.3)
 
 list(APPEND TEST
   "getInstructionName"
+  "getOperandName"
 )
 
 foreach(item ${TEST})

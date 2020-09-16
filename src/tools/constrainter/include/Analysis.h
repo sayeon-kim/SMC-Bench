@@ -14,6 +14,7 @@ class Operand{
   public:
     std::string Type;
     std::string name;
+    std::set<Operand>* tokens = nullptr;
   public:
     Operand();
     bool operator<(const Operand& e) const;
@@ -64,14 +65,16 @@ enum OperatorCode{
 class Constraint{
   public:
     int Type;
+    std::string instruction;
     Operand* operand1;
     Operand* operand2;
     Operand* operand3;
     Operand* operand4;
   public:
     Constraint();
-    Constraint(int Type, Operand* operand1=nullptr, Operand* operand2=nullptr, Operand* operand3=nullptr, Operand* operand4=nullptr);
+    Constraint(int Type, std::string instruction, Operand* operand1=nullptr, Operand* operand2=nullptr, Operand* operand3=nullptr, Operand* operand4=nullptr);
     bool operator<(const Constraint& e) const;
+    std::string toString();
 };
 
 /// Constration
