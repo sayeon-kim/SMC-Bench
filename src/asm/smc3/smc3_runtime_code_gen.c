@@ -9,9 +9,6 @@
 #define GEN_OFFSET 30
 #define TPL_OFFSET 40
 
-#define SIZE_OF_TPL 10
-#define SIZE_OF_LW 20
-
 #define SIZE_TPL_INIT_INST 10
 #define SIZE_TPL_BODY_INST 14
 #define SIZE_TPL_END_INST 18
@@ -39,9 +36,6 @@ int main(void){
 
     unsigned char*  ptr_tpl_end;
     unsigned char* ptr_tpl_body;
-
-    unsigned char   reg12[SIZE_OF_TPL];
-    unsigned char   reg13[SIZE_OF_LW];
 
     int             vec_length_reg4;     //$4
     int             vec_index_reg8;        //$8, counter
