@@ -6,24 +6,29 @@
 #include <sys/mman.h>
 
 
-#define GEN 30
-#define TPL 40
+#define GEN_OFFSET 30
+#define TPL_OFFSET 40
 
 #define SIZE_OF_TPL 10
 #define SIZE_OF_LW 20
 
-#define SIZE_TPL_INIT_INSTRUCTION 10
-#define SIZE_TPL_PLUS_INSTRUCITON 14
-#define SIZE_TPL_MUL_INSTRUCITON 21
+#define SIZE_TPL_INIT_INST 10
+#define SIZE_TPL_BODY_INST 14
+#define SIZE_TPL_END_INST 18
+
+#define TPL_VEC1_INDEX 10
+#define TPL_VEC2_INDEX 20
 
 int change_page_permissions_of_address(void *addr);
 void get_permission(void* foo_addr);
-void gen();
+int gen();
 
 //.data section
 int vec1[] = {22, 0, 25};
 int vec2[] = {7, 429, 6};
+
 int result;
+int innerprod_reg2;
 
 char* err_string = "Error while changing page permissions of foo()\n";
 
@@ -31,84 +36,181 @@ int main(void){
 
     unsigned char*  ptr_gen_reg9;
     unsigned char*  ptr_tpl_reg11;
+
+    unsigned char*  ptr_tpl_end;
+    unsigned char* ptr_tpl_body;
+
     unsigned char   reg12[SIZE_OF_TPL];
     unsigned char   reg13[SIZE_OF_LW];
 
-    int             vec_length;     //$4
-    int             vec_idx;        //$8
-    int             vec1_value;
+    int             vec_length_reg4;     //$4
+    int             vec_index_reg8;        //$8, counter
+    int             vec1_value_reg10;
     int             offset_gen;
 
 start:
     //li $4, 3
-    vec_length = 3;
+    vec_length_reg4 = 3;
 
     //li $8, 0
-    vec_idx = 0;
+    vec_index_reg8 = 0;
 
     //la $9, gen
-    ptr_gen_reg9 = (unsigned char*)main + GEN;
+    ptr_gen_reg9 = (unsigned char*)main + GEN_OFFSET;
 
     //la $11, tpl
-    ptr_tpl_reg11 = (unsigned char*)main + TPL;
+    ptr_tpl_reg11 = (unsigned char*)main + TPL_OFFSET;
 
     //lw $12, 0($11)
-    for(int i = 0; i < SIZE_OF_TPL; i++)
-    //sw $12, 0($9)      
-    //addi $9, $9, 4     
+    //sw $12, 0($9)
+    for(int i = 0; i < SIZE_TPL_INIT_INST; i++)
+      ptr_tpl_reg11[i] = ptr_gen_reg9[i];
+
+
+    //addi $9, $9, 4
+    ptr_gen_reg9 = ptr_gen_reg9 + SIZE_TPL_INIT_INST;
 
 loop:
     //beq $8, $4, post
-    if(vec_idx == vec_length) goto post;
+    if(vec_index_reg8 == vec_length_reg4) goto post;
 
     // li $13, 4
     // mul $13, $13, $8
     // lw $10, vec1($13)
-    vec1_value = vec1[vec_idx];
-    
-    // beqz $10, next
-    if(vec1_value == 0) goto next;
-    
-    //lw $12, 4($11)
-    for(int i = 0; i < SIZE_TPL_PLUS_INSTRUCITON; i++) reg12[i] = (ptr_tpl_reg11 + SIZE_TPL_INIT_INSTRUCTION)[i];
-    
-    //add $12, $12, $13
-    reg12[8] += vec_idx * 4;
+    vec1_value_reg10 = vec1[vec_index_reg8];
 
+    // beqz $10, next
+    if(vec1_value_reg10 == 0) goto next;
+
+    //lw $12, 4($11)
+    //add $12, $12, $13
     //sw $12, 0($9)
-    for(int i = 0; i < SIZE_TPL_PLUS_INSTRUCITON; i++) (ptr_gen_reg9 + offset_gen)[i] = reg12[i];
-    offset_gen += SIZE_TPL_PLUS_INSTRUCITON;
 
     //lw $12, 8($11)
-    for(int i = 0; i < SIZE_TPL_MUL_INSTRUCITON; i++) reg12[i] = (ptr_tpl_reg11 + SIZE_TPL_INIT_INSTRUCTION + SIZE_TPL_PLUS_INSTRUCITON)[i];
-
     //add $12, $12, $10
-    reg12[8] += vec_idx * 4;
-
     //sw $12, 4($9)
-    for(int i = 0; i < SIZE_TPL_MUL_INSTRUCITON; i++) (ptr_gen_reg9 + offset_gen)[i] = reg12[i];
+
+    // lw $12, 12($11)
+    // sw $12, 12($9)
+
+    // lw $12, 16($110
+    // sw $12, 12($9)
+
+    ptr_tpl_body = ptr_tpl_reg11 + SIZE_TPL_INIT_INST;
+
+    for(int i = 0; i < SIZE_TPL_BODY_INST; i++) {
+      ptr_gen_reg9[i] = ptr_tpl_body[i];
+    }
+
+    // tpl의 인덱스 0을 counter(vec_index_reg8)로 바꾸기
+    // - lw $13, 0($4)
+    // - li $12, 0
+    ptr_gen_reg9[TPL_VEC1_INDEX] += (unsigned char)vec_index_reg8 *4;
+    ptr_gen_reg9[TPL_VEC2_INDEX] += (unsigned char)vec_index_reg8 *4;
+
+
+    // addi $9, $9, 16
+    ptr_gen_reg9 += SIZE_TPL_BODY_INST;
+
 
 next:
-    vec_idx++;
+    // addi $8, $8, 1    (counter)
+    vec_index_reg8++;
+
+    // j loop
     goto loop;
 
 post:
-    gen();
+
+    // lw $12, 20($11)
+    // sw $12, 0($9)
+    ptr_tpl_end = 
+      ptr_tpl_reg11 + SIZE_TPL_INIT_INST + SIZE_TPL_BODY_INST;
+
+    for (int i=0; i<SIZE_TPL_END_INST; i++) {
+      ptr_gen_reg9[i] = ptr_tpl_end[i];
+    }
+
+    // la $4, vec2
+    //   - vec2를 가리키는 reg4를 직접 도입할 필요가 없음.
+    //   - 대신 배열 vec2 이름을 직접 사용함
+
+    // jal gen
+    innerprod_reg2 = gen();
+
+    // sw $2, result
+    result = innerprod_reg2;
+
+    // j main
+    printf("%d \n", result);
+
+    // [주의]
+    //   이후 tpl 코드를 실행하는데 의미없는 실행이고,
+    //   main을 종료하기 위함.
 
 tpl:
-    result = 0;
-    result = result + vec1[0];
-    result = result * vec2[0];
+    // li $2, 0
+    innerprod_reg2 = 0;
+
+    // lw $13, 0($4)
+    // li $12, 0
+    // mul $12, $12, $13
+    // add $2, $2, $12
+    innerprod_reg2 = innerprod_reg2 + vec1[0] * vec2[0];
+
+    // jr $31
+    return innerprod_reg2;
 }
 
 
-void gen (){
+int gen (){
     int dummy = 0;
-    dummy = 1;
-    dummy = 1;
-    dummy = 1;
-    dummy = 1;
-    dummy = 1;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    dummy += 2;
+    return dummy;
 }
 
 
