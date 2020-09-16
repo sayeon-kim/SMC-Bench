@@ -6,15 +6,15 @@
 #include <sys/mman.h>
 
 
-#define GEN_OFFSET 30
-#define TPL_OFFSET 40
+#define GEN_OFFSET 4 
+#define TPL_OFFSET 408
 
 #define SIZE_TPL_INIT_INST 10
-#define SIZE_TPL_BODY_INST 14
-#define SIZE_TPL_END_INST 18
+#define SIZE_TPL_BODY_INST 29
+#define SIZE_TPL_END_INST 8
 
-#define TPL_VEC1_INDEX 10
-#define TPL_VEC2_INDEX 20
+#define TPL_VEC1_INDEX 2
+#define TPL_VEC2_INDEX 8
 
 int change_page_permissions_of_address(void *addr);
 void get_permission(void* foo_addr);
@@ -50,7 +50,7 @@ start:
     vec_index_reg8 = 0;
 
     //la $9, gen
-    ptr_gen_reg9 = (unsigned char*)main + GEN_OFFSET;
+    ptr_gen_reg9 = (unsigned char*)gen + GEN_OFFSET;
 
     //la $11, tpl
     ptr_tpl_reg11 = (unsigned char*)main + TPL_OFFSET;
