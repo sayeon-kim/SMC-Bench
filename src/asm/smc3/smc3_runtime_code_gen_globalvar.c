@@ -7,7 +7,7 @@
 
 
 #define GEN_OFFSET 4
-#define TPL_OFFSET 420  // 91e - 77a
+#define TPL_OFFSET 418 // 420  // 91e - 77a
 
 #define SIZE_TPL_INIT_INST 10
 #define SIZE_TPL_BODY_INST 29
@@ -102,8 +102,8 @@ loop:
     // tpl의 인덱스 0을 counter(vec_index_reg8)로 바꾸기
     // - lw $13, 0($4)
     // - li $12, 0
-    ptr_gen_reg9[TPL_VEC1_INDEX] += (unsigned char)vec_index_reg8 *4;
-    ptr_gen_reg9[TPL_VEC2_INDEX] += (unsigned char)vec_index_reg8 *4;
+    ptr_gen_reg9[TPL_VEC1_INDEX] += (unsigned char)(vec_index_reg8 * 4 - 51);
+    ptr_gen_reg9[TPL_VEC2_INDEX] += (unsigned char)(vec_index_reg8 * 4 - 51);
 
 
     // addi $9, $9, 16
