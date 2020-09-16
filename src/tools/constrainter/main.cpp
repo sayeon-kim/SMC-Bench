@@ -196,6 +196,22 @@ void makeLLVMConstraint(llvm::Instruction* I)
     }
     case Instruction::Select :
     {
+      std::string result_name = I->getName();
+      Operand* v_result = makeVariable(result_name);
+
+      auto K = I->op_begin();
+      if(K != I->op_end()) K++;
+
+      for(K; K!=I->op_end(); K++)
+      {
+        Use& value_operand = *K;
+        std::string value_name = value_operand->getName();
+        
+        if(value_name.compare("")==0)value_name = "Constnat-Value";
+        Operand* v_value = makeVariable(value_name);
+
+        makeConstraint(2, "Select", v_value, v_result);
+      }
       break;
     }
     case Instruction::ExtractValue : 

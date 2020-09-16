@@ -15,6 +15,7 @@ define dso_local i32 @main() {
     %alloca_ins2 = alloca i16
     %alloca_ins3 = alloca i32
     %alloca_ins4 = alloca i64
+    %alloca_ins5 = alloca i64
 
     %alloca_struct1 = alloca %struct1
     %alloca_struct2 = alloca %struct2
@@ -67,7 +68,11 @@ define dso_local i32 @main() {
   loop:
     %indvar = phi i32 [0, %entry ], [ %nextindvar, %loop]
     %nextindvar = add i32 %indvar, 1
+    br label %next
   
-  ret i32 0
-  ; Call Instructions
+  next:
+    ; Select Instructions
+    %select_ins1 = select i1 true, i64* %alloca_ins4, i64* %alloca_ins5
+    %select_ins2 = select i1 false, i64 1234, i64 123
+    ret i32 0
 }
