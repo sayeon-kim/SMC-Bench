@@ -4,7 +4,7 @@ SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_FLAGS "-Wall -fno-rtti -O0")
 
 find_package(LLVM REQUIRED CONFIG)
-project(Constration)
+project(Constraint)
 
 include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/include")
@@ -24,7 +24,9 @@ set(LLVM_LINK_COMPONENTS
   IRReader
 )
 
-add_llvm_executable(Constration
+add_llvm_executable(Constraint
   main.cpp
   include/Analysis.cpp
 )
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/test)
