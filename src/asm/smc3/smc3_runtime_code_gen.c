@@ -61,7 +61,7 @@ start:
     //lw $12, 0($11)
     //sw $12, 0($9)
     for(int i = 0; i < SIZE_TPL_INIT_INST; i++)
-      ptr_tpl_reg11[i] = ptr_gen_reg9[i];
+      ptr_gen_reg9[i] = ptr_tpl_reg11[i] ;
 
 
     //addi $9, $9, 4
