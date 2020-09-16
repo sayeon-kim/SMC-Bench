@@ -6,8 +6,8 @@
 #include <sys/mman.h>
 
 
-#define GEN_OFFSET 4 
-#define TPL_OFFSET 408
+#define GEN_OFFSET 4
+#define TPL_OFFSET 420  // 91e - 77a
 
 #define SIZE_TPL_INIT_INST 10
 #define SIZE_TPL_BODY_INST 29
@@ -24,8 +24,8 @@ int gen();
 int vec1[] = {22, 0, 25};
 int vec2[] = {7, 429, 6};
 
-int result;
-int innerprod_reg2;
+int result = 0;
+int innerprod_reg2 = 0;
 
 char* err_string = "Error while changing page permissions of foo()\n";
 
@@ -41,6 +41,9 @@ int main(void){
     int             vec_index_reg8;        //$8, counter
     int             vec1_value_reg10;
     int             offset_gen;
+
+    // initialize
+    get_permission(gen);
 
 start:
     //li $4, 3
