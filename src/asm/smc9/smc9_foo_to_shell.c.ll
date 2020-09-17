@@ -11,11 +11,24 @@ target triple = "x86_64-pc-linux-gnu"
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i32, align 4
+  ; int code_size
   %3 = alloca i32, align 4
+  ; int i (for문에서 사용되는)
   store i32 0, i32* %1, align 4
   call void @get_permission(i8* bitcast (void ()* @foo to i8*))
+  ; get_permission(foo)
   store i32 29, i32* %2, align 4
+  ; int code_size = sizeof(xor_shellcode) - 1
+
+
+  ; %4라벨부터 %19라벨전까지
+  ;  
+  ;for(int i = 0; i < code_size; i++){
+	;	xor_shellcode[i] ^= -1;
+	;} 
+
   store i32 0, i32* %3, align 4
+  ;for(int i = 0
   br label %4
 
 4:                                                ; preds = %16, %0
@@ -29,24 +42,31 @@ define dso_local i32 @main() #0 {
   %10 = sext i32 %9 to i64
   %11 = getelementptr inbounds [30 x i8], [30 x i8]* @xor_shellcode, i64 0, i64 %10
   %12 = load i8, i8* %11, align 1
+  ; xor_shellcode[i]
   %13 = sext i8 %12 to i32
   %14 = xor i32 %13, -1
+  ; xor_shellcode[i] ^ -1
   %15 = trunc i32 %14 to i8
   store i8 %15, i8* %11, align 1
+  ; xor_shellcode[i] ^= -1
   br label %16
 
 16:                                               ; preds = %8
   %17 = load i32, i32* %3, align 4
   %18 = add nsw i32 %17, 1
   store i32 %18, i32* %3, align 4
+  ; for(int i = 0; i < code_size; i++
   br label %4
 
 19:                                               ; preds = %4
   %20 = load i32, i32* %2, align 4
   %21 = sext i32 %20 to i64
   call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 bitcast (void ()* @foo to i8*), i8* align 16 getelementptr inbounds ([30 x i8], [30 x i8]* @xor_shellcode, i64 0, i64 0), i64 %21, i1 false)
+  ; memcpy(foo, xor_shellcode, code_size)
   call void @foo()
+  ; foo()
   ret i32 0
+  ; return 0
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable
