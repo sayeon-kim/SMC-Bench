@@ -38,8 +38,6 @@ int main(void){
 
     int             vec_length_reg4;       //$4
     int             vec_index_reg8;        //$8, counter
-    int             offset_gen;
-    int             dummy;
 
     // initialize
     get_permission(main);
