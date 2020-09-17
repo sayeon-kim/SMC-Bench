@@ -93,7 +93,7 @@ post:
     ptr_tpl_end = ptr_tpl_reg11 + SIZE_TPL_INIT_INST + SIZE_TPL_BODY_INST;
     for (int i=0; i<SIZE_TPL_END_INST; i++) {
         ptr_gen_reg9[i] = ptr_tpl_end[i];
-        if(i == 1) ptr_gen_reg9[i] -= 45;
+        if(i == TPL_END_JUMP_ADDR_OFFSET) ptr_gen_reg9[i] -= 45;
     }
 
     //jal gen
