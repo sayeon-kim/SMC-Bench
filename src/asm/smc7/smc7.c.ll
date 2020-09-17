@@ -12,26 +12,44 @@ target triple = "x86_64-pc-linux-gnu"
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i8*, align 8
+  ; unsigned char* ptr_loop
   %3 = alloca i8*, align 8
+  ; unsigned char* ptr_new
   %4 = alloca i32, align 4
+  ; int i
   %5 = alloca i32, align 4
+  ; int offset
   store i32 0, i32* %1, align 4
   call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
+  ; get_permission(main)
   br label %6
 
+
+;start:
 6:                                                ; preds = %0
   store i32 0, i32* %5, align 4
+  ; offset = 0
   store i8* getelementptr inbounds (i8, i8* bitcast (i32 ()* @main to i8*), i64 49), i8** %2, align 8
+  ; ptr_loop = (unsigned char*) main + LOOP
   store i8* getelementptr inbounds (i8, i8* bitcast (i32 ()* @main to i8*), i64 112), i8** %3, align 8
+  ; ptr_new  = (unsigned char*) main + NEW
   br label %7
 
+
+;loop:
 7:                                                ; preds = %6
+  ; %8라벨부터 %27라벨 전까지
+  ;for(i=0; i<SIZE_LOOP; i++)
+  ;  (ptr_new + offset)[i] = ptr_loop[i];
+  ;해당 부분
   store i32 0, i32* %4, align 4
+  ; for(i=0;
   br label %8
 
 8:                                                ; preds = %24, %7
   %9 = load i32, i32* %4, align 4
   %10 = icmp slt i32 %9, 63
+  ; for(i=0; i<SIZE_LOOP;
   br i1 %10, label %11, label %27
 
 11:                                               ; preds = %8
@@ -40,30 +58,42 @@ define dso_local i32 @main() #0 {
   %14 = sext i32 %13 to i64
   %15 = getelementptr inbounds i8, i8* %12, i64 %14
   %16 = load i8, i8* %15, align 1
+  ; %16 = ptr_loop[i]
   %17 = load i8*, i8** %3, align 8
+  ; %17 = ptr_new 
   %18 = load i32, i32* %5, align 4
+  ; %18 =  offset
   %19 = sext i32 %18 to i64
   %20 = getelementptr inbounds i8, i8* %17, i64 %19
+  ; (ptr_new + offset)
   %21 = load i32, i32* %4, align 4
   %22 = sext i32 %21 to i64
   %23 = getelementptr inbounds i8, i8* %20, i64 %22
+  ; (ptr_new + offset)[i]
   store i8 %16, i8* %23, align 1
+  ; (ptr_new + offset)[i] = ptr_loop[i]
   br label %24
 
 24:                                               ; preds = %11
   %25 = load i32, i32* %4, align 4
   %26 = add nsw i32 %25, 1
   store i32 %26, i32* %4, align 4
+  ; for(i=0; i<SIZE_LOOP; i++
   br label %8
 
 27:                                               ; preds = %8
   %28 = load i32, i32* %5, align 4
+  ; %28 = offset
   %29 = add nsw i32 %28, 63
   store i32 %29, i32* %5, align 4
+  ; offset += SIZE_LOOP
   br label %30
 
+
+;new:
 30:                                               ; preds = %27
   ret i32 0
+  ; return 0
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable
