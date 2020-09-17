@@ -40,7 +40,7 @@ output, err = o2.communicate()
 o2.stdout.close()
 output_val = output.decode("utf-8").replace('\n','').split(".")
 
-text_start = int(output_val[0], 16) + int(output_val[1], 16)
+text_start = int(output_val[0], 16)
 text_size = int(output_val[2], 16)
 text_end = text_start + text_size 
 
