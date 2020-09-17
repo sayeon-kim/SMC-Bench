@@ -5,14 +5,14 @@
 #include <errno.h>
 #include <sys/mman.h>
 
-#define GEN_OFFSET 483 // 983 - 77a
-#define TPL_OFFSET 462 // 939 - 77a
+#define GEN_OFFSET 483
+#define TPL_OFFSET 462
 
 #define SIZE_TPL_INIT_INST 7  
 #define SIZE_TPL_BODY_INST 12
 #define SIZE_TPL_END_INST 2
 
-#define TPL_END_JUMP_ADDR_OFFSET 1 // eb cf (jmp  ...)
+#define TPL_END_JUMP_ADDR_OFFSET 1
 
 #define TPL_VEC1_INDEX 2
 #define TPL_VEC2_INDEX 5
@@ -68,39 +68,42 @@ start:
 loop:
     //beq $8, $4, post
     if(vec_index_reg8 == vec_length_reg4) goto post;
-
+    
+    //lw $12, (0, 4, 8)$11
+    //sw $12, (0, 4, 8)$11
     ptr_tpl_body = ptr_tpl_reg11 + SIZE_TPL_INIT_INST;
-
-
     for(int i = 0; i < SIZE_TPL_BODY_INST; i++) ptr_gen_reg9[i] = ptr_tpl_body[i];
 
+    //add $12, $12, $13
+    //add $12, $12, $10
     ptr_gen_reg9[TPL_VEC1_INDEX] += (unsigned char)(vec_index_reg8 * 4);
     ptr_gen_reg9[TPL_VEC2_INDEX] += (unsigned char)(vec_index_reg8 * 4);
 
 
+    //addi $9, $9, 16
     ptr_gen_reg9 += SIZE_TPL_BODY_INST;
 
-
 next:
+    // addi $8, $8, 1
     vec_index_reg8++;
-
+    // j loop
     goto loop;
 
 post:
-    ptr_tpl_end = 
-      ptr_tpl_reg11 + SIZE_TPL_INIT_INST + SIZE_TPL_BODY_INST;
-
+    //lw $12, 20($11)
+    //sw $12, 0($9)
+    ptr_tpl_end = ptr_tpl_reg11 + SIZE_TPL_INIT_INST + SIZE_TPL_BODY_INST;
     for (int i=0; i<SIZE_TPL_END_INST; i++) {
         ptr_gen_reg9[i] = ptr_tpl_end[i];
         if(i == 1) ptr_gen_reg9[i] -= 45;
     }
 
-    
+    //jal gen
     goto gen;
 
 after_call_gen:
     result = innerprod_reg2;
-    // j main
+
     printf("%d \n", result);    
 
 tpl:
