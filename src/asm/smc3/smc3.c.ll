@@ -10,120 +10,130 @@ target triple = "x86_64-pc-linux-gnu"
 @.str.1 = private unnamed_addr constant [5 x i8] c"%d \0A\00", align 1
 
 ; Function Attrs: noinline nounwind optnone uwtable
+; MAIN
 define dso_local i32 @main() #0 {
-  %1 = alloca i32, align 4
-  %2 = alloca i32, align 4
-  %3 = alloca [3 x i32], align 4
-  %4 = alloca [3 x i32], align 4
-  %5 = alloca i32, align 4
-  %6 = alloca i8*, align 8
-  %7 = alloca i8*, align 8
-  %8 = alloca i8*, align 8
-  %9 = alloca i8*, align 8
-  %10 = alloca i32, align 4
-  %11 = alloca i32, align 4
-  %12 = alloca i32, align 4
-  %13 = alloca i32, align 4
-  %14 = alloca i32, align 4
-  store i32 0, i32* %1, align 4
+  %1 = alloca i32, align 4 
+  %2 = alloca i32, align 4 ; %2 = innerprod_reg2
+  %3 = alloca [3 x i32], align 4 ; %3 = int vec1[]
+  %4 = alloca [3 x i32], align 4 ; %4 = int vec2[]
+  %5 = alloca i32, align 4 ; %5 = result
+  %6 = alloca i8*, align 8 ; %6 = ptr_gen_reg9
+  %7 = alloca i8*, align 8 ; %7 = ptr_tpl_reg11
+  %8 = alloca i8*, align 8 ; %8 = ptr_tpl_end
+  %9 = alloca i8*, align 8 ; %9 = ptr_tpl_body
+  %10 = alloca i32, align 4 ; %10 = vec_length_reg4
+  %11 = alloca i32, align 4 ; %11 = vec_index_reg8
+  %12 = alloca i32, align 4 ; %12 = int i(START:의 for문)
+  %13 = alloca i32, align 4 ; %13 = int i(LOOP:의 for문)
+  %14 = alloca i32, align 4 ; %14 = int i(POST:의 for문)
+  store i32 0, i32* %1, align 4 
   %15 = bitcast [3 x i32]* %3 to i8*
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 %15, i8* align 4 bitcast ([3 x i32]* @__const.main.vec1 to i8*), i64 12, i1 false)
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 %15, i8* align 4 bitcast ([3 x i32]* @__const.main.vec1 to i8*), i64 12, i1 false) ; vec1 <- {22, 0, 25}
   %16 = bitcast [3 x i32]* %4 to i8*
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 %16, i8* align 4 bitcast ([3 x i32]* @__const.main.vec2 to i8*), i64 12, i1 false)
-  store i32 0, i32* %5, align 4
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* align 4 %16, i8* align 4 bitcast ([3 x i32]* @__const.main.vec2 to i8*), i64 12, i1 false) ; vec2 <- {7, 429, 6}
+  store i32 0, i32* %5, align 4 ; result <- 0
   call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
   br label %17
 
+; START:
 17:                                               ; preds = %0
-  store i32 3, i32* %10, align 4
-  store i32 0, i32* %11, align 4
-  store i8* getelementptr inbounds (i8, i8* bitcast (i32 ()* @main to i8*), i64 483), i8** %6, align 8
-  store i8* getelementptr inbounds (i8, i8* bitcast (i32 ()* @main to i8*), i64 462), i8** %7, align 8
-  store i32 0, i32* %12, align 4
+  store i32 3, i32* %10, align 4 ; vec_length_reg4 <- 3
+  store i32 0, i32* %11, align 4 ; vec_index_reg8 <- 0
+  store i8* getelementptr inbounds (i8, i8* bitcast (i32 ()* @main to i8*), i64 483), i8** %6, align 8 ; ptr_gen_reg9 <- main + GEN_OFFSET(483)
+  store i8* getelementptr inbounds (i8, i8* bitcast (i32 ()* @main to i8*), i64 462), i8** %7, align 8 ; ptr_tpl_reg11 <- main + TPL_OFFSET(462)
+  store i32 0, i32* %12, align 4 ; i = 0
   br label %18
 
 18:                                               ; preds = %31, %17
-  %19 = load i32, i32* %12, align 4
-  %20 = icmp slt i32 %19, 7
+  %19 = load i32, i32* %12, align 4 
+  %20 = icmp slt i32 %19, 7 ; for(int i = 0; i < SIZE_TPL_BODY_INST(7); i++)
   br i1 %20, label %21, label %34
 
+;i < 7일 때 21: 분기와 31: 분기 실행
 21:                                               ; preds = %18
-  %22 = load i8*, i8** %7, align 8
-  %23 = load i32, i32* %12, align 4
+  %22 = load i8*, i8** %7, align 8 ; %22 = ptr_tpl_reg11
+  %23 = load i32, i32* %12, align 4 ; %23 = i
   %24 = sext i32 %23 to i64
-  %25 = getelementptr inbounds i8, i8* %22, i64 %24
+  %25 = getelementptr inbounds i8, i8* %22, i64 %24 ; %25 <- ptr_tpl_reg11[i]
   %26 = load i8, i8* %25, align 1
-  %27 = load i8*, i8** %6, align 8
-  %28 = load i32, i32* %12, align 4
+  %27 = load i8*, i8** %6, align 8 ; %27 = ptr_gen_reg9
+  %28 = load i32, i32* %12, align 4 ; %28 = i
   %29 = sext i32 %28 to i64
-  %30 = getelementptr inbounds i8, i8* %27, i64 %29
-  store i8 %26, i8* %30, align 1
+  %30 = getelementptr inbounds i8, i8* %27, i64 %29 ; %30 <- ptr_gen_reg9[i]
+  store i8 %26, i8* %30, align 1 ; ptr_gen_reg9[i] <- ptr_tpl_reg11[i]
   br label %31
-
 31:                                               ; preds = %21
-  %32 = load i32, i32* %12, align 4
-  %33 = add nsw i32 %32, 1
+  %32 = load i32, i32* %12, align 4 ; %32 = i
+  %33 = add nsw i32 %32, 1 ; i++
   store i32 %33, i32* %12, align 4
-  br label %18
+  br label %18 ; 18: 분기로 돌아가 i = 7일 때까지 반복
 
+; i = 7일 때 34: 분기실행
 34:                                               ; preds = %18
-  %35 = load i8*, i8** %6, align 8
-  %36 = getelementptr inbounds i8, i8* %35, i64 7
-  store i8* %36, i8** %6, align 8
+  %35 = load i8*, i8** %6, align 8 ; %35 = ptr_gen_reg9
+  %36 = getelementptr inbounds i8, i8* %35, i64 7 ; %36 <- ptr_gen_reg9 + SIZE_TPL_INIT_INST(7);
+  store i8* %36, i8** %6, align 8 ; ptr_gen_reg9 <- ptr_gen_reg9 + SIZE_TPL_INIT_INST(7)
   br label %37
 
+; LOOP:  
 37:                                               ; preds = %84, %34
-  %38 = load i32, i32* %11, align 4
-  %39 = load i32, i32* %10, align 4
-  %40 = icmp eq i32 %38, %39
+  %38 = load i32, i32* %11, align 4 ; %38 = vec_index_reg8
+  %39 = load i32, i32* %10, align 4 ; %39 = vec_length_reg4
+  %40 = icmp eq i32 %38, %39 ; if(vec_index_reg8 == vec_length_reg4)
   br i1 %40, label %41, label %42
 
 41:                                               ; preds = %37
-  br label %87
+  br label %87 ; goto post
 
 42:                                               ; preds = %37
-  %43 = load i8*, i8** %7, align 8
-  %44 = getelementptr inbounds i8, i8* %43, i64 7
-  store i8* %44, i8** %9, align 8
-  store i32 0, i32* %13, align 4
+  %43 = load i8*, i8** %7, align 8 ; %43 = ptr_tpl_reg11
+  %44 = getelementptr inbounds i8, i8* %43, i64 7 ; %44 <- ptr_tpl_reg11 + SIZE_TPL_INIT_INST(7)
+  store i8* %44, i8** %9, align 8 ; ptr_tpl_body <- ptr_tpl_reg11 + SIZE_TPL_INIT_INST(7)
+  store i32 0, i32* %13, align 4 ; i = 0
   br label %45
 
+;for(int i = 0; i < SIZE_TPL_BODY_INST; i++)
 45:                                               ; preds = %58, %42
   %46 = load i32, i32* %13, align 4
   %47 = icmp slt i32 %46, 12
   br i1 %47, label %48, label %61
 
+; i < SIZE_TPL_BODY_INST(12)일 때
 48:                                               ; preds = %45
-  %49 = load i8*, i8** %9, align 8
+  %49 = load i8*, i8** %9, align 8 ; %49 = ptr_tpl_body
   %50 = load i32, i32* %13, align 4
   %51 = sext i32 %50 to i64
-  %52 = getelementptr inbounds i8, i8* %49, i64 %51
+  %52 = getelementptr inbounds i8, i8* %49, i64 %51 ; %52 <- ptr_tpl_body[i]
   %53 = load i8, i8* %52, align 1
-  %54 = load i8*, i8** %6, align 8
+  %54 = load i8*, i8** %6, align 8 ; %54 = ptr_gen_reg9
   %55 = load i32, i32* %13, align 4
   %56 = sext i32 %55 to i64
-  %57 = getelementptr inbounds i8, i8* %54, i64 %56
-  store i8 %53, i8* %57, align 1
+  %57 = getelementptr inbounds i8, i8* %54, i64 %56 ; %57 <- ptr_gen_reg9[i]
+  store i8 %53, i8* %57, align 1 ; ptr_gen_reg9[i] <- ptr_tpl_body[i]
   br label %58
-
+  
+; i++
 58:                                               ; preds = %48
   %59 = load i32, i32* %13, align 4
   %60 = add nsw i32 %59, 1
   store i32 %60, i32* %13, align 4
   br label %45
 
+; i = SIZE_TPL_BODY_INST(12)일 때
 61:                                               ; preds = %45
-  %62 = load i32, i32* %11, align 4
-  %63 = mul nsw i32 %62, 4
+  %62 = load i32, i32* %11, align 4 ; %62 = vec_index_reg8
+  %63 = mul nsw i32 %62, 4 ; %63 = vec_index_reg8 * 4
   %64 = trunc i32 %63 to i8
   %65 = zext i8 %64 to i32
-  %66 = load i8*, i8** %6, align 8
-  %67 = getelementptr inbounds i8, i8* %66, i64 2
+  %66 = load i8*, i8** %6, align 8 ; %66 = ptr_gen_reg9
+  %67 = getelementptr inbounds i8, i8* %66, i64 2 ; %67 <- ptr_gen_reg9[TPL_VEC1_INDEX(2)]
   %68 = load i8, i8* %67, align 1
   %69 = zext i8 %68 to i32
-  %70 = add nsw i32 %69, %65
+  %70 = add nsw i32 %69, %65 
   %71 = trunc i32 %70 to i8
   store i8 %71, i8* %67, align 1
+  ; ptr_gen_reg9[TPL_VEC1_INDEX(2)] += (unsigned char)(vec_index_reg8 * 4)
+  
   %72 = load i32, i32* %11, align 4
   %73 = mul nsw i32 %72, 4
   %74 = trunc i32 %73 to i8
@@ -135,30 +145,39 @@ define dso_local i32 @main() #0 {
   %80 = add nsw i32 %79, %75
   %81 = trunc i32 %80 to i8
   store i8 %81, i8* %77, align 1
+  ; ptr_gen_reg9[TPL_VEC2_INDEX] += (unsigned char)(vec_index_reg8 * 4)
+  
   %82 = load i8*, i8** %6, align 8
   %83 = getelementptr inbounds i8, i8* %82, i64 12
   store i8* %83, i8** %6, align 8
+  ; ptr_gen_reg9 += SIZE_TPL_BODY_INST(12)
   br label %84
 
+; NEXT:
 84:                                               ; preds = %61
   %85 = load i32, i32* %11, align 4
   %86 = add nsw i32 %85, 1
   store i32 %86, i32* %11, align 4
-  br label %37
+  ; vec_index_reg8++
+  br label %37 ; goto loop
 
+; POST:
 87:                                               ; preds = %41
   %88 = load i8*, i8** %7, align 8
   %89 = getelementptr inbounds i8, i8* %88, i64 7
   %90 = getelementptr inbounds i8, i8* %89, i64 12
   store i8* %90, i8** %8, align 8
+  ; ptr_tpl_end = ptr_tpl_reg11 + SIZE_TPL_INIT_INST(7) + SIZE_TPL_BODY_INST(12)
   store i32 0, i32* %14, align 4
   br label %91
 
+; if(i < SIZE_TPL_END_INST(2))
 91:                                               ; preds = %116, %87
   %92 = load i32, i32* %14, align 4
   %93 = icmp slt i32 %92, 2
   br i1 %93, label %94, label %119
 
+; i < SIZE_TPL_END_INST(2)일 때
 94:                                               ; preds = %91
   %95 = load i8*, i8** %8, align 8
   %96 = load i32, i32* %14, align 4
@@ -170,10 +189,13 @@ define dso_local i32 @main() #0 {
   %102 = sext i32 %101 to i64
   %103 = getelementptr inbounds i8, i8* %100, i64 %102
   store i8 %99, i8* %103, align 1
+  ; ptr_gen_reg9[i] = ptr_tpl_end[i]
+  
   %104 = load i32, i32* %14, align 4
-  %105 = icmp eq i32 %104, 1
+  %105 = icmp eq i32 %104, 1 ; if(i == TPL_END_JUMP_ADDR_OFFSET(1))
   br i1 %105, label %106, label %115
 
+; i == TPL_END_JUMP_ADDR_OFFSET(1)일 때
 106:                                              ; preds = %94
   %107 = load i8*, i8** %6, align 8
   %108 = load i32, i32* %14, align 4
@@ -184,29 +206,35 @@ define dso_local i32 @main() #0 {
   %113 = sub nsw i32 %112, 45
   %114 = trunc i32 %113 to i8
   store i8 %114, i8* %110, align 1
+  ; ptr_gen_reg9[i] -= 45
   br label %115
 
 115:                                              ; preds = %106, %94
   br label %116
 
+; i++
 116:                                              ; preds = %115
   %117 = load i32, i32* %14, align 4
   %118 = add nsw i32 %117, 1
   store i32 %118, i32* %14, align 4
   br label %91
 
+; i = SIZE_TPL_END_INST(2)일 때
 119:                                              ; preds = %91
-  br label %132
+  br label %132 ; goto gen
 
+; AFTER_CALL_GEN:
 120:                                              ; preds = %132, %124
   %121 = load i32, i32* %2, align 4
   store i32 %121, i32* %5, align 4
+  ; result <- innerprod_reg2
   %122 = load i32, i32* %5, align 4
-  %123 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.1, i64 0, i64 0), i32 %122)
+  %123 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str.1, i64 0, i64 0), i32 %122) ; printf("%d \n", result)
   br label %124
 
+; TPL:
 124:                                              ; preds = %120
-  store i32 0, i32* %2, align 4
+  store i32 0, i32* %2, align 4 ; innerprod_reg2 <- 0
   %125 = load i32, i32* %2, align 4
   %126 = getelementptr inbounds [3 x i32], [3 x i32]* %3, i64 0, i64 0
   %127 = load i32, i32* %126, align 4
@@ -215,10 +243,12 @@ define dso_local i32 @main() #0 {
   %130 = mul nsw i32 %127, %129
   %131 = add nsw i32 %125, %130
   store i32 %131, i32* %2, align 4
-  br label %120
+  ; innerprod_reg2 = innerprod_reg2 + vec1[0] * vec2[0]
+  br label %120 ; goto after_call_gen
 
+; GEN:
 132:                                              ; preds = %119
-  br label %120
+  br label %120 ; goto after_call_gen
 }
 
 ; Function Attrs: argmemonly nounwind
