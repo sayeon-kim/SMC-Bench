@@ -40,18 +40,24 @@ output, err = o2.communicate()
 o2.stdout.close()
 output_val = output.decode("utf-8").replace('\n','').split(".")
 
-text_start = int(output_val[0], 16)
-text_size = int(output_val[2], 16)
-text_end = text_start + text_size 
+# These number is 0x..
+text_start = "0x" + str(output_val[0]).lstrip('0')
+text_off = "0x" + str(output_val[1]).lstrip('0')
+text_size = "0x" + str(output_val[2]).lstrip('0')
 
-hex_text_start = hex(text_start)
-hex_text_size = hex(text_size)
-hex_text_end = hex(text_end)
+print(text_off)
 
-o3 = subprocess.Popen(['xxd', '-p', '-s', hex_text_start, '-l',hex_text_size, target], stdout=subprocess.PIPE)
+# hex_text_start = hex(text_start)
+# hex_text_off = hex(text_off)
+# hex_text_size = hex(text_size)
+# hex_text_end = hex(text_end)
+
+o3 = subprocess.Popen(['xxd', '-p', '-s', text_off, '-l', text_size, target], stdout=subprocess.PIPE)
 text_bytes, err = o3.communicate()
 text_bytes = text_bytes.decode("utf-8").replace('\n','')
 o3.stdout.close()
+
+print(text_bytes)
 
 o4 = subprocess.Popen([remill_lift, "--os", target_os, "--arch", target_arch,"--bytes", text_bytes, "--ir_out", output_file], stdout=subprocess.PIPE)
 o4.stdout.close()
