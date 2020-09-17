@@ -5,77 +5,134 @@
 #include <errno.h>
 #include <sys/mman.h>
 
+#define GEN_OFFSET 483
+#define TPL_OFFSET 462
+
+#define SIZE_TPL_INIT_INST 7  
+#define SIZE_TPL_BODY_INST 12
+#define SIZE_TPL_END_INST 2
+
+#define TPL_END_JUMP_ADDR_OFFSET 1
+
+#define TPL_VEC1_INDEX 2
+#define TPL_VEC2_INDEX 5
+
 int change_page_permissions_of_address(void *addr);
-void get_permission(void *foo_addr);
-char *err_string = "Error while changing page permissions of foo()\n";
+void get_permission(void* foo_addr);
+int gen();
 
-int main(void)
-{
-    //overwriting 전의 계산되는 vectorr값
-    int origin[3] = {1, 2, 3};
-    //overwriting 할 vector값
-    int vec[3] = {10, 11, 13};
+char* err_string = "Error while changing page permissions of foo()\n";
 
-	void *origin1_instruction = (void *)main + 209; //num += origin[0]
-	void *origin2_instruction = (void *)main + 252; //num += origin[1]
-	void *origin3_instruction = (void *)main + 295; //num += origin[2]
+int main(void){
+    int innerprod_reg2;
+    int vec1[] = {22, 0, 25};
+    int vec2[] = {7, 429, 6};
 
-	void *vec_instruction = (void *)main + 323; //num += vec[0]
+    int result = 0;
 
-	void *vec_index = (void *)main + 325; //num += vec[0]의 vec[0]
+    unsigned char*  ptr_gen_reg9;
+    unsigned char*  ptr_tpl_reg11;
 
-	void *vec1_index = (void *)main + 46; //vec[0]
-	void *vec2_index = (void *)main + 53; //vec[1]
-	void *vec3_index = (void *)main + 60; //vec[2]
+    unsigned char*  ptr_tpl_end;
+    unsigned char*  ptr_tpl_body;
 
-	get_permission(main);
-	int num = 0;
-	
-TARGET:
-	//vec[0]을 num += vec[0]의 vec[0]에 overwriting
-	memcpy(vec_index, vec1_index, 1);
-	//vec[0]이 update된 num += vec[0] 명령어를 원래 있던 num += vec[0] 명령어에 overwriting
-	memcpy(origin1_instruction, vec_instruction, 3);
-    num += origin[0];
+    int             vec_length_reg4;       //$4
+    int             vec_index_reg8;        //$8, counter
 
-	//vec[1]을 num += vec[0]의 vec[0]에 overwriting
-	memcpy(vec_index, vec2_index, 1);
-	//vec[1]이 update된 num += vec[1] 명령어를 원래 있던 num += vec[0] 명령어에 overwriting
-	memcpy(origin2_instruction, vec_instruction, 3);
-    num += origin[1];
+    // initialize
+    get_permission(main);
 
-	//vec[2]을 num += vec[0]의 vec[0]에 overwriting
-	memcpy(vec_index, vec3_index, 1);
-	//vec[2]이 update된 num += vec[2] 명령어를 원래 있던 num += vec[0] 명령어에 overwriting
-	memcpy(origin3_instruction, vec_instruction, 3);
-    num += origin[2];
+start:
+    //li $4, 3
+    vec_length_reg4 = 3;
 
-	printf("%d\n", num);
-//overwriting 할 index update 이전의 vector
-    num += vec[0];
+    //li $8, 0
+    vec_index_reg8 = 0;
+
+    //la $9, gen
+    ptr_gen_reg9 = (unsigned char*)main + GEN_OFFSET;
+
+    //la $11, tpl
+    ptr_tpl_reg11 = (unsigned char*)main + TPL_OFFSET;
+
+    //lw $12, 0($11)
+    //sw $12, 0($9)
+    for(int i = 0; i < SIZE_TPL_INIT_INST; i++) ptr_gen_reg9[i] = ptr_tpl_reg11[i];
+
+
+    //addi $9, $9, 4
+    ptr_gen_reg9 = ptr_gen_reg9 + SIZE_TPL_INIT_INST;
+
+loop:
+    //beq $8, $4, post
+    if(vec_index_reg8 == vec_length_reg4) goto post;
+    
+    //lw $12, (0, 4, 8)$11
+    //sw $12, (0, 4, 8)$11
+    ptr_tpl_body = ptr_tpl_reg11 + SIZE_TPL_INIT_INST;
+    for(int i = 0; i < SIZE_TPL_BODY_INST; i++) ptr_gen_reg9[i] = ptr_tpl_body[i];
+
+    //add $12, $12, $13
+    //add $12, $12, $10
+    ptr_gen_reg9[TPL_VEC1_INDEX] += (unsigned char)(vec_index_reg8 * 4);
+    ptr_gen_reg9[TPL_VEC2_INDEX] += (unsigned char)(vec_index_reg8 * 4);
+
+
+    //addi $9, $9, 16
+    ptr_gen_reg9 += SIZE_TPL_BODY_INST;
+
+next:
+    // addi $8, $8, 1
+    vec_index_reg8++;
+    // j loop
+    goto loop;
+
+post:
+    //lw $12, 20($11)
+    //sw $12, 0($9)
+    ptr_tpl_end = ptr_tpl_reg11 + SIZE_TPL_INIT_INST + SIZE_TPL_BODY_INST;
+    for (int i=0; i<SIZE_TPL_END_INST; i++) {
+        ptr_gen_reg9[i] = ptr_tpl_end[i];
+        if(i == TPL_END_JUMP_ADDR_OFFSET) ptr_gen_reg9[i] -= 45;
+    }
+
+    //jal gen
+    goto gen;
+
+after_call_gen:
+    result = innerprod_reg2;
+
+    printf("%d \n", result);    
+
+tpl:
+    innerprod_reg2 = 0;
+    innerprod_reg2 = innerprod_reg2 + vec1[0] * vec2[0];
+    goto after_call_gen;
+
+gen:
+    // get_permission 코드 위에 오버라이팅!!
+    goto after_call_gen;
 }
 
-void get_permission(void *foo_addr)
-{
-	if (change_page_permissions_of_address(foo_addr) == -1)
-	{
-		write(STDERR_FILENO, err_string, strlen(err_string) + 1);
-		exit(1);
-	}
+
+///////////////////////////////
+// Permission-related functions
+///////////////////////////////
+void get_permission(void* foo_addr) {
+    if(change_page_permissions_of_address(foo_addr) == -1) {
+        write(STDERR_FILENO, err_string, strlen(err_string) + 1);
+        exit(1);
+    }    
 }
+int change_page_permissions_of_address(void *addr){
+    
+    int page_size = 4096;
 
-int change_page_permissions_of_address(void *addr)
-{
+    addr -= (unsigned long)addr % page_size;
 
-	int page_size = 4096;
+    if(mprotect(addr, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == -1){
+        return -1;
+    }
 
-	addr -= (unsigned long)addr % page_size;
-
-	if (mprotect(addr, page_size, PROT_READ | PROT_WRITE | PROT_EXEC) == -1)
-	{
-		return -1;
-	}
-	return 0;
+    return 0;
 }
-
-//clang-9 smc3.c -c -emit-llvm -S -target x86_64-pc-linux-gnu

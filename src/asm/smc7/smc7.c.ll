@@ -12,19 +12,88 @@ target triple = "x86_64-pc-linux-gnu"
 define dso_local i32 @main() #0 {
   %1 = alloca i32, align 4
   %2 = alloca i8*, align 8
-  ;(unsigned char *)foo_addr
+  ; unsigned char* ptr_loop
+  %3 = alloca i8*, align 8
+  ; unsigned char* ptr_new
+  %4 = alloca i32, align 4
+  ; int i
+  %5 = alloca i32, align 4
+  ; int offset
   store i32 0, i32* %1, align 4
-  store i8* bitcast (void (i8*, i8*)* @foo to i8*), i8** %2, align 8
-  %3 = load i8*, i8** %2, align 8
-  call void @get_permission(i8* %3)
-  %4 = load i8*, i8** %2, align 8
-  %5 = getelementptr inbounds i8, i8* %4, i64 55
-  ;(unsigned char *)foo_addr + 55
-  %6 = load i8*, i8** %2, align 8
-  ;(unsigned char *)foo_addr
-  call void @foo(i8* %5, i8* %6)
-  ;foo((unsigned char *)foo_addr + 55, (unsigned char *)foo_addr)
+  call void @get_permission(i8* bitcast (i32 ()* @main to i8*))
+  ; get_permission(main)
+  br label %6
+
+
+;start:
+6:                                                ; preds = %0
+  store i32 0, i32* %5, align 4
+  ; offset = 0
+  store i8* getelementptr inbounds (i8, i8* bitcast (i32 ()* @main to i8*), i64 49), i8** %2, align 8
+  ; ptr_loop = (unsigned char*) main + LOOP
+  store i8* getelementptr inbounds (i8, i8* bitcast (i32 ()* @main to i8*), i64 112), i8** %3, align 8
+  ; ptr_new  = (unsigned char*) main + NEW
+  br label %7
+
+
+;loop:
+7:                                                ; preds = %6
+  ; %8라벨부터 %27라벨 전까지
+  ;for(i=0; i<SIZE_LOOP; i++)
+  ;  (ptr_new + offset)[i] = ptr_loop[i];
+  ;해당 부분
+  store i32 0, i32* %4, align 4
+  ; for(i=0;
+  br label %8
+
+8:                                                ; preds = %24, %7
+  %9 = load i32, i32* %4, align 4
+  %10 = icmp slt i32 %9, 63
+  ; for(i=0; i<SIZE_LOOP;
+  br i1 %10, label %11, label %27
+
+11:                                               ; preds = %8
+  %12 = load i8*, i8** %2, align 8
+  %13 = load i32, i32* %4, align 4
+  %14 = sext i32 %13 to i64
+  %15 = getelementptr inbounds i8, i8* %12, i64 %14
+  %16 = load i8, i8* %15, align 1
+  ; %16 = ptr_loop[i]
+  %17 = load i8*, i8** %3, align 8
+  ; %17 = ptr_new 
+  %18 = load i32, i32* %5, align 4
+  ; %18 =  offset
+  %19 = sext i32 %18 to i64
+  %20 = getelementptr inbounds i8, i8* %17, i64 %19
+  ; (ptr_new + offset)
+  %21 = load i32, i32* %4, align 4
+  %22 = sext i32 %21 to i64
+  %23 = getelementptr inbounds i8, i8* %20, i64 %22
+  ; (ptr_new + offset)[i]
+  store i8 %16, i8* %23, align 1
+  ; (ptr_new + offset)[i] = ptr_loop[i]
+  br label %24
+
+24:                                               ; preds = %11
+  %25 = load i32, i32* %4, align 4
+  %26 = add nsw i32 %25, 1
+  store i32 %26, i32* %4, align 4
+  ; for(i=0; i<SIZE_LOOP; i++
+  br label %8
+
+27:                                               ; preds = %8
+  %28 = load i32, i32* %5, align 4
+  ; %28 = offset
+  %29 = add nsw i32 %28, 63
+  store i32 %29, i32* %5, align 4
+  ; offset += SIZE_LOOP
+  br label %30
+
+
+;new:
+30:                                               ; preds = %27
   ret i32 0
+  ; return 0
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable
@@ -96,52 +165,6 @@ declare dso_local void @exit(i32) #3
 ; Function Attrs: nounwind
 declare dso_local i32 @mprotect(i8*, i64, i32) #4
 
-; Function Attrs: noinline nounwind optnone uwtable
-define dso_local void @foo(i8*, i8*) #0 {
-  %3 = alloca i8*, align 8
-  ;unsigned char *dest
-  %4 = alloca i8*, align 8
-  ;unsigned char *src
-  %5 = alloca i32, align 4
-  ;int i
-  store i8* %0, i8** %3, align 8
-  store i8* %1, i8** %4, align 8
-  store i32 0, i32* %5, align 4
-  ;int i = 0
-  br label %6
-
-;for
-6:                                                ; preds = %17, %2
-  %7 = load i32, i32* %5, align 4
-  %8 = icmp slt i32 %7, 55
-  ;i<55
-  br i1 %8, label %9, label %20
-
-9:                                                ; preds = %6
-  %10 = load i8*, i8** %4, align 8
-  %11 = load i8, i8* %10, align 1
-  %12 = load i8*, i8** %3, align 8
-  store i8 %11, i8* %12, align 1
-  ;*dest = *src
-  %13 = load i8*, i8** %3, align 8
-  %14 = getelementptr inbounds i8, i8* %13, i32 1
-  store i8* %14, i8** %3, align 8
-  %15 = load i8*, i8** %4, align 8
-  %16 = getelementptr inbounds i8, i8* %15, i32 1
-  store i8* %16, i8** %4, align 8
-  br label %17
-
-17:
-;i++                                               ; preds = %9
-  %18 = load i32, i32* %5, align 4
-  %19 = add nsw i32 %18, 1
-  store i32 %19, i32* %5, align 4
-  br label %6
-
-20:                                               ; preds = %6
-  ret void
-}
-
 attributes #0 = { noinline nounwind optnone uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #1 = { "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
 attributes #2 = { nounwind readonly "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
@@ -156,3 +179,7 @@ attributes #7 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{!"clang version 9.0.0-2~ubuntu18.04.2 (tags/RELEASE_900/final)"}
+
+
+
+ clang-9 -c -emit-llvm -S -target x86_64-pc-linux-gnu smc7.c
