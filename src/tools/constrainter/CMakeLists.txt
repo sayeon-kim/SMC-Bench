@@ -6,7 +6,6 @@ SET(CMAKE_CXX_FLAGS "-Wall -fno-rtti -O0")
 find_package(LLVM REQUIRED CONFIG)
 project(Constraint)
 
-include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${LLVM_INCLUDE_DIRS}")
 
