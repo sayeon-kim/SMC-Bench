@@ -1,8 +1,21 @@
+---
+Author: Yu JaeIL
+Date: 2020-09-21
+---
+
 # Static Pointer Analysis
+
+## Purpose
+어째서 이러한 Static Pointer Analysis 를 하는가?
+
+->
+
+SSA이므로 수동적인 변수의 추적이 어렵다.
+
+따라서, 해당 포인터 변수가 어디에서 기인하는지 파악하기 위해서 분석한다.
 
 ## Dependency
 
-- [nlohmann/json package](https://github.com/nlohmann/json)
 - LLVM 10.0
 
 # Constraint

@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <map>
 
 #include <llvm/IR/Module.h>
 #include <llvm/IRReader/IRReader.h>
@@ -348,10 +349,8 @@ void makeLLVMConstraint(llvm::Instruction* I)
   }
 }
 
-std::unique_ptr<llvm::Module> readModule(std::string file_name)
+std::unique_ptr<llvm::Module> readModule(std::string file_name, llvm::SMDiagnostic error, llvm::LLVMContext& context)
 {
-  llvm::LLVMContext context;
-  llvm::SMDiagnostic error;
   std::unique_ptr<llvm::Module> module = llvm::parseIRFile(file_name, error, context);
   if(!module)
   {
@@ -442,9 +441,11 @@ std::string operandToString(int id)
 	return "Not Defined Operation.";
 }
 
-std::set<Constraint>* run(std::string file_name){
-  std::unique_ptr<llvm::Module> module = readModule(file_name);
-  
+std::map<std::string,std::set<Constraint>*>* run(std::string file_name){
+  llvm::LLVMContext context;
+  llvm::SMDiagnostic error;
+  std::map<std::string, std::set<Constraint>*>* result = new std::map<std::string, std::set<Constraint>*>();
+  std::unique_ptr<llvm::Module> module = readModule(file_name, error, context);
   for (auto F = module->begin(); F != module->end(); F++)
   {
     // Todo. Add Function Name.
@@ -460,10 +461,11 @@ std::set<Constraint>* run(std::string file_name){
         makeLLVMConstraint(&*I);
       }
     }
+    std::set<Constraint>* save_constraints = new std::set<Constraint>(*Constraint::Constraints);
+    result->insert(std::pair<std::string, std::set<Constraint>*>(function_name, save_constraints));
+    clear();
   }
 
-  std::set<Constraint>* result = Constraint::Constraints;
-  clear();
   return result;
 }
 

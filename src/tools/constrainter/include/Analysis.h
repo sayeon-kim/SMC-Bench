@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <map>
 
 #include <llvm/IR/Module.h>
 #include <llvm/IRReader/IRReader.h>
@@ -102,9 +103,10 @@ Constraint* makeConstraint(int Type, std::string instruction,Operand* operand1=n
 
 void makeLLVMConstraint(llvm::Instruction* I);
 
-std::unique_ptr<llvm::Module> readModule(std::string file_name);
+std::unique_ptr<llvm::Module> readModule(std::string file_name, llvm::SMDiagnostic error,
+                                         llvm::LLVMContext& context);
 
-std::set<Constraint>* run(std::string file_name);
+std::map<std::string,std::set<Constraint>*>* run(std::string file_name);
 
 void clear();
 
