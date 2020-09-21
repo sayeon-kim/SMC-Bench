@@ -1,69 +1,68 @@
 // test Analysis
 
+#ifndef SMC_ANALYSIS
+#define SMC_ANALYSIS
+
 #include <string>
 #include <set>
 #include <memory>
-#include "llvm/IR/Function.h"
-#include <nlohmann/json.hpp>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <map>
 
-using json = nlohmann::json;
+#include <llvm/IR/Module.h>
+#include <llvm/IRReader/IRReader.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/IR/Use.h>
+#include "llvm/IR/Function.h"
 
 namespace analysis {
 
+static int alloca_number = 0 ;
+
+//===----------------------------------------------------------------------===//
+// Operands
+//===----------------------------------------------------------------------===//
+// Operand
+// Operand is Interface for expression.
 class Operand{
   public:
+    static std::set<Operand>* Tokens;
+    static std::set<Operand>* Variables;
     std::string Type;
     std::string name;
     std::set<Operand>* tokens = nullptr;
   public:
     Operand();
+    Operand(const Operand& rhs);
+    ~Operand();
     bool operator<(const Operand& e) const;
-    virtual std::string toString();
-};
-
-class Token : public Operand{
-  public:
-    static std::set<Token>* Tokens;
-    std::string name;
-  public:
-    Token();
-    
-    Token(std::string tokenName);
-    bool operator<(const Token& e) const;
-    json toJson();
     std::string toString();
 };
 
-class Variable : public Operand{
-  public:
-    static std::set<Variable>* Variables;
-    std::set<Token>* tokens;
-    std::string name;
 
-  public:
-    Variable(std::string variableName);
-    Variable();
-    ~Variable();
-    std::set<Token>* getTokens();
-    bool operator<(const Variable& e) const;
-    std::string toString();
-    std::string toStringTokens();
-};
+// enum OperatorCode{
+//   in=0,
+//   subseteq
+// };
 
-enum OperatorCode{
-  in=0,
-  subseteq
-  };
-
-/**
- * Constraint Type.
- * 1 => operand1 ∈ [[ operand2 ]]
- * 2 => [[ operand1 ]] ⊆ [[ operand2 ]]
- * 3 => for each c in [[ operand1 ]], c ∈ [[ operand2 ]]
- * 
- */
+// //===----------------------------------------------------------------------===//
+// // Constraint
+// //===----------------------------------------------------------------------===//
+// /**
+//  * Constraint Type.
+//  * 1 => operand1 ∈ [[ operand2 ]]
+//  * 2 => [[ operand1 ]] ⊆ [[ operand2 ]]
+//  * 3 => for each c in [[ operand1 ]], c ∈ [[ operand2 ]]
+//  * 
+//  */
 class Constraint{
   public:
+    static std::set<Constraint>* Constraints;
     int Type;
     std::string instruction;
     Operand* operand1;
@@ -72,57 +71,51 @@ class Constraint{
     Operand* operand4;
   public:
     Constraint();
-    Constraint(int Type, std::string instruction, Operand* operand1=nullptr, Operand* operand2=nullptr, Operand* operand3=nullptr, Operand* operand4=nullptr);
+    Constraint(const Constraint& rhs);
+    Constraint(int Type, std::string instruction, Operand* operand1,
+                           Operand* operand2, Operand* operand3, Operand* operand4);
+    ~Constraint();
     bool operator<(const Constraint& e) const;
+
     std::string toString();
-};
+}; // class Constraint
 
-/// Constration
-class Constration{
-  public:
-    std::string Type;
-    bool condition;
-    static std::set<Constration*> Constrations;
-  public:
-    Constration();
-    virtual std::string toString();
-    virtual bool update();
-};
+// //===----------------------------------------------------------------------===//
+// // Functions
+// //===----------------------------------------------------------------------===//
 
-class ConsBinomial : public Constration{
-  public:
-    Operand* left_operand;
-    Operand* right_operand;
-    OperatorCode op;
+// /**
+//  * tokens is a set, so No reason to check it is unique or not
+//  */
+Operand* makeToken(std::string name);
 
-  public:
-    ConsBinomial(Operand* left_operand, Operand* right_operand, OperatorCode op, bool condition=true);
-    bool update();
-    bool update(bool condition);
-    std::string toString();
-};
+/**
+ * variables is a set, so No reason to check it is unique or not
+ */
+Operand* makeVariable(std::string name);
 
-class ConsIf : public Constration {
-  public:
-    Operand* if_left_operand;
-    Operand* if_right_operand;
-    Constration* cons;
-    OperatorCode if_op;
-  public:
-    ConsIf(Operand* if_left_operand, Operand* if_right_operand, OperatorCode if_op, Constration* cons, bool condition = true);
-    bool checkCondition();
-    bool update();
-    std::string toString();
-};
+/**
+ * constraints is a set, so No reason to check it is unique or not
+ */
+Constraint* makeConstraint(int Type, std::string instruction,Operand* operand1=nullptr,
+                           Operand* operand2=nullptr, Operand* operand3=nullptr,
+                           Operand* operand4=nullptr);
 
-void run();
+void makeLLVMConstraint(llvm::Instruction* I);
+
+std::unique_ptr<llvm::Module> readModule(std::string file_name, llvm::SMDiagnostic error,
+                                         llvm::LLVMContext& context);
+
+std::map<std::string,std::set<Constraint>*>* run(std::string file_name);
+
 void clear();
+
 void giveName(llvm::Function &F);
 
 std::string idToString(int id);
-std::string operandToString(int id);
-std::set<Token>* getTokens();
-std::set<Variable>* getVariables();
-bool checkToken(std::string check_string);
 
-} // namespace
+std::string operandToString(int id);
+
+} // namespace analysis
+
+#endif // Header Gaurd

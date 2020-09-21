@@ -8,6 +8,13 @@ target triple = "x86_64-pc-linux-gnu"
 %struct3 = type { %struct1, %struct2 }
 %struct4 = type { %struct1, %struct2, %struct3 }
 
+define dso_local void @functionTest() {
+  entry:
+    %alloca_ins1 = alloca i8
+    %alloca_ins2 = alloca i16
+    ret void
+}
+
 define dso_local i32 @main() {
   entry:
     ; alloca instructions

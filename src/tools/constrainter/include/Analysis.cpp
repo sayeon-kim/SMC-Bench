@@ -1,21 +1,25 @@
-// // File Descriptions
+// test Analysis
 
-#include<Analysis.h>
-#include <set>
+#include "Analysis.h"
+
 #include <string>
+#include <set>
+#include <memory>
+#include <fstream>
 #include <iostream>
-#include <cstddef>
+#include <memory>
+#include <map>
 
+#include <llvm/IR/Module.h>
+#include <llvm/IRReader/IRReader.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/IR/Use.h>
 #include "llvm/IR/Function.h"
-#include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Instruction.h"
 
-#include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
-
-namespace analysis{
-
+namespace analysis {
 //===----------------------------------------------------------------------===//
 // Operands
 //===----------------------------------------------------------------------===//
@@ -23,331 +27,370 @@ namespace analysis{
 // Operand is Interface for expression.
 Operand::Operand(){}
 
-bool Operand::operator<(const Operand& e) const{
-	if( !(this->Type.compare(e.Type) == 0) ) return false;
-	if( !(this->name.compare(e.name) == 0) ) return false;
-	return true;
+std::set<Operand>* Operand::Tokens = new std::set<Operand>();
+std::set<Operand>* Operand::Variables = new std::set<Operand>();
+
+Operand::Operand(const Operand& rhs)
+{
+  this->Type = rhs.Type;
+  this->name = rhs.name;
+  this->tokens = rhs.tokens;
 }
 
-std::string Operand::toString(){
-	if( (this->Type.compare("Token") == 0) ){
-		return this->name;	
-	}
-	return "[[ " + this->name + " ]]";
+Operand::~Operand()
+{
+  delete this->tokens;
 }
 
-// Token
-// Token is operand of expression. it represent a memory cell.
-std::set<Token>* Token::Tokens = new std::set<Token>();
+bool Operand::operator<(const Operand& e) const
+    {
+      if( !(this->Type.compare(e.Type) == 0) ) return false;
+      if( !(this->name.compare(e.name) == 0) ) return false;
+      return true;
+    }
 
-Token::Token(std::string tokenName){
-	this->Type = "Token";
-	this->name = tokenName;
-	Token::Tokens->insert(*this);
+std::string Operand::toString()
+{
+  if( (this->Type.compare("Token") == 0) ){
+    return this->name;	
+  }
+  return "[[ " + this->name + " ]]";
 }
-
-bool Token::operator<(const Token& e) const {
-	return this->name > e.name;
-}
-
-std::string Token::toString(){
-	return this->name;
-}
-
-json Token::toJson(){
-	json j;
-	j["Type"] = this->Type;
-	j["name"] = this->name;
-	return j;
-}
-
-
-
-// Variable
-// Variable is operand of expression. it represent a set of token.
-
-std::set<Variable>* Variable::Variables = new std::set<Variable>();
-
-Variable::Variable(std::string varName){
-	this->Type = "Variable";
-	this->name = varName;
-	this->tokens = new std::set<Token>();
-	Variables->insert(*this);
-}
-
-Variable::~Variable(){
-}
-
-bool Variable::operator<(const Variable& e) const {
-	return this->name > e.name;
-}
-
-std::set<Token>* Variable::getTokens(){
-	return this->tokens;
-}
-
-std::string Variable::toString(){
-	return this->name;
-}
-std::string Variable::toStringTokens(){
-	std::string buffer = "";
-	buffer += this->toString() + "= { ";
-	for( Token i : *(this->getTokens())){
-		buffer+= i.toString() + ", ";
-	}	
-	buffer += " }";
-	return buffer;
-}
-
-//===----------------------------------------------------------------------===//
-// Constrations
 //===----------------------------------------------------------------------===//
 // Constraint
-// Constraint is interface for constraints
-
+//===----------------------------------------------------------------------===//
+/**
+ * Constraint Type.
+ * 1 => operand1 ∈ [[ operand2 ]]
+ * 2 => [[ operand1 ]] ⊆ [[ operand2 ]]
+ * 3 => for each c in [[ operand1 ]], c ∈ [[ operand2 ]]
+ * 
+ */
 Constraint::Constraint(){}
 
-Constraint::Constraint(int Type, std::string instruction, Operand* operand1, Operand* operand2, Operand* operand3, Operand* operand4){
-	this->Type = Type;
-	this->instruction = instruction;
-	this->operand1 = operand1;
-	this->operand2 = operand2;
-	this->operand3 = operand3;
-	this->operand4 = operand4;
+Constraint::~Constraint(){}
+
+std::set<Constraint>* Constraint::Constraints = new std::set<Constraint>();
+
+Constraint::Constraint(const Constraint& rhs)
+{
+  this->Type = rhs.Type;
+  this->instruction = rhs.instruction;
+  auto k = &*rhs.operand1;
+  // this->operand1 = new Operand(&*rhs.operand1);
+  this->operand1 = rhs.operand1;
+  this->operand2 = rhs.operand2;
+  this->operand3 = rhs.operand3;
+  this->operand4 = rhs.operand4;
 }
 
-std::string Constraint::toString(){
-	std::string result = "";
-	result += "Instruction: " + this->instruction + ", ";
-	result += "Constraint-Type: " + std::to_string(this->Type) +",\t";
-	switch(this->Type){
-		case 1 :
-		{
-			result += this->operand1->toString();
-			result += " ∈ ";
-			result += this->operand2->toString();
-			break;
-		}
-		case 2 :
-		{
-			result += this->operand1->toString();
-			result += " ⊆ ";
-			result += this->operand2->toString();
-			break;
-		}
-		case 3 :
-		{
-			result += "for each c in ";
-			result += this->operand1->toString() +", ";
-			result += "c ∈ ";
-			result += this->operand2->toString();
-			break;
-		}
-	}
-	return result + "\n";
+Constraint::Constraint(int Type, std::string instruction, Operand* operand1,
+                      Operand* operand2, Operand* operand3, Operand* operand4)
+{
+  this->Type = Type;
+  this->instruction = instruction;
+  this->operand1 = operand1;
+  this->operand2 = operand2;
+  this->operand3 = operand3;
+  this->operand4 = operand4;
 }
 
-// have to update. it is a little wrong..
 bool Constraint::operator<(const Constraint& e) const{
-	// if( !(this->Type == e.Type) ) return false;
-	// if( !(this->operand1 == e.operand1) ) return false;
-	// if( !(this->operand2 == e.operand2) ) return false;
-	// if( !(this->operand3 == e.operand3) ) return false;
-	// if( !(this->operand4 == e.operand4) ) return false;
-	return true;
+  // if( !(this->Type == e.Type) ) return false;
+  // if( !(this->operand1 == e.operand1) ) return false;
+  // if( !(this->operand2 == e.operand2) ) return false;
+  // if( !(this->operand3 == e.operand3) ) return false;
+  // if( !(this->operand4 == e.operand4) ) return false;
+  return true;
 };
 
-
-// Constration
-// Constration is interface for expression.
-std::set<Constration*> Constration::Constrations = std::set<Constration*>();
-
-Constration::Constration(){}
-
-std::string Constration::toString(){
-	return "Constration";
+std::string Constraint::toString()
+{
+  std::string result = "";
+  result += "Instruction: " + this->instruction + ", ";
+  result += "Constraint-Type: " + std::to_string(this->Type) +",\t";
+  switch(this->Type){
+    case 1 :
+    {
+      result += this->operand1->toString();
+      result += " ∈ ";
+      result += this->operand2->toString();
+      break;
+    }
+    case 2 :
+    {
+      result += this->operand1->toString();
+      result += " ⊆ ";
+      result += this->operand2->toString();
+      break;
+    }
+    case 3 :
+    {
+      result += "for each c in ";
+      result += this->operand1->toString() +", ";
+      result += "c ∈ ";
+      result += this->operand2->toString();
+      break;
+    }
+  }
+  return result + "\n";
 }
 
-bool Constration::update(){
-	return false;
+
+// //===----------------------------------------------------------------------===//
+// // Functions
+// //===----------------------------------------------------------------------===//
+
+// /**
+//  * tokens is a set, so No reason to check it is unique or not
+//  */
+Operand* makeToken(std::string name)
+{
+  Operand* t = new Operand();
+  t->Type = "Token";
+  t->name = name;
+  Operand::Tokens->insert(*t);
+  return t;
 }
 
-// ConsBinomial
-// ConsBinomial express Binomial operation.
-
-ConsBinomial::ConsBinomial(Operand* left_operand, Operand* right_operand,
- 						  OperatorCode op, bool condition){
-	this->left_operand = left_operand;
-	this->right_operand = right_operand;
-	this->op = op;
-	this->condition = condition;
-	Constration::Constrations.insert(this);
+/**
+ * variables is a set, so No reason to check it is unique or not
+ */
+Operand* makeVariable(std::string name) 
+{
+  Operand* v = new Operand();
+  std::set<Operand>* tokensOfV = new std::set<Operand>();
+  v->Type = "Variable";
+  v->name = name;
+  v->tokens = tokensOfV;
+  Operand::Variables->insert(*v);
+  return v;
 }
 
-bool ConsBinomial::update(){
-	// Check Condition
-	if (!(this->condition)) return false;
-	// Check whether defined operation or not.
-	// Token ∈ Variable
-	if( !(*left_operand).Type.compare("Token")
-		&& !(*right_operand).Type.compare("Variable") && op == OperatorCode::in) {
-		// Type Upcasting.
-		Token* left_token = static_cast<Token*>(left_operand);
-		Variable* right_variable = static_cast<Variable*>(right_operand);
-
-		std::set<Token>* right_variable_tokens = right_variable->getTokens();
-
-		std::size_t length_before = right_variable_tokens->size();
-
-		right_variable_tokens->insert(*left_token);
-
-		std::size_t length_after = right_variable_tokens->size();
-
-		if(length_before != length_after){ return true;}
-		return false;
-	}
-	// Variable1 ⊆ Variable2
-	else if( !(*left_operand).Type.compare("Variable") 
-					&& !(*right_operand).Type.compare("Variable") 
-					&& op == OperatorCode::subseteq) {
-		// Type Upcasting.
-		Variable* left_variable = static_cast<Variable*>(left_operand);
-		Variable* right_variable = static_cast<Variable*>(right_operand);
-		std::set<Token>* left_variable_tokens = left_variable->getTokens();
-		std::set<Token>* right_variable_tokens = right_variable->getTokens();
-		
-		int length_before = right_variable_tokens->size();
-		for(auto& i : *left_variable_tokens){
-			right_variable_tokens->insert(i);
-		}
-
-		int length_after = right_variable_tokens->size();
-
-		if(length_before != length_after){ return true;}
-		else{ return false; }
-	}
-	// add more Operation.
-
-	// Not Defined Operation.
-	std::cout << "Not defined Operations" << "\n";
-	// throw this;
+/**
+ * constraints is a set, so No reason to check it is unique or not
+ */
+Constraint* makeConstraint(int Type, std::string instruction,Operand* operand1,
+                           Operand* operand2, Operand* operand3, Operand* operand4)
+{
+  Constraint* c = new Constraint(Type, instruction, operand1, operand2, operand3, operand4);
+  Constraint::Constraints->insert(*c);
+  return c;
 }
 
-std::string ConsBinomial::toString(){
-	return this->left_operand->toString() + "\t" + operandToString(this->op) 
-			+ "\t" + this->right_operand->toString();
+void makeLLVMConstraint(llvm::Instruction* I)
+{
+  int opCode = I->getOpcode();
+  switch(opCode){
+    case llvm::Instruction::Alloca :
+    {
+      /** 
+       * Only make once token.
+       * Only make once variable.
+       * So don't need to think more that token or variable is unique or not.
+       */
+      std::string name = "alloca-" + std::to_string(alloca_number);
+      std::string result_name = I->getName();
+      Operand *t = makeToken(name);
+      Operand *v = makeVariable(result_name);
+
+      /** alloca-i ∈ [[ result ]]] */
+      analysis::makeConstraint(1, "Alloca", t, v);
+
+      alloca_number += 1;
+      break;
+    }
+    case llvm::Instruction::Load : 
+    {
+      llvm::Use& instruction_op = *I->op_begin();
+      std::string pointer_name = instruction_op->getName();
+      std::string result_name = I->getName();
+
+      Operand *v_pointer = makeVariable(pointer_name);
+      Operand *v_result = makeVariable(result_name);
+
+      /** for each c in [[ pointer ]], c ∈ [[ result ]]] */
+      makeConstraint(3, "Load", v_pointer, v_result);
+      break;
+    }
+    case llvm::Instruction::Store : 
+    {
+      auto K = I->op_begin();
+      llvm::Use& value_operand = *K;
+      K++;
+      llvm::Use& pointer_operand = *K;
+
+      std::string value_name = value_operand->getName();
+      if(value_name.compare("")==0)value_name = "Constnat-Value";
+      std::string pointer_name = pointer_operand->getName();
+      
+      Operand *v_value = makeVariable(value_name);
+      Operand *v_pointer = makeVariable(pointer_name);
+      
+      /** for each c in [[ value ]], c ∈ [[ pointer ]]] */
+      makeConstraint(3, "Store", v_value, v_pointer);
+      break;
+    }
+    case llvm::Instruction::GetElementPtr : 
+    {
+      auto K = I->op_begin();
+      llvm::Use& ptrval_operand = *K;
+
+      std::string result_name = I->getName();
+      std::string ptrval_name = ptrval_operand->getName();
+
+      Operand *v_result = makeVariable(result_name);
+      Operand *t_ptrval = makeToken(ptrval_name);
+
+      /** ptrval ∈ [[ result ]] */
+      makeConstraint(1, "GetElementPtr", t_ptrval, v_result);
+      break;
+    }
+    case llvm::Instruction::IntToPtr : 
+    {
+      auto K = I->op_begin();
+      llvm::Use& value_operand = *K;
+
+      std::string result_name = I->getName();
+      std::string value_name = value_operand->getName();
+
+      /**
+       * if value is const, then value ∈ [[ result ]]
+       * if value is var, then [[ value ]] ⊆  [[ result ]] 
+       */
+      Operand* v_result = makeVariable(result_name);
+      if(result_name.compare("")==0){
+        Operand* t_value = makeToken(result_name);
+        makeConstraint(1, "IntToPtr", t_value, v_result);
+      } else {
+        Operand* v_value = makeVariable(result_name);
+        makeConstraint(2, "IntToPtr", v_value, v_result);
+      }
+      break;
+    }
+    case llvm::Instruction::BitCast : 
+    {
+      auto K = I->op_begin();
+      llvm::Use& value_operand = *K;
+
+      std::string result_name = I->getName();
+      std::string value_name = value_operand->getName();
+      if(value_name.compare("")==0)value_name = "Constnat-Value";
+
+      Operand* v_result = makeVariable(result_name);
+      Operand* t_value = makeToken(value_name);
+
+      makeConstraint(1, "BitCast", t_value, v_result);
+      break;
+    }
+    case llvm::Instruction::PHI:
+    {
+      std::string result_name = I->getName();
+      Operand* v_result = makeVariable(result_name);
+      for(auto K = I->op_begin(); K!=I->op_end(); K++){
+        llvm::Use& value_operand = *K;
+        std::string value_name = value_operand->getName();
+        
+        if(value_name.compare("")==0)value_name = "Constnat-Value";
+        Operand* v_value = makeVariable(value_name);
+
+        makeConstraint(2, "PHI", v_value, v_result);
+      }
+      break;
+    }
+    case llvm::Instruction::Call : 
+    {
+      // Todo.
+      // ????
+      // if return type is pointer then add result \in [[ result ]]
+    }
+    case llvm::Instruction::Select :
+    {
+      std::string result_name = I->getName();
+      Operand* v_result = makeVariable(result_name);
+
+      auto K = I->op_begin();
+      if(K != I->op_end()) K++;
+
+      for(K; K!=I->op_end(); K++)
+      {
+        llvm::Use& value_operand = *K;
+        std::string value_name = value_operand->getName();
+        
+        if(value_name.compare("")==0)value_name = "Constnat-Value";
+        Operand* v_value = makeVariable(value_name);
+
+        makeConstraint(2, "Select", v_value, v_result);
+      }
+      break;
+    }
+    case llvm::Instruction::ExtractValue : 
+    {
+      auto K = I->op_begin();
+      llvm::Use& value_operand = *K;
+
+      std::string result_name = I->getName();
+      std::string value_name = value_operand->getName();
+
+      Operand* v_result = makeVariable(result_name);
+      Operand* v_value = makeVariable(value_name);
+
+      makeConstraint(2, "ExtractValue", v_value, v_result);
+      break;
+    }
+    case llvm::Instruction::InsertValue:
+    {
+      break;
+    }
+    default:
+    {
+
+    }
+  }
 }
 
-// ConsIf
-// ConsIf express if condtional binomial constration.
-// todo Think more. but now it is okay. it works.
-ConsIf::ConsIf(Operand* if_left_operand, Operand* if_right_operand, 
-			   OperatorCode if_op, Constration* cons, bool condition){
-	this->if_left_operand = if_left_operand;
-	this->if_right_operand = if_right_operand;
-	this->if_op = if_op;
-	this->cons = cons;
-	this->condition = condition;
-
-	Constration::Constrations.insert(this);
+std::unique_ptr<llvm::Module> readModule(std::string file_name, llvm::SMDiagnostic error, llvm::LLVMContext& context)
+{
+  std::unique_ptr<llvm::Module> module = llvm::parseIRFile(file_name, error, context);
+  if(!module)
+  {
+    llvm::errs() << "Can't read file\n";
+    return nullptr;
+  }
+  return module;
 }
 
-bool ConsIf::checkCondition(){
-	// Token ∈ Variable
-	if( !if_left_operand->Type.compare("Token")
-		&& !if_right_operand->Type.compare("Variable") && if_op == OperatorCode::in) {
-		// Down Casting
-		Token* if_left_token = static_cast<Token*>(if_left_operand);
-		Variable* if_right_variable = static_cast<Variable*>(if_right_operand);
-		std::set<Token>* if_right_variable_tokens = if_right_variable->getTokens();
+void clear()
+{
+  alloca_number = 0;
+  Operand::Tokens->clear();
+  Operand::Variables->clear();
+  Constraint::Constraints->clear();
+}
 
-		// Check
-		auto answer = if_right_variable_tokens->find(*if_left_token);
-		if ( answer != if_right_variable_tokens->end()) return true;
-		return false;
-	}
-	// Variable1 ⊆ Variable2
-	else if (!if_left_operand->Type.compare("Variable") 
-					&& !if_right_operand->Type.compare("Variable") 
-					&& if_op == OperatorCode::subseteq) {
-		// Down Casting
-		Variable* if_left_variable = static_cast<Variable*>(if_left_operand);
-		Variable* if_right_variable = static_cast<Variable*>(if_right_operand);
-		std::set<Token>* if_right_variable_tokens = if_right_variable->getTokens();
-		std::set<Token>* if_left_variable_tokens = if_left_variable->getTokens();
+void giveName(llvm::Function &F){
+	// Clear Tokens, Variables, Constrations
+	int counter = 0;
+	if (F.hasName()) {
 
-		// Have to Fix.
-		bool condition = false;
-		for( auto i : *if_left_variable_tokens){
-			for( auto j : *if_right_variable_tokens){
-				if(i.toString() == j.toString()){ condition = true;}
+		for (auto I = F.begin(); I != F.end(); I++){
+			llvm::BasicBlock* BB = &*I;
+			if (BB->getName() == ""){
+				BB->setName( "%"+ std::to_string(counter));
+				counter++;
+			};
+			
+			for(auto J = BB->begin(); J != BB->end(); J++){
+				llvm::Instruction* II = &*J;
+				if(!(II->getType()->isVoidTy())){
+					II->setName("%" + std::to_string(counter));
+					counter++;
+				}
 			}
-			if(condition == false)return false;
-			condition = false;
+
 		}
-		// Check
-		return true;
+
 	}
-	
-	std::cout << "Not Defined Condition" << "\n";
-	// throw this;
-}
-
-bool ConsIf::update(){
-	// Have to Fix
-	if(this->checkCondition()){
-		this->cons->condition = true;
-		bool updateResult = this->cons->update();
-		this->cons->condition = false;
-		return updateResult;
-	}
-	return false;
-}
-
-std::string ConsIf::toString(){
-	return "If: " + if_left_operand->toString() + "\t" + operandToString(this->if_op) 
-	+ "\t" + if_right_operand->toString() + "\n\tThen: " + cons->toString();
-}
-
-//===----------------------------------------------------------------------===//
-// Functions
-//===----------------------------------------------------------------------===//
-// getToekns return a set registered all of Tokens
-std::set<Token>* getTokens(){
-	return Token::Tokens;
-}
-
-// getVariables return a set registered all of Variables
-std::set<Variable>* getVariables(){
-	return Variable::Variables;
-}
-
-// run update every constrations till Nothing changed.
-void run(){
-	int runCondition;
-
-	do{
-		runCondition = 0;
-		for( auto i : Constration::Constrations){
-			runCondition += i->update();
-		}
-	} while(runCondition);
-
-}
-
-// delete every token, variable, constration at global scope.
-void clear(){
-	Token::Tokens->clear();
-	Variable::Variables->clear();
-	Constration::Constrations.clear();
-}
-
-std::string operandToString(int id){
-	switch(id){
-		case 0: return "∈";
-		case 1: return "⊆";
-	}
-	return "Not Defined Operation.";
 }
 
 std::string idToString(int id){
@@ -389,45 +432,41 @@ std::string idToString(int id){
 	return "Unknown Type";
 }
 
-void giveName(llvm::Function &F){
-	// Clear Tokens, Variables, Constrations
-	int counter = 0;
-	if (F.hasName()) {
-
-		for (auto I = F.begin(); I != F.end(); I++){
-			llvm::BasicBlock* BB = &*I;
-			if (BB->getName() == ""){
-				BB->setName( "%"+ std::to_string(counter));
-				counter++;
-			};
-			
-			for(auto J = BB->begin(); J != BB->end(); J++){
-				llvm::Instruction* II = &*J;
-				if(!(II->getType()->isVoidTy())){
-					II->setName("%" + std::to_string(counter));
-					counter++;
-				}
-			}
-
-		}
-
+std::string operandToString(int id)
+{
+	switch(id){
+		case 0: return "∈";
+		case 1: return "⊆";
 	}
+	return "Not Defined Operation.";
 }
 
-bool checkToken(std::string check_string){
-	auto search = Token::Tokens->find(check_string);
-	if(search != Token::Tokens->end()){
-		return true;
-	}
-	return false;
+std::map<std::string,std::set<Constraint>*>* run(std::string file_name){
+  llvm::LLVMContext context;
+  llvm::SMDiagnostic error;
+  std::map<std::string, std::set<Constraint>*>* result = new std::map<std::string, std::set<Constraint>*>();
+  std::unique_ptr<llvm::Module> module = readModule(file_name, error, context);
+  for (auto F = module->begin(); F != module->end(); F++)
+  {
+    // Todo. Add Function Name.
+    std::string function_name = F->getName();
+
+    for (auto B = F->begin(); B != F->end(); B++)
+    {
+      // Basic Blocks
+      std::string block_name = B->getName();
+
+      for(auto I = B->begin(); I != B->end(); I++)
+      {
+        makeLLVMConstraint(&*I);
+      }
+    }
+    std::set<Constraint>* save_constraints = new std::set<Constraint>(*Constraint::Constraints);
+    result->insert(std::pair<std::string, std::set<Constraint>*>(function_name, save_constraints));
+    clear();
+  }
+
+  return result;
 }
 
-bool checkVariable(std::string check_string){
-	auto search = Variable::Variables->find(check_string);
-	if(search != Variable::Variables-> end()){
-		return true;
-	}
-	return false;
-}
-
-} // namespace
+} // namespace analysis
