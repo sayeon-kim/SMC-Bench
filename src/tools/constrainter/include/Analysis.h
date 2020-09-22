@@ -22,7 +22,7 @@
 
 namespace analysis {
 
-static int alloca_number = 0 ;
+static int alloca_number = 1 ;
 
 //===----------------------------------------------------------------------===//
 // Operands
@@ -33,6 +33,7 @@ class Operand{
   public:
     static std::set<Operand>* Tokens;
     static std::set<Operand>* Variables;
+  public:
     std::string Type;
     std::string name;
     std::set<Operand>* tokens = nullptr;
@@ -63,6 +64,7 @@ class Operand{
 class Constraint{
   public:
     static std::set<Constraint>* Constraints;
+  public:
     int Type;
     std::string instruction;
     Operand* operand1;
@@ -84,9 +86,9 @@ class Constraint{
 // // Functions
 // //===----------------------------------------------------------------------===//
 
-// /**
-//  * tokens is a set, so No reason to check it is unique or not
-//  */
+/**
+ * tokens is a set, so No reason to check it is unique or not
+ */
 Operand* makeToken(std::string name);
 
 /**

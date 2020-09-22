@@ -3,217 +3,297 @@ Author: Yu JaeIL
 Date: 2020-09-21
 ---
 
-# Static Pointer Analysis
+# Instruction
 
-## Purpose
-어째서 이러한 Static Pointer Analysis 를 하는가?
-
-->
-
-SSA이므로 수동적인 변수의 추적이 어렵다.
-
-따라서, 해당 포인터 변수가 어디에서 기인하는지 파악하기 위해서 분석한다.
-
-## Dependency
-
-- LLVM 10.0
-
-# Constraint
-
-```c++
-/**
- * Constraint Type.
- * 1 => operand1 ∈ [[ operand2 ]]
- * 2 => [[ operand1 ]] ⊆ [[ operand2 ]]
- * 3 => for each c in [[ operand1 ]], c ∈ [[ operand2 ]]
- */
-class Constraint{
-  public:
-    int Type;
-    Operand* operand1;
-    Operand* operand2;
-    Operand* operand3;
-    Operand* operand4;
-  public:
-    Constraint();
-    Constraint(int Type, Operand* operand1=nullptr, Operand* operand2=nullptr, Operand* operand3=nullptr, Operand* operand4=nullptr);
-    bool operator<(const Constraint& e) const;
-};
- ```
-
- # Operand
- ```c++
- /**
-  * Operand Type.
-  * Token => std::string("Token")
-  * Variable => std::string("Variable")
-  */
- class Operand{
-  public:
-    std::string Type;
-    std::string name;
-  public:
-    Operand();
-    bool operator<(const Operand& e) const;
-    virtual std::string toString();
-};
- ```
-
-# Instruction List
-
-- Number of Instructions :  67 (llvm/include/llvm/IR/Instruction.def)
-
-## Instructions related to Static Pointer Analysis
-- numbers : 8
-
-Opcode               | Instruction | Syntax | Constration | Remarks
-:------:             | :---------: | :----: | :---------: | :-----:
-31 | Alloca         | <result\> = alloca <type\> | alloca-i ∈ [[ result ]]] | Allocates memory on stack frame
-32 | Load           | <result\> = load <ty\>, <ty\>* <pointer\> | 　for each c in [[pointer]], => [[c]]　⊆　[[result]]   | Read data from pointer
-33 | Store          | store <ty\> <value\>, <ty\>* <pointer\> | for each c in [[value]] => [[c]] ⊆ [[pointer]] | Store data to pointer
-34 | GetElementPtr  | <result\> = getelementptr <ty1\> <ty1\>* <ptrval\>{ <tyN\> <idx\>}*|  ptrval ∈ [[ result ]] | Get pointer pointing all elements. Tag(cell) or Pointer?
-48 | IntToPtr       |<result\> = inttoptr <ty\> <value\> to <ty2\> | if value is const　=>　value ∈ [[result]], <br> if value is var => [[value]] ⊆ [[result]] | Intger Value Cast Into Pointer
-55 | PHI            | <result> = phi <ty\> [ <val0\>, <label0\>, ... <valK\>, <labelK\>], | [[val0]] ⊆ ... , [[valK]] ⊆ [[result]]  | SSA Instruction.
-56 | Call           | <result\> = call <ty\>\|<fnty> <fnptrval\> (<function args\>) | if ty or fnptrval is pointer type =><br>fnptrval(function args) ∈ [[result]] ?| Function Call <br> 09.12 spa_10.txt 312번째 줄. (잘 준비.)
-57 | Select         | <result\> = select selty <cond\>, <ty1\> <val1\>, <ty2\> <val2\> | [[val1] ⊆ [[result]], [[val2]]⊆ [[result]] | selty is i1 or < N x i1> => if true result <= value1, else result <= val2
-64 | ExtractValue   | <result\> = extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| [[val]] ⊆ [[result]]   | get a single scalar element from vector data type by index.
-49 | BitCast        | <result\> = <ty\> <value\> to <ty2\>| value ∈ [[result]] | Same bit width, just change type. 보류.. Integer to Pointer 안됨. Pointer to Pointer 만 됨.
-
-## I don't know
-- numbers : 14
-
-Opcode               | Instruction | Syntax | Constration | Remarks
-:------:             | :---------: | :----: | :---------: | :-----:
-6  | Resume      | resume <type\> <value\> | ? | Exception Handling Instruction
-7  | Unreachable |                         | ? | Exception Handling Instruction
-8  | CleanupRet  |                         | ? | Exception Handling Instruction
-9  | CatchRet    |                         | ? | Exception Handling Instruction
-10 | CatchSwitch |                         | ? |Exception Handling Instruction
-36 | AtomicCmpXchg, AtomicCmpXchgInst | ? | ? | ?
-37 | AtomicRMW      | ? | ? | ?
-60 | VAArg          | <resultval\> = va_arg <va_list*\> <arglist\>, <argty\> | ? | it is used to access arguments passed through the variable argument
-63 | ShuffleVector  | | ? | make a new vector from two input vector.
-65 | InsertValue    | <result\> = insertvalue <aggregate type\> <val\>, <ty\> <elt\>, <idx\>{, <idx\>}*| ? | insert value into aggregate type (cf. insertelement) 09.12 해야함.
-66 | LandingPad     | | ? | Exception Handling Instruction
-67 | Freeze         | | ? | ?
+Below 10 instructions can effect pointer or can be effected.
 
 ---
----
----
----
-
-## Terminator Instructions
-Opcode               | Instruction | Syntax | Constration | Remarks
-:------:             | :---------: | :----: | :---------: | :-----:
-1      | ret         |             | None   | return
-2      | Br          |             | None   | branch another block            
-3      | Switch      |             | None   | 
-4      | IndirectBr  |             | None   |             
-5      | Invoke      | %retval = invokew <ty\>\|<fnty\> <fnptrval\>(<function args\>) to label <normal label\> unwind label <exception label\> | ?      | Exception Handling Instruction
-6  | Resume      | resume <type\> <value\> | ? | Exception Handling Instruction
-7  | Unreachable |                         | ? | Exception Handling Instruction
-8  | CleanupRet  |                         | ? | Exception Handling Instruction
-9  | CatchRet    |                         | ? | Exception Handling Instruction
-10 | CatchSwitch |                         | ? |Exception Handling Instruction
-11 | CallBr      |                         | None  | goto
-
-## Standard unary operators...
-Opcode              | Instruction | Syntax | Constration | Remarks
-:------:            | :---------: | :----: | :---------: | :-----:
-12 | FNeg           | <result\> = fneg [fast-math flags]* <ty\> <op1\> | None | Float Instruction
-
-## Standard binary operators...
-Opcode              | Instruction | Syntax | Constration | Remarks
-:------:            | :---------: | :----: | :---------: | :-----:
-13 | Add            | | None | Integer Instruction
-14 | FAdd           | | None | Float Instruction
-15 | Sub            | | None | Integer Instruction
-16 | FSub           | | None | Float Instruction
-17 | Mul            | | None | Integer Instruction
-18 | FMul           | | None | Float Instruction
-19 | UDiv           | | None | Integer Instruction
-20 | SDiv           | | None | Integer Instruction
-21 | FDiv           | | None | Float Instruction
-22 | URem           | | None | Integer Instruction
-23 | SRem           | | None | Integer Instruction
-24 | FRem           | | None | Float Instruction
-
-## Logical operators...(Integer operands)
-Opcode              | Instruction | Syntax | Constration | Remarks
-:------:            | :---------: | :----: | :---------: | :-----:
-25 | Shl            | | None | Integer Instruction
-26 | LShr           | | None | Integer Instruction
-27 | AShr           | | None | Integer Instruction
-28 | And            | | None | Integer Instruction
-29 | Or             | | None | Integer Instruction
-30 | Xor            | | None | Integer Instruction
-
-## Memory operators...
-Opcode              | Instruction | Syntax | Constration | Remarks
-:------:            | :---------: | :----: | :--------:  | :-----:
-31 | Alloca         | <result\> = alloca <type\> | alloca-i ∈ [[ result ]]] | Allocates memory on stack frame
-32 | Load           | <result\> = load <ty\>, <ty\>* <pointer\> | if ty is pointer type => [[result]] ⊆ [[pointer]] | Read data from pointer
-33 | Store          | store <ty\> <value\>, <ty\>* <pointer\> | for each c in [[value]] => [[c]] ⊆ [[pointer]] | Store data to pointer
-34 | GetElementPtr  | <result\> = getelementptr <ty1\> <ty1\>* <ptrval\>{ <tyN\> <idx\>}*|  ptrval{[tyN_idx]}+ ∈ [[ result ]] | Get pointer pointing a index element
-35 | Fence          | | None | happens-before edge instruction
-36 | AtomicCmpXchg, AtomicCmpXchgInst | ? | ? | ?
-37 | AtomicRMW      | ? | ? | ?
-
-## Cast operators...
-Opcode              | Instruction | Syntax | Constration | Remarks
-:------            | :--------- | :---- | :--------- | :-----
-38 | Trunc          | | None | Truncates Integer Type
-39 | ZExt           | | None | Integer type Instruction
-40 | SExt           | | None | Integer Type Instruction
-41 | FPToUI         | | None | Flot Type Instruction 
-42 | FPToSI         | | None | Flot Type Instruction
-43 | UIToFP         | | None | Get Flot Type Instruction
-44 | SIToFP         | | None | Get Flot Type Instruction
-45 | FPTrunc        | | None | Get Flot Type Instruction 
-46 | FPExt          | | None | Get Flot Type Instruction
-47 | PtrToInt       | | None | Get Integer Type Instruction
-48 | IntToPtr       |<result\> = inttoptr <ty\> <value\> to <ty2\> | value ∈ [[result]] | Intger Value Cast Into Pointer
-49 | BitCast        | <result\> = bitcast <ty\> <value\> to <ty2\>| if ty2 is pointer => value ∈ [[result]] | Same bit width, just change type.
-50 | AddrSpaceCast  | <result\> = addrespacecast <pty\> <ptrval\> to <pty2\> | for [[ptrval]] each memory cell e => m_e ∈ [[result]] | change address space of pointer. n to m. default is addresspace(0)* 09.12 이런 명령어들은 로그로 출력...
-
-Opcode              | Instruction | Syntax | Constration | Remarks
-:------:            | :---------: | :----: | :---------: | :-----:
-51 | CleanupPad     |  | ? | Exception Handling Instruction
-52 | CatchPad       | | ? | Exception Handling Instruction
-
-## Other operators...
-Opcode              | Instruction | Syntax | Constration | Remarks
-:------:            | :---------: | :----: | :---------: | :-----:
-53 | ICmp           | | None | Integer Compare Instruction
-54 | FCmp           | | None | Float Compare Instruction
-55 | PHI            | | ? | SSA Instruction 
-56 | Call           | <result\> = call <ty\>\|<fnty> <fnptrval\> (<function args\>) | if ty or fnptrval is pointer type =><br>fnptrval(function args) ∈ [[result]] ?| Function Call
-57 | Select         | <result\> = select selty <cond\>, <ty1\> <val1\>, <ty2\> <val2\> | ? | selty is i1 or < N x i1> => if true result <= value1, else result <= val2
-58 | UserOp1        | | None | Interanl Instruction
-59 | UserOp2        | | None | Internal Instruction
-60 | VAArg          | <resultval\> = va_arg <va_list*\> <arglist\>, <argty\> | ? | it is used to access arguments passed through the variable argument
-61 | ExtractElement | | None | return sclar type from vector
-62 | InsertElement  | | None | insert sclar type into vector
-63 | ShuffleVector  | | ? | make a new vector from two input vector.
-64 | ExtractValue   | <result\> = extractvalue <aggregate type\> <val\>, <idx\>{, <idx\>}*| [[val]] ⊆ [[result]]   | get a value from aggregate data type by index. (cf. getelement ptr)
-65 | InsertValue    | <result\> = insertvalue <aggregate type\> <val\>, <ty\> <elt\>, <idx\>{, <idx\>}*| ? | insert value into aggregate type (cf. insertelement)
-66 | LandingPad     | | ? | Exception Handling Instruction
-67 | Freeze         | | ? | ?
+## **alloca**
+- Reference: [alloca](https://llvm.org/docs/LangRef.html#alloca-instruction)
+**syntax**
+```
+<result> = alloca <type>
+```
+**Andersn's Algorithm**
+```c
+result = alloc
+```
+**constraint**
+```
+alloca_i ∈ [[result]]
+```
+**example**
+```llvm
+%alloca_ins1 = alloca i32 ; alloca_ins1 type is i32*
+%alloca_ins2 = alloca i64, align 4 ; alloca_ins2type is i64*
+```
+```
+alloca-1 ∈ [[alloca_ins1]]
+alloca-2 ∈ [[alloca_ins2]]
+```
 
 ---
----
----
----
+## **load**
+- Reference: [load](https://llvm.org/docs/LangRef.html#load-instruction)
+**syntax**
+```
+<result> = load [volatile] <ty>, <ty>* <pointer>
+```
+**Anderson's Algorithm**
+```c
+result = *pointer
+```
+**constraint**
+```
+For each c ∈ [[All Tokens]], 
+  c ∈ [[pointer]] => [[c]] ⊆ [[result]]
+```
+**example**
+```llvm
+%alloca_ins1 = alloca i32
+%load_ins1 = load i32, i32* %alloca_ins1
+```
+```
+alloca-1 ∈ [[alloca_ins1]]
+[[alloca-1]] ⊆ [[load_ins1]]
+```
 
-## Things to think
+---
+## **store**
+- Reference: [store](https://llvm.org/docs/LangRef.html#store-instruction)
 
-#### ? Instructions [ ]
-- 
--
-- 
-- 
+**syntax**
+```
+store [volatile] <ty> <value>, <ty>* <pointer>
+```
+**Anderson's Algorithm**
+```c
+*pointer = value
+```
+**constraint**
+```
+For each c in [[All tokens]],
+  c in [[pointer]] => [[value]] ⊆ [[c]]
+```
 
-#### Global Variables [ ]
-#### Loop [ ]
-#### Function [ ]
-#### Vector of Pointer [ ]
+**example**
+```llvm
+%alloca_ins1 = alloca i32
+%alloca_ins2 = alloca i32
+store i32 16, i32* %alloca_ins1
+%load_ins1 = load i32, i32* %alloca_ins1
+store i32 %load_ins1, i32* %alloca_ins2
+```
+```
+alloca-1 ∈ [[alloca_ins1]]
+alloca-2 ∈ [[alloca_ins2]]
+[[Constant value]] ⊆ [[alloca_ins1]] 
+[[alloca-1]] ⊆ [[load_ins1]]
+[[load_ins1]] ⊆ [[alloca-2]]
+```
+
+---
+## **getelementptr**
+- Reference: [getelementptr](https://llvm.org/docs/LangRef.html#getelementptr-instruction)
+
+**syntax**
+```
+<result> = getelementptr <ty>, <ty>* <ptrval> {, <ty> idx}*
+```
+**Anderson's Algorithm**
+```c
+result = &ptrval
+```
+**constraint**
+```
+ptrval ∈ [[result]]
+```
+
+**example**
+```llvm
+%struct1 = type { i1, i8, i16, i32, i64}
+%alloca_struct1 = alloca %struct1
+%GEP_ins1 = %getelementptr %struct1, %struct1* %alloca_struct1, i32 0, i32 0
+```
+```
+alloca-1 ∈ [[alloca_struct1]]
+alloca_struct1 ∈ [[GEP_ins1]]
+```
+
+---
+## **inttoptr**
+- Reference: [inttoptr](https://llvm.org/docs/LangRef.html#inttoptr-to-instruction)
+
+**syntax**
+```
+<result> = inttoptr <ty> <value> to <ty2>
+```
+**Anderson's Algorithm**
+```c
+result = value
+```
+
+**constraint**
+```
+[[value]] ⊆ [[result]] 
+```
+**example**
+```llvm
+%alloca_ins1 = alloca i32
+store i32 1, i32* %alloca_ins1
+%load_ins1 = load i32, i32* %alloca_ins1
+%ITP_ins1 = inttoptr i8 1 to i16*
+%ITP_ins2 = inttoptr i32 %load_ins1 to i16*
+```
+
+```
+alloca-1 ∈ [[alloca_ins1]]
+[[]] ⊆ [[alloca-1]]
+[[]] ⊆ [[load_ins1]], [[alloca-1]] ⊆ [[load_ins1]]
+[[]] ⊆ [ITP_ins1]
+[[load_ins1]] ⊆ [[ITP_ins2]]
+```
+
+---
+## **bitcast**
+- Reference: [bitcast](https://llvm.org/docs/LangRef.html#bitcast-to-instruction)
+
+- When ever ty is pointer type, ty2 can be pointer type.
+
+**syntax**
+```
+<result> = bitcast <ty> <value> to <ty2>
+```
+**Anderson's Algorithm**
+```c
+result = value
+```
+**constraint**
+```
+[[value]] ⊆ [[result]] 
+```
+**example**
+```llvm
+%bitcast_ins1 = bitcast i32 8 to float
+%bitcast_ins2 = bitcast i32* %ITP_ins2 to i32*
+```
+
+```
+[[]] ⊆ [[bitcast_ins1]]
+[[ITP_ins2]] ⊆ [[bitcast_ins2]]
+```
+
+---
+## **phi**
+- Reference: [phi](https://llvm.org/docs/LangRef.html#phi-instruction)
+
+**syntax**
+```
+<result> = phi <ty> [ <val0>, <label0>], ...
+```
+**Anderson's Algorithm**
+```c
+label0:
+  result = val0 // when result is where in block label0..
+label1:
+  result = val1 // when result is where in block label1..
+```
+**constraint**
+```
+[[val1]] ⊆ [[result]], [[val2]] ⊆ [[result]], ...
+```
+**example**
+```llvm
+loop:
+  %indvar = phi i32 [0, %entry ], [ %nextindvar, %loop]
+  %nextindvar = add i32 %indvar, 1
+  br label %next
+```
+
+```
+[[]] ⊆ [[indvar]], [[nextindvar]] ⊆ [[indvar]]
+```
+
+---
+## **call**
+- Reference [call](https://llvm.org/docs/LangRef.html#call-instruction)
+
+**syntax**
+```
+<result> = call <ty>|<fnty> <fnptrval>(<function args>)
+```
+**Anderson's Algorithm**
+```
+result = return_ty
+```
+**constraint**
+```
+[[return_ty_1]] ⊆ [[result]]
+```
+
+**example**
+```llvm
+call void @functionTest() ; call_ins1
+%call_ins2 = call i32 @functionTestSecond()
+```
+
+```
+[[]] ⊆ [[call_ins2]]
+```
+
+---
+## **select**
+- Reference [select](https://llvm.org/docs/LangRef.html#select-instruction)
+
+**syntax**
+```
+<result> = select selty <cond>, <ty> <val1>, <ty> <val2> 
+selty is either i1 or {<N x i1>}
+```
+**Anderson's Algorithm**
+```
+if(cond){
+  result = val1
+} else {
+  result = val2
+}
+```
+**constraint**
+```
+[[val1]] ⊆ [[result]], [[val2]] ⊆ [[result]] 
+```
+**example**
+```
+%select_ins1 = select i1 true, i64* %alloca_ins4, i64* %alloca_ins5
+%select_ins2 = select i1 false, i64 1234, i64 123
+```
+
+```
+```
+
+---
+## **extractvalue**
+- Reference [extractvalue](https://llvm.org/docs/LangRef.html#extractvalue-instruction)
+
+**syntax**
+```
+<result> = extractvalue <aggregate type> <val>, <idx>{, <idx>}*
+```
+**Anderson's Algorithm**
+```
+result = val[idx]
+```
+**constraint**
+```
+[[val]] ⊆ [[result]]
+```
+**example**
+```llvm
+%extractvalue_ins1 = extractvalue %struct1 %load_ins1, 0
+%extractvalue_ins2 = extractvalue %struct2 %load_ins2, 0, 1
+```
+
+```
+[[load_ins1]] ⊆ [[extractvalue_ins1]]
+[[load_ins2]] ⊆ [[extractvalue_ins2]]
+```

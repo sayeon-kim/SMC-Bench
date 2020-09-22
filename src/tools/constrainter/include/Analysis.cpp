@@ -365,7 +365,7 @@ std::unique_ptr<llvm::Module> readModule(std::string file_name,
 
 void clear()
 {
-  alloca_number = 0;
+  alloca_number = 1;
   Operand::Tokens->clear();
   Operand::Variables->clear();
   Constraint::Constraints->clear();
