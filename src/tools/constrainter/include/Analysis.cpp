@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <map>
+#include <tuple>
 
 #include <llvm/IR/Module.h>
 #include <llvm/IRReader/IRReader.h>
@@ -19,6 +20,7 @@
 #include <llvm/IR/Use.h>
 #include "llvm/IR/Function.h"
 
+using namespace std;
 namespace analysis {
 //===----------------------------------------------------------------------===//
 // Operands
@@ -66,6 +68,8 @@ std::string Operand::toString()
  * 3 => for each c in [[ operand1 ]], c ∈ [[ operand2 ]]
  * 
  */
+// std::set<Operand>* Constraint::Operands = nullptr;
+
 Constraint::Constraint(){}
 
 Constraint::~Constraint(){}
@@ -128,8 +132,16 @@ std::string Constraint::toString()
     {
       result += "for each c in ";
       result += this->operand1->toString() +", ";
-      result += "c ∈ ";
+      result += "[[ c ]] ⊆ ";
       result += this->operand2->toString();
+      break;
+    }
+    case 4 :
+    {
+      result += "for each c in ";
+      result += this->operand1->toString() +", ";
+      result += this->operand2->toString() + " ⊆ ";
+      result += "[[ c ]] ";
       break;
     }
   }
@@ -190,12 +202,13 @@ void makeLLVMConstraint(llvm::Instruction* I)
        * Only make once variable.
        * So don't need to think more that token or variable is unique or not.
        */
-      std::string name = "alloca-" + std::to_string(alloca_number);
-      std::string result_name = I->getName();
-      Operand *t = makeToken(name);
-      Operand *v = makeVariable(result_name);
+      // std::string name = "alloca-" + std::to_string(alloca_number);
+      std::string token_name = I->getName();
+      std::string variable_name = I->getName();
+      Operand *t = makeToken(token_name);
+      Operand *v = makeVariable(variable_name);
 
-      /** alloca-i ∈ [[ result ]]] */
+      /** result ∈ [[ result ]]] */
       analysis::makeConstraint(1, "Alloca", t, v);
 
       alloca_number += 1;
@@ -211,7 +224,7 @@ void makeLLVMConstraint(llvm::Instruction* I)
       Operand *v_result = makeVariable(result_name);
 
       /** for each c in [[ pointer ]], c ∈ [[ result ]]] */
-      makeConstraint(3, "Load", v_pointer, v_result);
+      makeConstraint(4, "Load", v_pointer, v_result);
       break;
     }
     case llvm::Instruction::Store : 
@@ -444,16 +457,15 @@ std::string operandToString(int id)
 	return "Not Defined Operation.";
 }
 
-std::map<std::string,std::set<Constraint>*>* run(std::string file_name){
+map<string, tuple<set<Constraint>*, set<Operand>*>>* run(string file_name){
   llvm::LLVMContext context;
   llvm::SMDiagnostic error;
-  std::map<std::string, std::set<Constraint>*>* result = new std::map<std::string,
-                                                                      std::set<Constraint>*>();
-  std::unique_ptr<llvm::Module> module = readModule(file_name, error, context);
+  map<string, tuple<set<Constraint>*, set<Operand>*>>* result 
+      = new map<string, tuple<set<Constraint>*, set<Operand>*>>();                                        
+      
+  unique_ptr<llvm::Module> module = readModule(file_name, error, context);
   for (auto F = module->begin(); F != module->end(); F++)
   {
-    // Todo. Add Function Name.
-    std::string function_name = F->getName();
 
     for (auto B = F->begin(); B != F->end(); B++)
     {
@@ -465,12 +477,19 @@ std::map<std::string,std::set<Constraint>*>* run(std::string file_name){
         makeLLVMConstraint(&*I);
       }
     }
+    std::map<std::set<Constraint>*, std::set<Operand>*>* save_constraints_operands 
+                                            = new std::map<std::set<Constraint>*, std::set<Operand>*>();
+
+    // return values
+    std::string function_name = F->getName();
     std::set<Constraint>* save_constraints = new std::set<Constraint>(*Constraint::Constraints);
-    result->insert(std::pair<std::string, std::set<Constraint>*>(function_name,
-                                                                 save_constraints));
+    std::set<Operand>* save_tokens = new std::set<Operand>(*Operand::Tokens);
+
+    auto temp = std::make_tuple(save_constraints, save_tokens);
+    result->insert(pair<string, tuple<set<Constraint>*, set<Operand>*>>(function_name, temp));
+    
     clear();
   }
-
   return result;
 }
 

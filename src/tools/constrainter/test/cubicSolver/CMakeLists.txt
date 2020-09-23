@@ -30,4 +30,5 @@ add_llvm_executable(cubicSolver
 
 add_custom_target(cubicSolverTestFile ALL
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test.ll ${CMAKE_CURRENT_BINARY_DIR}/test.ll
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test2.ll ${CMAKE_CURRENT_BINARY_DIR}/test2.ll
 )

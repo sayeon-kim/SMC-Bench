@@ -2,6 +2,7 @@
 #include <iostream>
 #include <Analysis.h>
 #include <map>
+#include <tuple>
 
 int main(int argc, char **argv)
 {
@@ -10,7 +11,8 @@ int main(int argc, char **argv)
   {    
     // print function name
     std::cout << item->first << "\n";
-    auto t = item->second;
+    auto t2 = item->second;
+    auto t = std::get<0>(t2);
     for(auto i = t->begin(); i != t->end(); i++)
     {
       auto constraint = *i;

@@ -79,6 +79,7 @@ inline void CubicSolver<V, T, cycleElimination>::init(set<T>& tokens){
     getTokenInt(t);
     getOrPutNode(v);
     tokenToVariable[t] = v;
+    addConstantConstraint(t, v);
   }
 }
 
@@ -166,6 +167,11 @@ inline int CubicSolver<V, T, cycleElimination>::getTokenInt(T* x)
   if (tokenToInt.find(x) == tokenToInt.end()) {
     tokenToInt[x] = nextTokenId();
     intToToken[lastTknId] = x;
+
+    V* v = (V*)(&(*x));
+    getOrPutNode(v);
+    tokenToVariable[x] = v;
+    addConstantConstraint(x, v);
   }  
 
   return tokenToInt[x];
@@ -175,7 +181,7 @@ template<typename V, typename T, bool cycleElimination>
 inline typename CubicSolver<V,T,cycleElimination>::Node* CubicSolver<V, T, cycleElimination>::getTokenNode(T* x)
 {
  
-  V* v = tokenToVariable(x);
+  V* v = tokenToVariable[x];
   Node* node = getOrPutNode(v);
   return node;
 }
@@ -186,6 +192,10 @@ inline typename CubicSolver<V,T,cycleElimination>::Node* CubicSolver<V, T, cycle
   if (varToNode.find(x) == varToNode.end()) {
     CubicSolver<V, T, cycleElimination>::Node* newNode = new CubicSolver<V,T,cycleElimination>::Node();
     newNode->vars.insert(x);
+
+    T* t = (T*)(&(*x));
+    getTokenInt(t);
+
     varToNode[x] = newNode;
   }
   
@@ -346,14 +356,14 @@ inline void CubicSolver<V, T, cycleElimination>::addConditionalConstraint(T* t, 
 template<typename V, typename T, bool cycleElimination>
 inline void CubicSolver<V, T, cycleElimination>::add3thConstraint(V* x, V* y){
   Node* nodex = getOrPutNode(x);
+  getOrPutNode(y);
   string tokenSolStr = nodex->tokenSol.to_string();
   reverse(tokenSolStr.begin(), tokenSolStr.end());
-
-  for(int i = 0; i < tokenSolStr.length(); i++){
+  for(int i = 0; i < (int)tokenSolStr.length(); i++){
     if(tokenSolStr == "1"){
-      T* t = intToToken(i);
-      Node* nodet = getTokenNode(t);
-      addConditionalConstraint(t,x,y,nodet);
+      T* t = intToToken[i];
+      V* v = tokenToVariable[t];
+      addConditionalConstraint(t,x,y,v);
     }
   }
 }
@@ -361,14 +371,15 @@ inline void CubicSolver<V, T, cycleElimination>::add3thConstraint(V* x, V* y){
 template<typename V, typename T, bool cycleElimination>
 inline void CubicSolver<V, T, cycleElimination>::add4thConstraint(V* x, V* y){
   Node* nodex = getOrPutNode(x);
+  getOrPutNode(y);
   string tokenSolStr = nodex->tokenSol.to_string();
   reverse(tokenSolStr.begin(), tokenSolStr.end());
 
-  for(int i = 0; i < tokenSolStr.length(); i++){
+  for(int i = 0; i < (int)tokenSolStr.length(); i++){
     if(tokenSolStr == "1"){
-      T* t = intToToken(i);
-      Node* nodet = getTokenNode(t);
-      addConditionalConstraint(t,x,nodet,y);
+      T* t = intToToken[i];
+      V* v = tokenToVariable[t];
+      addConditionalConstraint(t,x,v,y);
     }
   }
 }
@@ -450,7 +461,9 @@ inline void CubicSolver<V, T, cycleElimination>::print()
     cout << "}" << "\n";
   }
   std::cout << "====================\n";
-} // end of cubicSolver::print()
+}
+
+ // end of cubicSolver::print()
 
 // old print
 // template<typename V, typename T, bool cycleElimination>
@@ -466,7 +479,7 @@ inline void CubicSolver<V, T, cycleElimination>::print()
 //     std::cout << '\n';
 //     });
 
-//   map<V*,set<T*>> temp = this->getSolution();
+//   map<V*,set<T*>> temp = this->oetSolution();
 //   for (auto it = temp.begin(); it != temp.end(); it++) {
 //     cout << "변수" << (it->first) << "은 토큰 : ";
 //     set<T*> s = it->second;

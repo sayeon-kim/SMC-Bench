@@ -10,6 +10,7 @@
 #include <iostream>
 #include <memory>
 #include <map>
+#include <tuple>
 
 #include <llvm/IR/Module.h>
 #include <llvm/IRReader/IRReader.h>
@@ -20,6 +21,7 @@
 #include <llvm/IR/Use.h>
 #include "llvm/IR/Function.h"
 
+using namespace std;
 namespace analysis {
 
 static int alloca_number = 1 ;
@@ -31,8 +33,8 @@ static int alloca_number = 1 ;
 // Operand is Interface for expression.
 class Operand{
   public:
-    static std::set<Operand>* Tokens;
-    static std::set<Operand>* Variables;
+    static std::set<Operand>* Tokens; // token 만들면, 그 모든 token 들을 가지고 있는 set. Token <-mapping-> Varaible <-mapping-> Node
+    static std::set<Operand>* Variables; // variable 만들면, 그 모든 variable 들을 가지고 있는 set. add method?
   public:
     std::string Type;
     std::string name;
@@ -59,11 +61,12 @@ class Operand{
  * 1 => operand1 ∈ [[ operand2 ]]
  * 2 => [[ operand1 ]] ⊆ [[ operand2 ]]
  * 3 => for each c in cells, if c in [[ operand1 ]] => [[ c ]] ⊆ [[ operand2 ]]
- * 4 => for each c in cells, if c in [[ operand2 ]] => [[ operand1 ]] ⊆ [[ c ]]
+ * 4 => for each c in cells, if c in [[ operand1 ]] => [[ operand2 ]] ⊆ [[ c ]]
  */
 class Constraint{
   public:
     static std::set<Constraint>* Constraints;
+    std::set<Operand>* Operands;
   public:
     int Type;
     std::string instruction;
@@ -108,7 +111,8 @@ void makeLLVMConstraint(llvm::Instruction* I);
 std::unique_ptr<llvm::Module> readModule(std::string file_name, llvm::SMDiagnostic error,
                                          llvm::LLVMContext& context);
 
-std::map<std::string,std::set<Constraint>*>* run(std::string file_name);
+// std::map<std::string, std::map<std::set<Constraint>*, std::set<Operand>*>>* run(std::string file_name);
+map<string, tuple<set<Constraint>*, set<Operand>*>>*  run(std::string file_name);
 
 void clear();
 
