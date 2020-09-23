@@ -20,6 +20,18 @@ body: lw $8, 12($10) 	# $10에 12가 더해진 즉, 3줄 다음인 (addi $2,$2, 
 
 ```
 
+### C Program 동작 확인
+```shell
+git clone https://github.com/JNU-SoftwareLAB/SMC-Bench.git	#Bench Project Clone
+cd ./SMC-Bench/src/asm/smc8
+gcc smc8.c -o result 		                			#gcc compile
+./result
+## 무한루프 발생시 SMC 동작
+
+gdb ./result
+b *main+62                                                  
+# 이후 continue명령어를 실행해가면서 disass main을 해보면 main binary가 계속 바뀌는것을 확인할 수 있다.
+```
 
 
 

@@ -19,6 +19,19 @@ loop:
 new:
 ```
 
+### C Program 동작 확인
+```shell
+git clone https://github.com/JNU-SoftwareLAB/SMC-Bench.git	#Bench Project Clone
+cd ./SMC-Bench/src/asm/smc7
+gcc smc7.c -o result 		                				#gcc compile
+./result
+
+## Self growing code는 특성상 프로그램의 크기가 계속 커지게 되므로 보호되는 메모리 구역을 침범하게 된다. SegFault가 발생하지만 gdb로 확인시 SMC동작이 제대로 되는것을 확인할 수 있다.
+gdb ./result
+b *main+108
+disass main,+200 											#Self-Growing Code 동작 확인 가능 ( get_permission 함수 메모리 구역 내에 main과 똑같은 Binary코드 발견)
+```
+
 
 
 ```assembly

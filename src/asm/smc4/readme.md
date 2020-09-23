@@ -30,3 +30,16 @@ ggen:
 $4에 ggen addr를 저장 후-> $9에 main의 addr 저장한다. 그리고 $8의 값에 0x01200008 인 (jr $9)값 을 load 한다. gen의 위치로 jump 한다.
 
 $8를 $4에 저장후 $4로 분기한다. 즉 , 앞에서 $4에 ggen 의 addr 를 저장했기 때문에,  ggen으로 분기 한다. 이때, $9에 main의 addr가 들어가있기에 이 프로그램은 다시 쭉 반복하고 다시 ggen 에서 main을 찾아 가는 순으로 반복 되어진다.
+
+
+### C Program 동작 확인
+```shell
+git clone https://github.com/JNU-SoftwareLAB/SMC-Bench.git	#Bench Project Clone
+cd ./SMC-Bench/src/asm/smc4
+gcc smc4.c -o result 		                				#gcc compile
+gdb ./result                                                #gdb execute
+b *main+110                                                 #break
+disass main                                                 #disass후 modifing 이전의 main의 memory 상태 확인.  (main+259 ~ main+302)
+c
+disass main                                                 #disass후 modifing 이후의 main의 memory 상태 확인. (main+266 ~ main+305)
+```

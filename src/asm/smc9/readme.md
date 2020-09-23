@@ -35,6 +35,15 @@ pg:   li $2, 1
 pgend:
 ```
 
+### C Program 동작 확인
+```shell
+git clone https://github.com/JNU-SoftwareLAB/SMC-Bench.git	#Bench Project Clone
+cd ./SMC-Bench/src/asm/smc9
+gcc smc9.c -o result 		                			#gcc compile
+./result
+
+## foo함수가 정상적으로 작동하면 SMC 정상 작동
+```
 
 
 ```asm
