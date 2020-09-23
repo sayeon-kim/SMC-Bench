@@ -120,3 +120,13 @@ gen:	                                             # gen 라벨 다음 코드는 
 	jr $31
 ```
 
+### C Program 동작 확인
+```shell
+git clone https://github.com/JNU-SoftwareLAB/SMC-Bench.git	#Bench Project Clone
+cd ./SMC-Bench/src/asm/smc3
+gcc smc3.c -o result 						#gcc compile
+./result > result.log						#execute
+## Ctrl + C 를 눌러 프로그램 종료
+## result.log의 첫번째줄의 결과 확인  304가 출력되면 SMC 정상 작동
+
+```

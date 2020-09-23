@@ -27,6 +27,16 @@ $8 레지스터에 g의 주소를 저장하고, $9 레지스터에, g의 명령�
 addi $10, $9, 4는 $10 레지스터에 sw $9, 4($8) 을 저장하는것과 같은 의미다.
 g에서 해당 명령어를 실행하면 g의 다음주소인 h의 j dead가 $9에 저장된 명령어로 바뀌게 된다.
 
+### C Program 동작 확인
+```shell
+git clone https://github.com/JNU-SoftwareLAB/SMC-Bench.git	#Bench Project Clone
+cd ./SMC-Bench/src/asm/smc5
+gcc smc5.c -o result 		                				      #gcc compile
+./result
+
+## Number Value : 1 이 무한루프로 출력된다면 SMC 정상작동
+```
+
 
 실행 과정
 

@@ -76,7 +76,6 @@ start:
     ptr_reg9 = (unsigned char*)main + START;
 
     // li $8, 0x01200008 (jr $9)
-    // 이게 Main으로 가도록만 하면 될것 같습니다.
     memcpy(reg8, "\xe9\x38\xff\xff\xff", SIZE_OF_JMPQ);
     
     // j gen

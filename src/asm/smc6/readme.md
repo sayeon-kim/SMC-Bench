@@ -35,6 +35,16 @@ main:  j alter
  ( sw $8, alter ) 문장이 실행된 결과로 이렇게 바뀌게 된다.  그리고 프로그램이 끝나게 된다.
 
 
+### C Program 동작 확인
+```shell
+git clone https://github.com/JNU-SoftwareLAB/SMC-Bench.git	#Bench Project Clone
+cd ./SMC-Bench/src/asm/smc6
+gcc smc6.c -o result 		                				      #gcc compile
+./result
+
+## 무한루프시 SMC 정상 작동
+```
+
 
 실행 과정
 
