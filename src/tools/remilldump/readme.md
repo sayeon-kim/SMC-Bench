@@ -9,7 +9,7 @@ target=smc5.x86
 python3 remilldump.py ${target}.o --os linux --arch x86 --output ${target}.ll
 ```
 
-## Step By Step to get remill lift from taret
+## Step By Step to get remill lift from target
 
 ### Step0. Compile a nasm file
 ```bash

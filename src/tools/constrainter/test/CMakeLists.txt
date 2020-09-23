@@ -4,6 +4,7 @@ list(APPEND TEST
   "getInstructionName"
   "getOperandName"
   "printConstraints"
+  "cubicSolver"
 )
 
 foreach(item ${TEST})

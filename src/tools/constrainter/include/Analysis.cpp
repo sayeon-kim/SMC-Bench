@@ -173,7 +173,8 @@ Operand* makeVariable(std::string name)
 Constraint* makeConstraint(int Type, std::string instruction,Operand* operand1,
                            Operand* operand2, Operand* operand3, Operand* operand4)
 {
-  Constraint* c = new Constraint(Type, instruction, operand1, operand2, operand3, operand4);
+  Constraint* c = new Constraint(Type, instruction, operand1, operand2, operand3,
+                                 operand4);
   Constraint::Constraints->insert(*c);
   return c;
 }
@@ -349,9 +350,11 @@ void makeLLVMConstraint(llvm::Instruction* I)
   }
 }
 
-std::unique_ptr<llvm::Module> readModule(std::string file_name, llvm::SMDiagnostic error, llvm::LLVMContext& context)
+std::unique_ptr<llvm::Module> readModule(std::string file_name, 
+                            llvm::SMDiagnostic error, llvm::LLVMContext& context)
 {
-  std::unique_ptr<llvm::Module> module = llvm::parseIRFile(file_name, error, context);
+  std::unique_ptr<llvm::Module> module = 
+                                  llvm::parseIRFile(file_name, error, context);
   if(!module)
   {
     llvm::errs() << "Can't read file\n";
@@ -362,7 +365,7 @@ std::unique_ptr<llvm::Module> readModule(std::string file_name, llvm::SMDiagnost
 
 void clear()
 {
-  alloca_number = 0;
+  alloca_number = 1;
   Operand::Tokens->clear();
   Operand::Variables->clear();
   Constraint::Constraints->clear();
@@ -444,7 +447,8 @@ std::string operandToString(int id)
 std::map<std::string,std::set<Constraint>*>* run(std::string file_name){
   llvm::LLVMContext context;
   llvm::SMDiagnostic error;
-  std::map<std::string, std::set<Constraint>*>* result = new std::map<std::string, std::set<Constraint>*>();
+  std::map<std::string, std::set<Constraint>*>* result = new std::map<std::string,
+                                                                      std::set<Constraint>*>();
   std::unique_ptr<llvm::Module> module = readModule(file_name, error, context);
   for (auto F = module->begin(); F != module->end(); F++)
   {
@@ -462,7 +466,8 @@ std::map<std::string,std::set<Constraint>*>* run(std::string file_name){
       }
     }
     std::set<Constraint>* save_constraints = new std::set<Constraint>(*Constraint::Constraints);
-    result->insert(std::pair<std::string, std::set<Constraint>*>(function_name, save_constraints));
+    result->insert(std::pair<std::string, std::set<Constraint>*>(function_name,
+                                                                 save_constraints));
     clear();
   }
 

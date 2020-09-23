@@ -22,7 +22,7 @@
 
 namespace analysis {
 
-static int alloca_number = 0 ;
+static int alloca_number = 1 ;
 
 //===----------------------------------------------------------------------===//
 // Operands
@@ -33,6 +33,7 @@ class Operand{
   public:
     static std::set<Operand>* Tokens;
     static std::set<Operand>* Variables;
+  public:
     std::string Type;
     std::string name;
     std::set<Operand>* tokens = nullptr;
@@ -50,19 +51,20 @@ class Operand{
 //   subseteq
 // };
 
-// //===----------------------------------------------------------------------===//
-// // Constraint
-// //===----------------------------------------------------------------------===//
-// /**
-//  * Constraint Type.
-//  * 1 => operand1 ∈ [[ operand2 ]]
-//  * 2 => [[ operand1 ]] ⊆ [[ operand2 ]]
-//  * 3 => for each c in [[ operand1 ]], c ∈ [[ operand2 ]]
-//  * 
-//  */
+//===----------------------------------------------------------------------===//
+// Constraint
+//===----------------------------------------------------------------------===//
+/**
+ * Constraint Type.
+ * 1 => operand1 ∈ [[ operand2 ]]
+ * 2 => [[ operand1 ]] ⊆ [[ operand2 ]]
+ * 3 => for each c in cells, if c in [[ operand1 ]] => [[ c ]] ⊆ [[ operand2 ]]
+ * 4 => for each c in cells, if c in [[ operand2 ]] => [[ operand1 ]] ⊆ [[ c ]]
+ */
 class Constraint{
   public:
     static std::set<Constraint>* Constraints;
+  public:
     int Type;
     std::string instruction;
     Operand* operand1;
@@ -84,9 +86,9 @@ class Constraint{
 // // Functions
 // //===----------------------------------------------------------------------===//
 
-// /**
-//  * tokens is a set, so No reason to check it is unique or not
-//  */
+/**
+ * tokens is a set, so No reason to check it is unique or not
+ */
 Operand* makeToken(std::string name);
 
 /**

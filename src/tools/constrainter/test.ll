@@ -15,6 +15,13 @@ define dso_local void @functionTest() {
     ret void
 }
 
+define dso_local i32 @functionTestSecond() {
+  entry:
+    %alloca_ins1 = alloca i8
+    %alloca_ins2 = alloca i16
+    ret i32 32
+}
+
 define dso_local i32 @main() {
   entry:
     ; alloca instructions
@@ -81,5 +88,9 @@ define dso_local i32 @main() {
     ; Select Instructions
     %select_ins1 = select i1 true, i64* %alloca_ins4, i64* %alloca_ins5
     %select_ins2 = select i1 false, i64 1234, i64 123
+    
+    call void @functionTest()
+    %call_ins2 = call i32 @functionTestSecond()
+
     ret i32 0
 }
