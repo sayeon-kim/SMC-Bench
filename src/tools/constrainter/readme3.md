@@ -25,9 +25,9 @@ SSA이므로 수동적인 변수의 추적이 어렵다.
  * Constraint Type.
  * 1 => operand1 ∈ [[ operand2 ]]
  * 2 => [[ operand1 ]] ⊆ [[ operand2 ]]
- * 3 => for each c in [[ operand1 ]], [[ c ]] ⊆ [[ operand2 ]]
- * 4 => for each c in [[ operand2 ]], [[ operand1 ]] ⊆ [[ c ]]
- */g
+ * 3 => for each c in cells, if c in [[ operand1 ]] => [[ c ]] ⊆ [[ operand2 ]]
+ * 4 => for each c in cells, if c in [[ operand2 ]] => [[ operand1 ]] ⊆ [[ c ]]
+ */
 class Constraint{
   public:
     int Type;

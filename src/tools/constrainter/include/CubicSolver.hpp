@@ -37,9 +37,11 @@ private:
 
   std::map<V*, Node*> varToNode;
   std::map<T*, int> tokenToInt;
-  
+  std::map<int, T*> intToToken;
+  std::map<T*, V*> tokenToVariable;
 
 public:
+  void init(set<T>& tokens);
   void setFunctionName(std::string function_name);
   // Token t ∈ Variable x
   void addConstantConstraint(T* t, V* x);
@@ -47,6 +49,10 @@ public:
   void addSubsetConstraint(V* x, V* y);
   // if token t ∈ Variable x, then Variable y ⊆ Variable z
   void addConditionalConstraint(T* t, V* x, V* y, V* z);
+  //for each Token c in Variable x, Variable y ⊆ Variable c
+  void add3thConstraint(V* x, V* y);
+  //for each Token c in Variable x, Variable c ⊆ Variable y
+  void add4thConstraint(V* x, V* y);
 
   list<T*> getAllTokens();
   map<V*, std::set<T*>> getSolution();
@@ -57,12 +63,24 @@ public:
 private:
   int nextTokenId();
   int getTokenInt(T* x);
+  Node* getTokenNode(T* x);
   Node* getOrPutNode(V* x);
   std::list<Node*> detectPath(Node* from, Node* to);
   std::list<Node*> detectPathRec(set<Node*>& visited, Node* current, Node* from, Node* to);
   void collapseCycle(std::list<Node*> cycle);
   void addAndPropagateBits(std::bitset<bitsetLength>& s, V* x);
 }; // class CubicSolver
+
+template<typename V, typename T, bool cycleElimination>
+inline void CubicSolver<V, T, cycleElimination>::init(set<T>& tokens){
+  for(auto token = tokens.begin(); token != tokens.end(); token++){
+    T* t = (T*)(&(*token));
+    V* v = (V*)(&(*token));
+    getTokenInt(t);
+    getOrPutNode(v);
+    tokenToVariable[t] = v;
+  }
+}
 
 template<typename V, typename T, bool cycleElimination>
 inline void CubicSolver<V, T, cycleElimination>::setFunctionName(std::string function_name)
@@ -147,9 +165,19 @@ inline int CubicSolver<V, T, cycleElimination>::getTokenInt(T* x)
 {
   if (tokenToInt.find(x) == tokenToInt.end()) {
     tokenToInt[x] = nextTokenId();
-  }
-  
+    intToToken[lastTknId] = x;
+  }  
+
   return tokenToInt[x];
+}
+
+template<typename V, typename T, bool cycleElimination>
+inline typename CubicSolver<V,T,cycleElimination>::Node* CubicSolver<V, T, cycleElimination>::getTokenNode(T* x)
+{
+ 
+  V* v = tokenToVariable(x);
+  Node* node = getOrPutNode(v);
+  return node;
 }
 
 template<typename V, typename T, bool cycleElimination>
@@ -316,6 +344,36 @@ inline void CubicSolver<V, T, cycleElimination>::addConditionalConstraint(T* t, 
 }
 
 template<typename V, typename T, bool cycleElimination>
+inline void CubicSolver<V, T, cycleElimination>::add3thConstraint(V* x, V* y){
+  Node* nodex = getOrPutNode(x);
+  string tokenSolStr = nodex->tokenSol.to_string();
+  reverse(tokenSolStr.begin(), tokenSolStr.end());
+
+  for(int i = 0; i < tokenSolStr.length(); i++){
+    if(tokenSolStr == "1"){
+      T* t = intToToken(i);
+      Node* nodet = getTokenNode(t);
+      addConditionalConstraint(t,x,y,nodet);
+    }
+  }
+}
+
+template<typename V, typename T, bool cycleElimination>
+inline void CubicSolver<V, T, cycleElimination>::add4thConstraint(V* x, V* y){
+  Node* nodex = getOrPutNode(x);
+  string tokenSolStr = nodex->tokenSol.to_string();
+  reverse(tokenSolStr.begin(), tokenSolStr.end());
+
+  for(int i = 0; i < tokenSolStr.length(); i++){
+    if(tokenSolStr == "1"){
+      T* t = intToToken(i);
+      Node* nodet = getTokenNode(t);
+      addConditionalConstraint(t,x,nodet,y);
+    }
+  }
+}
+
+template<typename V, typename T, bool cycleElimination>
 inline list<T*> CubicSolver<V, T, cycleElimination>::getAllTokens(){
   list<T*> tokens;
 
@@ -330,13 +388,6 @@ inline list<T*> CubicSolver<V, T, cycleElimination>::getAllTokens(){
 template<typename V, typename T, bool cycleElimination>
 inline map<V*, std::set<T*>> CubicSolver<V, T, cycleElimination>::getSolution()
 {
-  map<int, T*> intToToken;
-  for_each(tokenToInt.begin(), tokenToInt.end(), [&] (const std::pair<T*, int>& t)
-  {
-    intToToken[t.second] = t.first;
-  });
-  
-  
   map<V*, std::set<T*>> ret;
   for_each(varToNode.begin(), varToNode.end(), [&](const pair<V*, Node*>& t) {
     V* key = t.first;

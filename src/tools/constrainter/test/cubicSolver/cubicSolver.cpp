@@ -11,6 +11,8 @@ int main(int argc, char **argv)
   // Cublic Solver
   std::vector<CubicSolver<analysis::Operand, analysis::Operand>> cubic_answer;
   
+  // cubic_answer.init(vec1, vec2)
+
   // Constraints on Function
   for(auto FC = moduleConstraints->begin(); FC != moduleConstraints->end(); FC++)
   {
