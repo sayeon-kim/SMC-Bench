@@ -45,6 +45,7 @@ result = *pointer
 ```
 **constraint**
 ```
+; type4
 For each c ∈ [[All Tokens]], 
   c ∈ [[pointer]] => [[c]] ⊆ [[result]]
 ```
@@ -72,6 +73,7 @@ store [volatile] <ty> <value>, <ty>* <pointer>
 ```
 **constraint**
 ```
+; type3
 For each c ∈ [[All tokens]],
   c ∈ [[pointer]] => [[value]] ⊆ [[c]]
 ``
