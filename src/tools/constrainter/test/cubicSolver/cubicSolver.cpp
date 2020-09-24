@@ -61,7 +61,8 @@ int main(int argc, char **argv)
         }
         case 2:
         {
-          cubic.addSubsetConstraint(constraint.operand1, constraint.operand2);
+          cubic.addSubsetConstraint
+          (constraint.operand1, constraint.operand2);
           break;
         }
         case 3:

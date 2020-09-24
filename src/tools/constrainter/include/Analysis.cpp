@@ -132,16 +132,16 @@ std::string Constraint::toString()
     {
       result += "for each c in ";
       result += this->operand1->toString() +", ";
-      result += "[[ c ]] ⊆ ";
-      result += this->operand2->toString();
+            result += this->operand2->toString();
+      result += " ⊆ [[ c ]]";
       break;
     }
     case 4 :
     {
       result += "for each c in ";
       result += this->operand1->toString() +", ";
-      result += this->operand2->toString() + " ⊆ ";
-      result += "[[ c ]] ";
+      result += "[[ c ]] ⊆ ";
+      result += this->operand2->toString();
       break;
     }
   }
@@ -241,8 +241,8 @@ void makeLLVMConstraint(llvm::Instruction* I)
       Operand *v_value = makeVariable(value_name);
       Operand *v_pointer = makeVariable(pointer_name);
       
-      /** for each c in [[ value ]], c ∈ [[ pointer ]]] */
-      makeConstraint(3, "Store", v_value, v_pointer);
+      /** for each c in [[ pointer ]], [[ value ]] ⊆ [[ c ]]] */
+      makeConstraint(3, "Store", v_pointer, v_value);
       break;
     }
     case llvm::Instruction::GetElementPtr : 

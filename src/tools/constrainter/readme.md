@@ -6,7 +6,7 @@ Date: 2020-09-23
 # Consraints
 Instruction|Constraint|Syntax|
 ---|---|---|
-alloca | alloca_i ∈ [[result] | <result\> = alloca <type\>
+alloca | result ∈ [[result] | <result\> = alloca <type\>
 load | c ∈ [[pointer]] => [[c]] ⊆ [[result]] | <result\> = load [volatile] <ty\>, <ty\>* <pointer\>
 store | c ∈ [[pointer]] => [[value]] ⊆ [[c]] | store [volatile] <ty\> <value\>, <ty\>* <pointer\>
 getelementptr | ptrval ∈ [[result]] | <result\> = getelementptr <ty\>, <ty\>* <ptrval\> {, <ty\> idx}*
