@@ -4,7 +4,7 @@
 
 
 ; alloca, 1, alloca_ins1 ∈ [[alloca_ins1]]
-; alloca, 1, alloca_ins1 ∈ [[alloca_ins2]]
+; alloca, 1, alloca_ins2 ∈ [[alloca_ins2]]
 
 ; store, 3, [[1]] ⊆ [[alloca_ins1]]
 ; store, 3, [[2]] ⊆ [[alloca_ins2]]
@@ -13,18 +13,30 @@
 ; load, 4, [[2]] ⊆ [[load_ins2]], [[alloca_ins2]] ⊆ [[load_ins2]]
 
 ; store, 3, [[x]] ⊆ [[1]], [[x]] ⊆ [[alloca_ins1]]
-; store, 3, [[y]] ⊆ [[1]], [[y]] ⊆ [[alloca_ins1]]
-; store, 3, [[z]] ⊆ [[1]], [[z]] ⊆ [[alloca_ins1]]
-
 ; store, 3, [[load_ins2]] ⊆ [[alloca_ins1]], [[2]] ⊆ [[alloca_ins1]]
 
+; Solution
+; [[alloca_ins1] = { alloca_ins1 }
+; [[alloca_ins2]] = { alloca_ins2 }
+; [[alloca_ins1]] = { alloca_ins1, [[1]] }
+; [[alloca_ins2]] = { alloca_ins2, [[2]] }
+; [[load_ins1]] = { [[alloca_ins1]], [[1]]}
+; [[load_ins2]] = { [[alloca_ins2]], [[2]]}
+; [[alloca_ins1]] = { alloca_ins1, [[1]], [[x]], [[2]], [[load_ins2]] }
+; [[1]] = { [[x]] }
+; [[2]] = { ? }
+; [[x]] = ?
+
 ; Result
-; [[alloca_ins1]] = { alloca_ins1, alloca_ins2, [[1]], [[2]] }
-; [[x]] = { alloca_ins1 }
-; [[y]] = { alloca_ins1 }
-; [[z]] = { alloca_ins1 }
+; [[alloca_ins1]] = { alloca_ins1, alloca_ins2 }
+; [[alloca_ins2]] = { alloca_ins2 }
+; [[load_ins1]] = { alloca_ins1, alloca_ins2 }
+; [[load_ins2]] = { alloca_ins2 }
+; [[x]] = ?
 ; [[1]] = ?
 ; [[2]] = ?
+
+
 
 ; Todo.
 ; 1. 상수 (1) 같은건 어떻게 처리할지?
@@ -36,6 +48,7 @@ define dso_local i32 @main() {
     ; alloca instructions
     %alloca_ins1 = alloca i8
     %alloca_ins2 = alloca i8
+
     store i8 1, i8* %alloca_ins1
     store i8 2, i8* %alloca_ins2
     
@@ -43,13 +56,8 @@ define dso_local i32 @main() {
     %load_ins2 = load i8, i8* %alloca_ins2 ; 1
     
     %x = add i8 %load_ins1, 2
-    %y = add i8 %load_ins1, 3
-    %z = add i8 %load_ins1, 4
 
     store i8 %x, i8* %alloca_ins1
-    store i8 %y, i8* %alloca_ins1
-    store i8 %z, i8* %alloca_ins1
-
     store i8 %load_ins2, i8* %alloca_ins1;
       
     ret i32 0
