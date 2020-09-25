@@ -25,4 +25,9 @@ body:
     nop
     mov [eax + 8], ebx      ; allocate instruction of ebx in pointer of ebx + 8
     nop
+    add edx, 1
+    cmp edx, 2
     jmp body                ; jmp body
+    mov eax, 1
+    mov ebx, 0
+    int 0x80
