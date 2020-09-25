@@ -51,7 +51,7 @@ main:
 	nop
 	sw $8, alter
 alter: 
-	jp alter
+	jp alter ; pc is here now.
 	li $9, 0
 	sw $9, main
 	j main
