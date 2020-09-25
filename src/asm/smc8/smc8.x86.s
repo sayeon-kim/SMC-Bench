@@ -27,7 +27,7 @@ body:
     nop
     add edx, 1
     cmp edx, 2
-    jmp body                ; jmp body
+    jzp body                ; jmp body
     mov eax, 1
     mov ebx, 0
     int 0x80
