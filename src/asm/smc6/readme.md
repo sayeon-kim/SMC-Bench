@@ -13,26 +13,55 @@ alter: lw $8, main
 
 ```
 
+Step 1.
+- Jump Alter
 
+Step 2.
 
-먼저 alter로 분기한다.
+- Load value of main into $8
+- $8 = 'j alter'
 
-$8에 main 의 포인터를 load 한다. 그리고 $9에 0을 immediate load한다.
+Step 3.
 
-$9의 값을 main에 store 한다.
+- Load value 0 into $9
 
-이때 main 부분의 code 값이 바뀐것을 볼 수 있다.
+Step 4.
 
-다시 main으로 분기한다. 
+- Store value of $9 into main
+
+- So ' j alter ' -> 'nop'
+
+Step 5.
+
+- Jump main
+
+Step 6.
+
+- NOP. then execute next instruction(Step 7)
+
+Step 7.
+
+- Store value of $8 into alter
+
+- So The result like this.
 
 ```asm
-main:  j alter
+	.text
+main:  
+	nop
 	sw $8, alter
+alter: 
+	jp alter
+	li $9, 0
+	sw $9, main
+	j main
 ```
 
-이때, 이미 main의 첫번째 부분이  ( j alter)가 아닌 아무 문장이 없으므로, 아까 j분기로 건너뛰게 되었던, ( sw $8, alter ) 문장이 실행된다.
+Step 8.
 
- ( sw $8, alter ) 문장이 실행된 결과로 이렇게 바뀌게 된다.  그리고 프로그램이 끝나게 된다.
+- JMP TO SELF.
+
+- INFINITY LOOP.
 
 
 ### C Program 동작 확인
