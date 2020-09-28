@@ -36,12 +36,56 @@ target triple = "i386-pc-linux-gnu-elf"
 %struct.SegmentShadow = type { %union.anon, i32, i32 }
 %struct.Memory = type opaque
 
-; Function Attrs: noinline noreturn nounwind
-define noalias nonnull %struct.Memory* @sub_0(%struct.State* noalias nocapture dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
-  br label %4
-
-; <label>:4:                                      ; preds = %4, %3
-  br label %4
+; Function Attrs: noinline nounwind
+define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32, %struct.Memory* noalias) local_unnamed_addr #0 {
+  %4 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 1, i32 0
+   ;%4 = eax
+  %5 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 3, i32 0
+  ;%5 = ebx
+  %6 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 33, i32 0, i32 0
+  ;%10 = eip
+  %AX = bitcast %union.anon.1* %4 to i16*, !remill_register !0
+  %BL = bitcast %union.anon.1* %5 to i8*, !remill_register !1
+  %7 = tail call zeroext i16 @__remill_read_memory_16(%struct.Memory* %2, i32 134512736) #3
+  ; load addr(_start)
+  store i16 %7, i16* %AX, align 2, !tbaa !2
+  ; mov ax, [_start]  
+  store i8 -112, i8* %BL, align 1, !tbaa !6
+  ; mov bl, 0x90
+  %8 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %2, i32 134512736, i8 zeroext -112) #3
+  ; mov [_start], bl 
+  %9 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %8, i32 134512737, i8 zeroext -112) #3
+  ; mov [_start+1], bl 
+  %10 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %9, i32 134512776, i8 zeroext -112) #3
+  ; mov [re_start], bl 
+  %11 = tail call %struct.Memory* @__remill_write_memory_8(%struct.Memory* %10, i32 134512777, i8 zeroext -112) #3
+  ; mov [re_start+1], bl  
+  %12 = add i32 %1, 45
+  ; %12 <- 'halt' next addr
+  store i32 %12, i32* %6, align 4
+  ; eip = 'halt' next addr
+  %13 = tail call %struct.Memory* @__remill_missing_block(%struct.State* nonnull %0, i32 %12, %struct.Memory* %11)
+  ret %struct.Memory* %13
 }
 
-attributes #0 = { noinline noreturn nounwind "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
+; Function Attrs: noduplicate noinline nounwind optnone readnone
+declare zeroext i16 @__remill_read_memory_16(%struct.Memory*, i32) #1
+
+; Function Attrs: noduplicate noinline nounwind optnone readnone
+declare %struct.Memory* @__remill_write_memory_8(%struct.Memory*, i32, i8 zeroext) #1
+
+; Function Attrs: noduplicate noinline nounwind optnone
+declare %struct.Memory* @__remill_missing_block(%struct.State* dereferenceable(3376), i32, %struct.Memory*) #2
+
+attributes #0 = { noinline nounwind "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #1 = { noduplicate noinline nounwind optnone readnone "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #2 = { noduplicate noinline nounwind optnone "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #3 = { nobuiltin nounwind readnone }
+
+!0 = !{[3 x i8] c"AX\00"}
+!1 = !{[3 x i8] c"BL\00"}
+!2 = !{!3, !3, i64 0}
+!3 = !{!"short", !4, i64 0}
+!4 = !{!"omnipotent char", !5, i64 0}
+!5 = !{!"Simple C++ TBAA"}
+!6 = !{!4, !4, i64 0}
