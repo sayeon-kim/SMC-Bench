@@ -428,17 +428,22 @@ inline void CubicSolver<V, T, cycleElimination>::print()
 
   // print Solutions of Variables.
   std::cout << "Solution:\n";
-  for(auto var = variables.begin(); var != variables.end(); var++)
+  for(auto var = varToNode.begin(); var != varToNode.end(); var++)
   {
     auto variable = var->first;
 
     std::cout << "\t" << variable.toString() << "= { ";
-    set<T> s = var->second;
+    set<T> s = variables[variable];
 
-    for (auto it = s.begin(); it != s.end(); it++) {
-      cout << (*it).toString() << ", ";
+    if(s.empty()){
+      cout << "?";
     }
-    cout << "}" << "\n";
+    else{
+      for (auto it = s.begin(); it != s.end(); it++) {
+        cout << (*it).toString() << ", ";
+      }
+    }
+    cout << " }" << "\n";
   }
   std::cout << "====================\n";
 }

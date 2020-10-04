@@ -27,7 +27,3 @@ add_llvm_executable(printConstraints
   printConstraints.cpp
   ${CMAKE_SOURCE_DIR}/include/Analysis.cpp
 )
-
-add_custom_target(printConstraintsTestFile ALL
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test.ll ${CMAKE_CURRENT_BINARY_DIR}/test.ll
-)
