@@ -385,6 +385,7 @@ inline map<V, std::set<T>> CubicSolver<V, T, cycleElimination>::getSolution()
     Node* node = t.second;
     string tokenSol_str = node->tokenSol.to_string();
     reverse(tokenSol_str.begin(), tokenSol_str.end());
+    ret[key]=set<T>();
     for (int i = 0; i < (int)tokenSol_str.length(); i++) {
       if (tokenSol_str[i] == '1') {
         ret[key].insert(intToToken[i]);
@@ -428,26 +429,25 @@ inline void CubicSolver<V, T, cycleElimination>::print()
 
   // print Solutions of Variables.
   std::cout << "Solution:\n";
-  for(auto var = varToNode.begin(); var != varToNode.end(); var++)
+  for(auto var = variables.begin(); var != variables.end(); var++)
   {
     auto variable = var->first;
 
     std::cout << "\t" << variable.toString() << "= { ";
-    set<T> s = variables[variable];
+    set<T> s = var->second;
 
     if(s.empty()){
       cout << "?";
     }
     else{
-      for (auto it = s.begin(); it != s.end(); it++) {
-        cout << (*it).toString() << ", ";
-      }
+    for (auto it = s.begin(); it != s.end(); it++) {
+      cout << (*it).toString() << ", ";
+    }
     }
     cout << " }" << "\n";
   }
   std::cout << "====================\n";
 }
-
  // end of cubicSolver::print()
 
 // old print

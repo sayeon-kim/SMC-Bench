@@ -223,6 +223,10 @@ Constraint* makeConstraint(int Type, std::string instruction,Operand* operand1,
 void makeLLVMConstraint(llvm::Instruction* I)
 {
   int opCode = I->getOpcode();
+    if(I->getName() == "" && !I->getType()->isVoidTy()){
+      I->setName("%"+to_string(name_number));
+      name_number += 1;
+    }
   switch(opCode){
     case llvm::Instruction::Alloca :
     {
@@ -494,19 +498,27 @@ vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Op
   vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>*
   result = new vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>();
   unique_ptr<llvm::Module> module = readModule(file_name, error, context);
+
+  name_number = 0;
+
   for (auto F = module->begin(); F != module->end(); F++) 
   {
-
+    name_number = F->arg_size();
     for (auto B = F->begin(); B != F->end(); B++)
     {
       // Basic Blocks
       std::string block_name = B->getName();
+      if(block_name == ""){
+        name_number += 1;
+      }
 
       for(auto I = B->begin(); I != B->end(); I++)
       {
         makeLLVMConstraint(&*I);
       }
     }
+    name_number = 0;
+
     string function_name = F->getName();
     set<Constraint>* save_constraints = new std::set<Constraint>(*Constraint::Constraints);
     set<Operand>* save_tokens = new std::set<Operand>(*Operand::Tokens);
@@ -515,7 +527,7 @@ vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Op
     auto k = make_tuple(function_name, save_constraints, save_tokens, save_variables, tokens_variables);
     result->push_back(k);
     clear();
-  }    
+  } // function loop   
   return result;
 }
 

@@ -24,6 +24,7 @@
 using namespace std;
 namespace analysis {
 
+static int name_number = 0;
 static int alloca_number = 1 ;
 
 //===----------------------------------------------------------------------===//
