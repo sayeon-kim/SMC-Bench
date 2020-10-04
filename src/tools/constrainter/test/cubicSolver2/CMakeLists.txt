@@ -4,7 +4,7 @@ SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_FLAGS "-Wall -fno-rtti -O0")
 
 find_package(LLVM REQUIRED CONFIG)
-project(printConstraints)
+project(cubicSolver2)
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${LLVM_INCLUDE_DIRS}")
@@ -23,13 +23,13 @@ set(LLVM_LINK_COMPONENTS
   IRReader
 )
 
-add_llvm_executable(cubicSolver
+add_llvm_executable(cubicSolver2
   cubicSolver.cpp
   ${CMAKE_SOURCE_DIR}/include/Analysis.cpp
   ${CMAKE_SOURCE_DIR}/include/CubicEngine.cpp
 )
 
-add_custom_target(cubicSolverTestFile ALL
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test.ll ${CMAKE_CURRENT_BINARY_DIR}/test.ll
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test2.ll ${CMAKE_CURRENT_BINARY_DIR}/test2.ll
-)
+#add_custom_target(cubicSolverTestFile ALL
+  #COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test.ll ${CMAKE_CURRENT_BINARY_DIR}/test.ll
+  #COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test2.ll ${CMAKE_CURRENT_BINARY_DIR}/test2.ll
+#)

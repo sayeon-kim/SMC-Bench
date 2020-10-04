@@ -33,9 +33,10 @@ static int alloca_number = 1 ;
 // Operand is Interface for expression.
 class Operand{
   public:
-    static std::set<Operand>* Tokens; // token 만들면, 그 모든 token 들을 가지고 있는 set. Token <-mapping-> Varaible <-mapping-> Node
-    static std::set<Operand>* Variables; // variable 만들면, 그 모든 variable 들을 가지고 있는 set. add method?
-  public:
+    static std::set<Operand>* Tokens; // ALL Tokens in function.
+    static std::set<Operand>* Variables; // ALL Variables in function.
+    static std::set<pair<Operand,Operand>>* TokensAndVariables;
+
     std::string Type;
     std::string name;
     std::set<Operand>* tokens = nullptr;
@@ -44,7 +45,9 @@ class Operand{
     Operand(const Operand& rhs);
     ~Operand();
     bool operator<(const Operand& e) const;
-    std::string toString();
+    bool operator!=(const Operand& e) const;
+    Operand& operator=(const Operand& e);
+    std::string toString() const;
 };
 
 
@@ -112,7 +115,7 @@ std::unique_ptr<llvm::Module> readModule(std::string file_name, llvm::SMDiagnost
                                          llvm::LLVMContext& context);
 
 // std::map<std::string, std::map<std::set<Constraint>*, std::set<Operand>*>>* run(std::string file_name);
-map<string, tuple<set<Constraint>*, set<Operand>*>>*  run(std::string file_name);
+vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>* run(std::string file_name);
 
 void clear();
 

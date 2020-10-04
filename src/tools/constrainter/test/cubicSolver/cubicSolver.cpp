@@ -1,88 +1,88 @@
-#include <iostream>
-#include "CubicSolver.hpp"
 #include "Analysis.h"
+#include "CubicEngine.h"
+
+#include <iostream>
 #include <map>
 #include <vector>
 #include <tuple>
+
+using namespace std;
 
 int main(int argc, char **argv)
 {
   // argv[1] is filename.
   // Constraint about Module
   auto moduleConstraints = analysis::run(argv[1]);
-  
+
   // Cublic Solver
-  
   
   // // cubic_answer.init(vec1, vec2)
 
   // // Constraints on Function
   for(auto FC = moduleConstraints->begin(); FC != moduleConstraints->end(); FC++)
   {
-    // FC -> first => (string) Function name
-    auto function_name = FC->first;
-    // FC -> second => (set<constraint>) Iterator of Constraints at a Function.
-    auto constraints_iter = std::get<0>(FC->second);
-    auto tokens_function = std::get<1>(FC->second);
+    auto function_name = get<0>(*FC);
+    auto constraints = get<1>(*FC);
+    auto tokens = get<2>(*FC);
+    auto variables = get<3>(*FC);
 
-    CubicSolver<analysis::Operand, analysis::Operand> cubic;
-    cubic.setFunctionName(function_name);
-
-    std::cout << "Tokens.\n";
-    for(auto temp = tokens_function->begin(); temp != tokens_function->end(); temp++)
+    // Cubic Solver
+    CubicEngine cubic;
+    // cubic.init(tokens, variables);
+  cout << "=======================\n";
+    cout << "Tokens.\n";
+    for(auto temp = tokens->begin(); temp != tokens->end(); temp++)
     {
       auto temp_value = *temp;
-      std::cout << temp_value.toString();
+      cout << temp_value.toString() << ", ";
     }
-    std::cout << "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n";
-    cubic.print();
+    cout << "\n=======================";
 
     // print Constraints
-    std::cout << "Print Constraints:\n";
-    for(auto constraints = constraints_iter->begin(); constraints != constraints_iter->end(); constraints++)
+    cout << "Print Constraints:\n";
+    for(auto iter = constraints->begin(); iter != constraints->end(); iter++)
     {
-      auto constraint = *constraints;
-      std::cout << constraint.toString();
+      auto constraint = *iter;
+      cout << constraint.toString();
     }
 
-    // Insert each Constraint into Cubic Engine
-    for(auto constraints = constraints_iter->begin(); constraints != constraints_iter->end(); constraints++)
-    {
-      // a Constraint.
-      auto constraint = *constraints;
+    // // Insert each Constraint into Cubic Engine
+    // for(auto iter = constraints->begin(); iter != constraints->end(); iter++)
+    // {
+    //   // a Constraint.
+    //   auto constraint = *iter;
 
-      // Ander Algorithm Type 1,2,3,4
-      switch(constraint.Type){
-        case 1:
-        {
-          // 
-          cubic.addConstantConstraint(constraint.operand1, constraint.operand2);
-          break;
-        }
-        case 2:
-        {
-          cubic.addSubsetConstraint
-          (constraint.operand1, constraint.operand2);
-          break;
-        }
-        case 3:
-        {
-          /** for each c in [[ operand1 ]], c ∈ [[ operand2 ]]] */
-          cubic.add3thConstraint(constraint.operand1, constraint.operand2);
-          break;
-        }
-        case 4:
-        {
-          /** for each c in [[ operand1 ]], c ∈ [[ operand2 ]]] */
-          cubic.add4thConstraint(constraint.operand1, constraint.operand2);
-        }
-        default :{
-          // Not Defined Type.
-        }
-      };
-    }
-    cubic.print();
-  }
+    //   //Ander Algorithm Type 1,2,3,4
+    //   switch(constraint.Type){
+    //     case 1:
+    //     {
+    //       cubic.addConstantConstraint(*constraint.operand1, *constraint.operand2);
+    //       break;
+    //     }
+    //     case 2:
+    //     {
+    //       cubic.addSubsetConstraint(*constraint.operand1, *constraint.operand2);
+    //       break;
+    //     }
+    //     case 3:
+    //     {
+    //       /** for each c in [[ operand1 ]], c ∈ [[ operand2 ]]] */
+    //       cubic.add3thConstraint(*constraint.operand1, *constraint.operand2);
+    //       break;
+    //     }
+    //     case 4:
+    //     {
+    //       /** for each c in [[ operand1 ]], c ∈ [[ operand2 ]]] */
+    //       cubic.add4thConstraint(*constraint.operand1, *constraint.operand2);
+    //     }
+    //     default :{
+    //       // Not Defined Type.
+    //     }
+    //   };
+    // }
+  
+    // cubic.print();
+  } // loop module
 
   return 0;
-}
+} // main

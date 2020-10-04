@@ -31,27 +31,51 @@ Operand::Operand(){}
 
 std::set<Operand>* Operand::Tokens = new std::set<Operand>();
 std::set<Operand>* Operand::Variables = new std::set<Operand>();
+std::set<pair<Operand,Operand>>* Operand::TokensAndVariables = new std::set<pair<Operand, Operand>>();
 
 Operand::Operand(const Operand& rhs)
 {
   this->Type = rhs.Type;
   this->name = rhs.name;
-  this->tokens = rhs.tokens;
+  if(rhs.tokens != NULL){
+    tokens = new set<Operand>(*rhs.tokens);
+  }
 }
 
 Operand::~Operand()
 {
-  delete this->tokens;
+  if(tokens != NULL){
+    delete tokens;
+  }
 }
 
 bool Operand::operator<(const Operand& e) const
     {
-      if( !(this->Type.compare(e.Type) == 0) ) return false;
-      if( !(this->name.compare(e.name) == 0) ) return false;
-      return true;
+      if( !(this->Type.compare(e.Type) == 0) ) return this->Type < e.Type;
+      else return this->name < e.name;
     }
 
-std::string Operand::toString()
+bool Operand::operator!=(const Operand& e) const
+    { 
+      if(this->Type.compare(e.Type) == false)return true;
+      if(this->name.compare(e.name) == false)return true;
+      return false;
+    }
+
+Operand& Operand::operator=(const Operand& e){
+  delete tokens;
+  this->Type = e.Type;
+  this->name = e.name;
+
+  if(e.tokens != NULL){
+    this->tokens = new set<Operand>(*e.tokens);
+  }
+
+  return *this;
+}
+    
+
+std::string Operand::toString() const
 {
   if( (this->Type.compare("Token") == 0) ){
     return this->name;	
@@ -162,6 +186,11 @@ Operand* makeToken(std::string name)
   t->Type = "Token";
   t->name = name;
   Operand::Tokens->insert(*t);
+
+  
+  //Tokens map variable
+  Operand* v = makeVariable(name);
+  Operand::TokensAndVariables->insert({*t,*v});
   return t;
 }
 
@@ -381,6 +410,7 @@ void clear()
   alloca_number = 1;
   Operand::Tokens->clear();
   Operand::Variables->clear();
+  Operand::TokensAndVariables->clear();
   Constraint::Constraints->clear();
 }
 
@@ -457,14 +487,14 @@ std::string operandToString(int id)
 	return "Not Defined Operation.";
 }
 
-map<string, tuple<set<Constraint>*, set<Operand>*>>* run(string file_name){
+vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>* run(string file_name)
+{
   llvm::LLVMContext context;
   llvm::SMDiagnostic error;
-  map<string, tuple<set<Constraint>*, set<Operand>*>>* result 
-      = new map<string, tuple<set<Constraint>*, set<Operand>*>>();                                        
-      
+  vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>*
+  result = new vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>();
   unique_ptr<llvm::Module> module = readModule(file_name, error, context);
-  for (auto F = module->begin(); F != module->end(); F++)
+  for (auto F = module->begin(); F != module->end(); F++) 
   {
 
     for (auto B = F->begin(); B != F->end(); B++)
@@ -477,19 +507,15 @@ map<string, tuple<set<Constraint>*, set<Operand>*>>* run(string file_name){
         makeLLVMConstraint(&*I);
       }
     }
-    std::map<std::set<Constraint>*, std::set<Operand>*>* save_constraints_operands 
-                                            = new std::map<std::set<Constraint>*, std::set<Operand>*>();
-
-    // return values
-    std::string function_name = F->getName();
-    std::set<Constraint>* save_constraints = new std::set<Constraint>(*Constraint::Constraints);
-    std::set<Operand>* save_tokens = new std::set<Operand>(*Operand::Tokens);
-
-    auto temp = std::make_tuple(save_constraints, save_tokens);
-    result->insert(pair<string, tuple<set<Constraint>*, set<Operand>*>>(function_name, temp));
-    
+    string function_name = F->getName();
+    set<Constraint>* save_constraints = new std::set<Constraint>(*Constraint::Constraints);
+    set<Operand>* save_tokens = new std::set<Operand>(*Operand::Tokens);
+    set<Operand>* save_variables = new std::set<Operand>(*Operand::Variables);
+    set<pair<Operand,Operand>>* tokens_variables = new set<pair<Operand,Operand>>(*Operand::TokensAndVariables);
+    auto k = make_tuple(function_name, save_constraints, save_tokens, save_variables, tokens_variables);
+    result->push_back(k);
     clear();
-  }
+  }    
   return result;
 }
 
