@@ -4,17 +4,9 @@
 
 This Repository is about Self Modyfing Code(SMC)
 
-Our interest is SMC written LLVM IR
+## Install
 
-## Requirements
-
-for running MIPS code, we use MARS
-
-for running x86 code, we use NASM
-
-## Todo
-
-[Todo List](https://gist.github.com/dbwodlf3/f9dcdfc7b13f453c74fff69d2bf077d2)
+Todo...
 
 ## Related Repository
 
