@@ -1,110 +1,82 @@
-# SMC 코드 1번
+# SMC1
 
-### Unbounded Code Rewriting
+## Unbounded Code Rewriting
 
 ```assembly
-	.data
-num:	.byte 8
-	.text
-main:	
-	lw $4, num # Set Argument
-     	lw $9, key # $9 = Ec(add $2 $2 0)
-     	li $8, 1   # counter
-     	li $2, 1   # accumulator
-      
-loop:	
-	beq $8, $4, halt  # check if done
-     	addi $8, $8, 1    # inc counter
-     	add $10, $9, $2   # new instr to put
-      
-key: 	
-	addi $2, $2, 0
-     	sw $10, key    	     # store new instr
-     	j loop		     # next round
-      
-halt: 	
-	j halt
+section .data
+    num db 8
+
+section .text
+global _init
+_init:
+    mov ebp, num  ; num
+    mov ecx, 1 	  ; counter
+    mov edx, 1 	  ; accumulator
+
+loop:
+    cmp ecx, [ebp]   ; compare num and counter
+    jz halt          ; if num and counter equal then jump halt.
+    add ecx, 1       ; else, counter add 1.
+    mov bl, dl       ; save constant operand of add instruction to bl register.(Store Fn into bl.)
+
+key:
+    add edx, 0       ; Store next Fibonacci number to edx(Fn + Fn-1 = Fn+1)
+    mov al, bl       ; store Fn fibonachi value into al.
+    mov [key+2], al  ; update constant operand of add instruction. in add(edx, constant), (Fn). next instruction, Fn+2 = Fn+1 + Fn. and, now is edx Fn+1.
+    jmp loop
+
+halt:   ; exit
+    mov eax, 1
+    xor ebx, ebx
+    int 0x80
 ```
 
+### description
 
+SMC1 is a fibonacci sequence program using self modyfing.
 
-### 실행 과정
+This program rewrite constant operand of add instruction.
 
-```
-key:  addi $2 $2 0
+#### Step 1. _init
 
-      $4 <- 8
-      $9 <- "addi $2 $2 0"
-      $8 <- 1
-      $2 <- 1      // fib 1 = 1
+- mov ebp num
+- mov ecx, 1
+- mov edx, 1
 
-loop: 
-      $8  <- 2
-      $10 <- "addi $2 $2 1"
-key:
-      $2  <- 1     // fib 2 = 1
+ebp is number of sequence. (n in F1,F2,F3, ... Fn)
 
-      key :=  addi $2 $2 1
+ecx is counter.
 
+edx is accumulator of result.
 
-loop: 
-      $8  <- 3
-      $10 <- "addi $2 $2 1"
-key:
-      $2  <- 2     // fib 3 = 2
+#### Step 2. loop
 
-      key :=  addi $2 $2 1
+- cmp ecx, [ebp]
 
+- jz halt
 
-loop: 
-      $8  <- 4
-      $10 <- "addi $2 $2 2"
-key:
-      $2  <- 3     // fib 4 = 3
+compare n and num and if they are equal then halt else continue.
 
-     key :=  addi $2 $2 2
+- add ecx, 1
+- mov bl, dl
 
+increase counter.
 
-loop: 
-      $8  <- 5
-      $10 <- "addi $2 $2 3"
-key:
-      $2  <- 5     // fib 5 = 5
+store Fn into bl.
 
-     key :=  addi $2 $2 3
+#### Step 3. key
 
+- add edx, 0
 
-loop: 
-      $8  <- 6
-      $10 <- "addi $2 $2 5"
-key:
-      $2  <- 8     // fib 6 = 8
+This instruction will be rewritten continually.
 
-      key := addi $2 $2 5
+- mov al, bl
 
+Store Fn into al
 
-loop: 
-      $8  <- 7
-      $10 <- "addi $2 $2 8"
-key:
-      $2  <- 13     // fib 7 = 13
+- mov [key+2], al
 
-      key := addi $2 $2 8
-
-
-loop: 
-      $8  <- 8
-      $10 <- "addi $2 $2 13"
-key:
-      $2  <- 21     // fib 8 = 21
-
-      key := addi $2 $2 13
-
-
-halt: j halt
-
-```
-
+Store Fn into constant operand of add instruction.
 
 
 ### C Program 동작 확인
