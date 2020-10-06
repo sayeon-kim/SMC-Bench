@@ -35,23 +35,24 @@ int main(int argc, char **argv)
 
     
     // cubic.init(tokens, variables);
-  cout << "=======================\n";
-    cout << "Tokens.\n";
-    for(auto temp = tokens->begin(); temp != tokens->end(); temp++)
-    {
-      auto temp_value = *temp;
-      cout << temp_value.toString() << ", ";
-    }
-    cout << "\n=======================\n";
+    // cout << "=======================\n";
+    // cout << "Tokens.\n";
+    // for(auto temp = tokens->begin(); temp != tokens->end(); temp++)
+    // {
+    //   auto temp_value = *temp;
+    //   cout << temp_value.toString() << ", ";
+    // }
+    // cout << "\n=======================\n";
 
     // print Constraints
+    cout << "=======================\n";
     cout << "Print Constraints:\n";
     for(auto iter = constraints->begin(); iter != constraints->end(); iter++)
     {
       auto constraint = *iter;
       cout << constraint.toString();
     }
-
+    cout << "=======================\n";
     // Insert each Constraint into Cubic Engine
     for(auto iter = constraints->begin(); iter != constraints->end(); iter++)
     {
@@ -86,10 +87,14 @@ int main(int argc, char **argv)
         }
       };
     }
-    cout << "=======================\n";
-    cout << "Solutions\n";
     cubic.print();
-    cout << "=======================\n";
+
+    // auto nodes = cubic.getAllNodes();
+
+    // for(auto nodeIter = nodes.begin(); nodeIter != nodes.end(); nodeIter++){
+    //   CubicSolver<Operand,Operand>::Node* node = *nodeIter;
+    //   node->print();
+    // }
   } // loop module
 
   return 0;

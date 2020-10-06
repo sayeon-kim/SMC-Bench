@@ -72,7 +72,7 @@ Opcode               | Instruction | Syntax | Constration | Remarks
 33 | Store          | store <ty\> <value\>, <ty\>* <pointer\> | for each c in [[value]] => [[c]] ⊆ [[pointer]] | Store data to pointer
 34 | GetElementPtr  | <result\> = getelementptr <ty1\> <ty1\>* <ptrval\>{ <tyN\> <idx\>}*|  ptrval ∈ [[ result ]] | Get pointer pointing all elements. Tag(cell) or Pointer?
 48 | IntToPtr       |<result\> = inttoptr <ty\> <value\> to <ty2\> | if value is const　=>　value ∈ [[result]], <br> if value is var => [[value]] ⊆ [[result]] | Intger Value Cast Into Pointer
-49 | BitCast        | <result\> = <ty\> <value\> to <ty2\>| value ∈ [[result]] | Same bit width, just change type. 보류.. Integer to Pointer 안됨. Pointer to Pointer 만 됨.
+49 | BitCast        | <result\> = <ty\> <value\> to <ty2\>| [[value]] ⊆ [[result]] | Same bit width, just change type. 보류.. Integer to Pointer 안됨. Pointer to Pointer 만 됨.
 55 | PHI            | <result> = phi <ty\> [ <val0\>, <label0\>, ... <valK\>, <labelK\>], | [[val0]] ⊆ ... , [[valK]] ⊆ [[result]]  | SSA Instruction.
 56 | Call           | <result\> = call <ty\>\|<fnty> <fnptrval\> (<function args\>) | if ty or fnptrval is pointer type =><br>fnptrval(function args) ∈ [[result]] ?| Function Call <br> 09.12 spa_10.txt 312번째 줄. (잘 준비.)
 57 | Select         | <result\> = select selty <cond\>, <ty1\> <val1\>, <ty2\> <val2\> | [[val1] ⊆ [[result]], [[val2]]⊆ [[result]] | selty is i1 or < N x i1> => if true result <= value1, else result <= val2
@@ -153,7 +153,7 @@ Opcode              | Instruction | Syntax | Constration | Remarks
 46 | FPExt          | | None | Get Flot Type Instruction
 47 | PtrToInt       | | None | Get Integer Type Instruction
 48 | IntToPtr       | ✓ | ✓ | ✓
-49 | BitCast        | <result\> = bitcast <ty\> <value\> to <ty2\>| if ty2 is pointer => value ∈ [[result]] | Same bit width, just change type.
+49 | BitCast        | <result\> = bitcast <ty\> <value\> to <ty2\>| if ty2 is pointer => [[value]] ⊆ [[result]] | Same bit width, just change type.
 50 | AddrSpaceCast  | <result\> = addrespacecast <pty\> <ptrval\> to <pty2\> | for [[ptrval]] each memory cell e => m_e ∈ [[result]] | change address space of pointer. n to m. default is addresspace(0)* 09.12 이런 명령어들은 로그로 출력...
 
 Opcode              | Instruction | Syntax | Constration | Remarks

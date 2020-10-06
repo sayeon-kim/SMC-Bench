@@ -17,21 +17,27 @@ public:
 public:
   std::string functionName; 
 
-private:
+public:
   class Node {
   public:
     Node();
     std::set<V> succ;
+    std::set<V> pred;
     std::bitset<bitsetLength> tokenSol;
     std::map<int, std::set<std::pair<V, V>>> conditionals;
     std::set<V> vars;
-
     bool operator<(const Node& other);
     bool operator==(const Node& other);
     bool operator!=(const Node& other);
+    set<int> getAllTokenInt();
+    std::set<T> tokens;
+    
 
+  public: 
     // TEST FUNCTION
     void print();
+  
+  
   }; // inner class Node
 
   int lastTknId = -1;
@@ -56,6 +62,7 @@ public:
   void add4thConstraint(V x, V y);
 
   list<T> getAllTokens();
+  set<Node*> getAllNodes();
   map<V, std::set<T>> getSolution();
 
   // TEST FUNCTION
@@ -94,6 +101,21 @@ inline CubicSolver<V, T, cycleElimination>::Node::Node()
 }
 
 template<typename V, typename T, bool cycleElimination>
+inline set<int> CubicSolver<V, T, cycleElimination>::Node::getAllTokenInt(){
+  
+  set<int> tokens;
+  std::string tokenSolString = tokenSol.to_string();
+  reverse(tokenSolString.begin(), tokenSolString.end());
+  
+  for (int i = 0; i < (int)tokenSolString.length(); i++) {
+    if (tokenSolString[i] == '1') {
+      tokens.insert(i);
+    }
+  }
+  return tokens;
+}
+
+template<typename V, typename T, bool cycleElimination>
 inline bool CubicSolver<V, T, cycleElimination>::Node::operator<(const Node& other)
 {
   return this < &other;
@@ -121,14 +143,10 @@ inline void CubicSolver<V, T, cycleElimination>::Node::print()
     });
   std::cout << '\n';
 
-  std::string tokenSolString = tokenSol.to_string();
-  reverse(tokenSolString.begin(), tokenSolString.end());
   std::cout << "현재 노드가 가지고 있는 토큰들 : ";
-  for (int i = 0; i < (int)tokenSolString.length(); i++) {
-    if (tokenSolString[i] == '1') {
-      std::cout << i << " ";
-    }
-  }
+  for_each(tokens.begin(), tokens.end(), [](T t){
+    std:: cout << t.toString() << " ";
+  });
   std::cout << '\n';
 
 
@@ -377,6 +395,32 @@ inline list<T> CubicSolver<V, T, cycleElimination>::getAllTokens(){
 }
 
 template<typename V, typename T, bool cycleElimination>
+inline set<typename CubicSolver<V,T,cycleElimination>::Node*> CubicSolver<V, T, cycleElimination>::getAllNodes(){
+  set<Node*> nodes;
+  
+
+  for(auto nodeiterater = varToNode.begin(); nodeiterater != varToNode.end(); nodeiterater++){
+    V v = nodeiterater->first;
+    Node* node = nodeiterater->second;
+    
+    set<int> tokenInts = node->getAllTokenInt();
+    for(auto tokenintIter = tokenInts.begin(); tokenintIter != tokenInts.end();tokenintIter++){
+      node->tokens.insert(intToToken[*tokenintIter]);
+    }
+
+    for(auto succIter = node->succ.begin(); succIter != node->succ.end(); succIter++){
+      Node* succNode = varToNode[*succIter];
+      if(node == succNode)continue;
+      succNode->pred.insert(v);
+    }
+
+    nodes.insert(node);
+  }
+
+  return nodes;
+}
+
+template<typename V, typename T, bool cycleElimination>
 inline map<V, std::set<T>> CubicSolver<V, T, cycleElimination>::getSolution()
 {
   map<V, std::set<T>> ret;
@@ -404,8 +448,12 @@ template<typename V, typename T, bool cycleElimination>
 inline void CubicSolver<V, T, cycleElimination>::print()
 {	
   map<V,set<T>> variables = this->getSolution();
+  set<Node*> nodes = this->getAllNodes();
   auto tokens = this->getAllTokens();
 
+  // for(auto it = nodes.begin(); it != nodes.end(); it++){
+  //   (*it)->print();
+  // }
 
   // print Function name.
   std::cout << "Function: " << this->functionName << "\n";
@@ -432,17 +480,22 @@ inline void CubicSolver<V, T, cycleElimination>::print()
   for(auto var = variables.begin(); var != variables.end(); var++)
   {
     auto variable = var->first;
-
+    Node* node = varToNode[variable];
     std::cout << "\t" << variable.toString() << "= { ";
-    set<T> s = var->second;
+    
+    set<T> tokenSet = var->second;
+    set<V> variableSet = node->pred;
 
-    if(s.empty()){
+    if(tokenSet.empty()){
       cout << "?";
     }
     else{
-    for (auto it = s.begin(); it != s.end(); it++) {
-      cout << (*it).toString() << ", ";
-    }
+      for (auto it = tokenSet.begin(); it != tokenSet.end(); it++) {
+       cout << (*it).toString() << ", ";
+      }
+      for (auto it = variableSet.begin(); it != variableSet.end(); it++) {
+       cout << (*it).toString() << ", ";
+      }
     }
     cout << " }" << "\n";
   }
