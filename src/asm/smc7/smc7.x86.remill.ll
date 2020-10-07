@@ -54,35 +54,35 @@ define %struct.Memory* @sub_0(%struct.State* noalias dereferenceable(3376), i32,
 
 ; loop
 ; <label>:14:                                     ; preds = %14, %3
-  %15 = phi i32 [ 51, %3 ], [ %21, %14 ]  ; 51 = address of new
-  %16 = phi i32 [ 31, %3 ], [ %20, %14 ]  ; 31 = address of loop
+  %15 = phi i32 [ 51, %3 ], [ %21, %14 ]          ; 51 = address of new
+  %16 = phi i32 [ 31, %3 ], [ %20, %14 ]          ; 31 = address of loop
   %17 = phi %struct.Memory* [ %2, %3 ], [ %19, %14 ]
-  %18 = tail call i32 @__remill_read_memory_32(%struct.Memory* %17, i32 %16) #3 ; mov edx, [eax](read intruction of loop)
+  %18 = tail call i32 @__remill_read_memory_32(%struct.Memory* %17, i32 %16) #3                       ; mov edx, [eax](read intruction of loop)
   %19 = tail call %struct.Memory* @__remill_write_memory_32(%struct.Memory* %17, i32 %15, i32 %18) #3 ; mov [ebx], edx(write instruction of loop to new)
-  %20 = add i32 %16, 2  ; eax += 2
-  %21 = add i32 %15, 2  ; ebx += 2
-  %22 = icmp eq i32 %16, 49 ; cmp eax, ecx
-  br i1 %22, label %23, label %14 ; ; jne loop
+  %20 = add i32 %16, 2            ; eax += 2
+  %21 = add i32 %15, 2            ; ebx += 2
+  %22 = icmp eq i32 %16, 49       ; cmp eax, ecx
+  br i1 %22, label %23, label %14 ; jne loop
 
 ; if eax and address of new  not equal than jump loop
 
 ; <label>:23:                                     ; preds = %14
   %24 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 6, i32 7, i32 0, i32 0  ; %24 = edx
-  %25 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 3  ; arithflags
+  %25 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 3                ; arithflags
   %26 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 7  
   %27 = getelementptr inbounds %struct.State, %struct.State* %0, i32 0, i32 2, i32 13
   store i32 %18, i32* %24, align 4, !tbaa !0  ; %18 <- edx
-  store i32 %21, i32* %5, align 4 ; %21 <- ebx
-  store i32 %21, i32* %6, align 4, !tbaa !0 ; %21 <- ecx
-  store i32 2, i32* %9, align 4, !tbaa !0 ; ebp <- 2
-  store i8 1, i8* %11, align 1, !tbaa !4  ; arithflag <- 0 or 1
+  store i32 %21, i32* %5, align 4             ; %21 <- ebx
+  store i32 %21, i32* %6, align 4, !tbaa !0   ; %21 <- ecx
+  store i32 2, i32* %9, align 4, !tbaa !0     ; ebp <- 2
+  store i8 1, i8* %11, align 1, !tbaa !4      ; arithflag <- 0 or 1
   store i8 0, i8* %25, align 1, !tbaa !18 
   store i8 1, i8* %12, align 1, !tbaa !19
   store i8 0, i8* %26, align 1, !tbaa !20
   store i8 1, i8* %13, align 1, !tbaa !21
   store i8 0, i8* %27, align 1, !tbaa !22
 
-  store i32 1, i32* %4, align 4, !tbaa !0    ; eax <- 1
+  store i32 1, i32* %4, align 4, !tbaa !0     ; eax <- 1
   %28 = add i32 %1, 100
   store i32 %28, i32* %10, align 4 ; eip <- PC + 100
   ; int 0x80
