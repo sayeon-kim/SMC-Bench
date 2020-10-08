@@ -15,14 +15,14 @@ halt:
 	la	$a0, smc_string ;6 $a0 <- smc_string, argument1(string ptr)
 	syscall ;7 print
 	li	$v0, 32 ;8 $v0 <- 32, for syscall.
-	li $a0, 1000 ;9 $a0 <- 1000, argument1(sleep time)
-	syscall ;10 sleep 1 second.
-	j halt ;11 jmp halt
+	li $a0, 1000 #9 $a0 <- 1000, argument1(sleep time)
+	syscall #10 sleep 1 second.
+	j halt #11 jmp halt
 target: 
-	nop;4 j halt
+	nop #4 j halt
 exit:
-	li $v0, 4 ; never execute.
-	la $a0, exit_string ; never execute.
-	syscall ; never execute.
-	li $v0, 10 ; never execute.
-	syscall ; never execute.
+	li $v0, 4 # never execute.
+	la $a0, exit_string # never execute.
+	syscall # never execute.
+	li $v0, 10 # never execute.
+	syscall # never execute.

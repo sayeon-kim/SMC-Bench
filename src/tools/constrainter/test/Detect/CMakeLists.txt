@@ -4,7 +4,7 @@ SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_FLAGS "-Wall -fno-rtti -O0")
 
 find_package(LLVM REQUIRED CONFIG)
-project(printConstraints)
+project(Detect)
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${LLVM_INCLUDE_DIRS}")
@@ -23,7 +23,8 @@ set(LLVM_LINK_COMPONENTS
   IRReader
 )
 
-add_llvm_executable(printConstraints
-  printConstraints.cpp
+add_llvm_executable(Detect
+  Detect.cpp
   ${CMAKE_SOURCE_DIR}/include/Analysis.cpp
+  ${CMAKE_SOURCE_DIR}/include/CubicEngine.cpp
 )

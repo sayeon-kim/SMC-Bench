@@ -21,7 +21,12 @@ def compile():
 	text_bytes, err = p2.communicate()
 	print(text_bytes.decode('utf-8'))
 
+def test():
+	p1 = subprocess.Popen()
+
 if args.testWay == "0":
 	compile()
 if args.testWay == "1":
 	compile()
+if args.testWay == "2":
+	test()

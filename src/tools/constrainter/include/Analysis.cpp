@@ -1,6 +1,7 @@
 // test Analysis
 
 #include "Analysis.h"
+#include "CubicSolver.hpp"
 
 #include <string>
 #include <set>
@@ -31,27 +32,51 @@ Operand::Operand(){}
 
 std::set<Operand>* Operand::Tokens = new std::set<Operand>();
 std::set<Operand>* Operand::Variables = new std::set<Operand>();
+std::set<pair<Operand,Operand>>* Operand::TokensAndVariables = new std::set<pair<Operand, Operand>>();
 
 Operand::Operand(const Operand& rhs)
 {
   this->Type = rhs.Type;
   this->name = rhs.name;
-  this->tokens = rhs.tokens;
+  if(rhs.tokens != NULL){
+    tokens = new set<Operand>(*rhs.tokens);
+  }
 }
 
 Operand::~Operand()
 {
-  delete this->tokens;
+  if(tokens != NULL){
+    delete tokens;
+  }
 }
 
 bool Operand::operator<(const Operand& e) const
     {
-      if( !(this->Type.compare(e.Type) == 0) ) return false;
-      if( !(this->name.compare(e.name) == 0) ) return false;
-      return true;
+      if( !(this->Type.compare(e.Type) == 0) ) return this->Type < e.Type;
+      else return this->name < e.name;
     }
 
-std::string Operand::toString()
+bool Operand::operator!=(const Operand& e) const
+    { 
+      if(this->Type.compare(e.Type) == false)return true;
+      if(this->name.compare(e.name) == false)return true;
+      return false;
+    }
+
+Operand& Operand::operator=(const Operand& e){
+  delete tokens;
+  this->Type = e.Type;
+  this->name = e.name;
+
+  if(e.tokens != NULL){
+    this->tokens = new set<Operand>(*e.tokens);
+  }
+
+  return *this;
+}
+    
+
+std::string Operand::toString() const
 {
   if( (this->Type.compare("Token") == 0) ){
     return this->name;	
@@ -162,6 +187,11 @@ Operand* makeToken(std::string name)
   t->Type = "Token";
   t->name = name;
   Operand::Tokens->insert(*t);
+
+  
+  //Tokens map variable
+  Operand* v = makeVariable(name);
+  Operand::TokensAndVariables->insert({*t,*v});
   return t;
 }
 
@@ -191,9 +221,21 @@ Constraint* makeConstraint(int Type, std::string instruction,Operand* operand1,
   return c;
 }
 
+void ConstantConstraint(){
+  std::string token_name = "Constant-Value";
+  std::string variable_name = "Constant-Value";
+  Operand *t = makeToken(token_name);
+  Operand *v = makeVariable(variable_name);
+  analysis::makeConstraint(1, "Init Constant-Value", t, v);
+}
+
 void makeLLVMConstraint(llvm::Instruction* I)
 {
   int opCode = I->getOpcode();
+    if(I->getName() == "" && !I->getType()->isVoidTy()){
+      I->setName("%"+to_string(name_number));
+      name_number += 1;
+    }
   switch(opCode){
     case llvm::Instruction::Alloca :
     {
@@ -219,6 +261,8 @@ void makeLLVMConstraint(llvm::Instruction* I)
       llvm::Use& instruction_op = *I->op_begin();
       std::string pointer_name = instruction_op->getName();
       std::string result_name = I->getName();
+      if(pointer_name == "")pointer_name = "Constant-Value";
+      if(result_name == "")result_name = "Constant-Value";
 
       Operand *v_pointer = makeVariable(pointer_name);
       Operand *v_result = makeVariable(result_name);
@@ -235,8 +279,9 @@ void makeLLVMConstraint(llvm::Instruction* I)
       llvm::Use& pointer_operand = *K;
 
       std::string value_name = value_operand->getName();
-      if(value_name.compare("")==0)value_name = "Constnat-Value";
       std::string pointer_name = pointer_operand->getName();
+      if(value_name == "")value_name = "Constant-Value";
+      if(pointer_name == "")value_name = "Constant-Value";
       
       Operand *v_value = makeVariable(value_name);
       Operand *v_pointer = makeVariable(pointer_name);
@@ -252,6 +297,10 @@ void makeLLVMConstraint(llvm::Instruction* I)
 
       std::string result_name = I->getName();
       std::string ptrval_name = ptrval_operand->getName();
+      if(result_name == "")result_name = "Constant-Value";
+      if(ptrval_name == "")ptrval_name = "Constant-Value";
+
+      if(ptrval_name=="")ptrval_name = "Constant-Value";
 
       Operand *v_result = makeVariable(result_name);
       Operand *t_ptrval = makeToken(ptrval_name);
@@ -267,19 +316,17 @@ void makeLLVMConstraint(llvm::Instruction* I)
 
       std::string result_name = I->getName();
       std::string value_name = value_operand->getName();
+      if(result_name == "")result_name = "Constant-Value";
+      if(value_name == "")value_name = "Constant-Value";
 
       /**
        * if value is const, then value ∈ [[ result ]]
        * if value is var, then [[ value ]] ⊆  [[ result ]] 
        */
       Operand* v_result = makeVariable(result_name);
-      if(result_name.compare("")==0){
-        Operand* t_value = makeToken(result_name);
-        makeConstraint(1, "IntToPtr", t_value, v_result);
-      } else {
-        Operand* v_value = makeVariable(result_name);
+      Operand* v_value = makeVariable(value_name);
+
         makeConstraint(2, "IntToPtr", v_value, v_result);
-      }
       break;
     }
     case llvm::Instruction::BitCast : 
@@ -289,23 +336,27 @@ void makeLLVMConstraint(llvm::Instruction* I)
 
       std::string result_name = I->getName();
       std::string value_name = value_operand->getName();
-      if(value_name.compare("")==0)value_name = "Constnat-Value";
+      if(result_name == "")result_name = "Constant-Value";
+      if(value_name == "")value_name = "Constant-Value";      
 
       Operand* v_result = makeVariable(result_name);
-      Operand* t_value = makeToken(value_name);
+      Operand* v_value = makeVariable(value_name);
 
-      makeConstraint(1, "BitCast", t_value, v_result);
+      makeConstraint(2, "BitCast", v_value, v_result);
       break;
     }
     case llvm::Instruction::PHI:
     {
-      std::string result_name = I->getName();
-      Operand* v_result = makeVariable(result_name);
       for(auto K = I->op_begin(); K!=I->op_end(); K++){
         llvm::Use& value_operand = *K;
-        std::string value_name = value_operand->getName();
         
-        if(value_name.compare("")==0)value_name = "Constnat-Value";
+        std::string result_name = I->getName();
+        std::string value_name = value_operand->getName();
+
+        if(result_name == "")result_name = "Constant-Value";
+        if(value_name == "")value_name = "Constant-Value";  
+
+        Operand* v_result = makeVariable(result_name);
         Operand* v_value = makeVariable(value_name);
 
         makeConstraint(2, "PHI", v_value, v_result);
@@ -314,15 +365,24 @@ void makeLLVMConstraint(llvm::Instruction* I)
     }
     case llvm::Instruction::Call : 
     {
-      // Todo.
-      // ????
-      // if return type is pointer then add result \in [[ result ]]
+      if(!(I->getType()->isVoidTy()))
+      {
+        std::string result_name = I->getName();
+        std::string value_name = "Constant-Value";
+        Operand* v_result = makeVariable(result_name);
+        Operand* v_value = makeVariable(value_name);
+
+        makeConstraint(2, "Call", v_value, v_result);
+      }
+      break;
     }
     case llvm::Instruction::Select :
     {
       std::string result_name = I->getName();
-      Operand* v_result = makeVariable(result_name);
+      if(result_name == "")result_name = "Constant-Value";
 
+      Operand* v_result = makeVariable(result_name);
+        
       auto K = I->op_begin();
       if(K != I->op_end()) K++;
 
@@ -331,7 +391,8 @@ void makeLLVMConstraint(llvm::Instruction* I)
         llvm::Use& value_operand = *K;
         std::string value_name = value_operand->getName();
         
-        if(value_name.compare("")==0)value_name = "Constnat-Value";
+        if(value_name == "")value_name = "Constant-Value";
+
         Operand* v_value = makeVariable(value_name);
 
         makeConstraint(2, "Select", v_value, v_result);
@@ -345,6 +406,8 @@ void makeLLVMConstraint(llvm::Instruction* I)
 
       std::string result_name = I->getName();
       std::string value_name = value_operand->getName();
+      if(result_name == "")result_name = "Constant-Value";
+      if(value_name == "")value_name = "Constant-Value";
 
       Operand* v_result = makeVariable(result_name);
       Operand* v_value = makeVariable(value_name);
@@ -381,6 +444,7 @@ void clear()
   alloca_number = 1;
   Operand::Tokens->clear();
   Operand::Variables->clear();
+  Operand::TokensAndVariables->clear();
   Constraint::Constraints->clear();
 }
 
@@ -448,6 +512,10 @@ std::string idToString(int id){
 	return "Unknown Type";
 }
 
+std::string opcodeToString(int opcode){
+  
+}
+
 std::string operandToString(int id)
 {
 	switch(id){
@@ -457,40 +525,234 @@ std::string operandToString(int id)
 	return "Not Defined Operation.";
 }
 
-map<string, tuple<set<Constraint>*, set<Operand>*>>* run(string file_name){
-  llvm::LLVMContext context;
-  llvm::SMDiagnostic error;
-  map<string, tuple<set<Constraint>*, set<Operand>*>>* result 
-      = new map<string, tuple<set<Constraint>*, set<Operand>*>>();                                        
-      
-  unique_ptr<llvm::Module> module = readModule(file_name, error, context);
-  for (auto F = module->begin(); F != module->end(); F++)
-  {
 
+
+vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>* run(llvm::Module* module)
+{
+  vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>*
+  result = new vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>();
+  
+
+  name_number = 0;
+
+  for (auto F = module->begin(); F != module->end(); F++) 
+  {
+    // Init.
+    ConstantConstraint(); 
+
+    name_number = F->arg_size();
     for (auto B = F->begin(); B != F->end(); B++)
     {
       // Basic Blocks
       std::string block_name = B->getName();
+      if(block_name == ""){
+        name_number += 1;
+      }
 
       for(auto I = B->begin(); I != B->end(); I++)
       {
         makeLLVMConstraint(&*I);
       }
     }
-    std::map<std::set<Constraint>*, std::set<Operand>*>* save_constraints_operands 
-                                            = new std::map<std::set<Constraint>*, std::set<Operand>*>();
+    name_number = 0;
 
-    // return values
-    std::string function_name = F->getName();
-    std::set<Constraint>* save_constraints = new std::set<Constraint>(*Constraint::Constraints);
-    std::set<Operand>* save_tokens = new std::set<Operand>(*Operand::Tokens);
-
-    auto temp = std::make_tuple(save_constraints, save_tokens);
-    result->insert(pair<string, tuple<set<Constraint>*, set<Operand>*>>(function_name, temp));
-    
+    string function_name = F->getName();
+    set<Constraint>* save_constraints = new std::set<Constraint>(*Constraint::Constraints);
+    set<Operand>* save_tokens = new std::set<Operand>(*Operand::Tokens);
+    set<Operand>* save_variables = new std::set<Operand>(*Operand::Variables);
+    set<pair<Operand,Operand>>* tokens_variables = new set<pair<Operand,Operand>>(*Operand::TokensAndVariables);
+    auto k = make_tuple(function_name, save_constraints, save_tokens, save_variables, tokens_variables);
+    result->push_back(k);
     clear();
+  } // function loop   
+  return result;
+}
+
+set<Operand> getAnswerVariables(CubicSolver<Operand, Operand> cubic){
+  set<Operand> returnAnswer;
+
+  auto answer = cubic.getSolution();
+
+  for(auto iter = answer.begin(); iter != answer.end(); iter++)
+  {
+    auto k = *iter;
+    Operand variable = k.first;
+
+    returnAnswer.insert(variable);
+
+    for(auto iter2 = k.second.begin(); iter2 != k.second.end(); iter2++)
+    {
+      auto token = *iter2;
+
+      variable.tokens->insert(token);
+    }
   }
+  return returnAnswer;
+}
+
+void printOperand(set<Operand> operands){
+  cout << "print Operands\n";
+  for(auto iter = operands.begin(); iter != operands.end(); iter++)
+  {
+    Operand operand = *iter;
+    cout << operand.toString();
+  }
+  cout << "=======================\n";
+}
+
+// void printInstructions(vector<llvm::Instruction*>* instructions)
+// {
+  
+//   for(auto iter = instructions->begin(); iter != instructions->end(); iter++)
+//   {
+//     auto instruction = *iter;
+//     cout << instruction->getOpcodeName() << " ";
+//     const llvm::DebugLoc &debugInfo = instruction->getDebugLoc();
+//     auto k = debugInfo.getLine();
+//     cout << "";
+//     cout << "\n";
+//     // cout << (string) (*iter)->getName();
+//   }
+// }
+// set<llvm::Instruction> specificValue(llvm::Function* F)
+// {
+//   set<llvm::Instruction> result;
+
+//   return result;
+// }
+
+llvm::Value* findInstructionByName(llvm::Function* F, string instructionName){
+  for(auto fIter = F->begin(); fIter != F->end(); fIter++)
+  {
+    auto basic_block_iter = fIter;
+    for (auto iIter = basic_block_iter->begin(); iIter != basic_block_iter->end(); iIter++)
+    {
+      auto instruction = &*iIter;
+      if (instruction->getName() == instructionName)
+      {
+        return instruction;
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+llvm::Instruction* findVariableByName(llvm::Function* F, string valueName){
+  for(auto fIter = F->begin(); fIter != F->end(); fIter++)
+  {
+    auto basic_block_iter = fIter;
+    for (auto iIter = basic_block_iter->begin(); iIter != basic_block_iter->end(); iIter++)
+    {
+      auto instruction = &*iIter;
+      if (instruction->getName() == valueName)
+      {
+        return instruction;
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+llvm::Function* findFunctionByName(llvm::Module* module, string functionName)
+{
+  for(auto iter = module->begin(); iter != module->end(); iter++)
+  {
+    auto function = &*iter;
+
+    if(function->getName() == functionName) return function;
+  }
+
+  return nullptr;
+}
+
+vector<tuple<string, set<Operand>>>* getVariables(llvm::Module* module)
+{
+  auto result = new vector<tuple<string, set<Operand>>>();
+
+  auto analysis = analysis::run(module);
+
+  for(auto FunctionIter = analysis->begin(); FunctionIter != analysis->end(); FunctionIter++)
+  {
+    auto function_name = get<0>(*FunctionIter); 
+    auto constraints = get<1>(*FunctionIter);
+    auto tokens = get<2>(*FunctionIter);
+    auto variables = get<3>(*FunctionIter);
+    auto tokensAndVariables = get<4>(*FunctionIter);
+
+    CubicSolver<Operand, Operand> cubic;
+    cubic.init(tokensAndVariables);
+    cubic.setFunctionName(function_name);
+  
+    for(auto constraintIter = constraints->begin(); constraintIter != constraints->end(); constraintIter++)
+    {
+      auto constraint = *constraintIter;
+
+      switch(constraint.Type)
+      {
+        case 1:
+        {
+          cubic.addConstantConstraint(*constraint.operand1, *constraint.operand2);
+          break;
+        }
+        case 2:
+        {
+          cubic.addSubsetConstraint(*constraint.operand1, *constraint.operand2);
+          break;
+        }
+        case 3:
+        {
+          cubic.add3thConstraint(*constraint.operand1, *constraint.operand2);
+        }
+        case 4:
+        {
+          cubic.add4thConstraint(*constraint.operand1, *constraint.operand2);
+        }
+        default :
+        {
+          // Not Defined Type.
+        }
+      }
+    }
+    auto answers = getAnswerVariables(cubic);
+    
+    result->push_back(make_tuple(function_name, answers));
+  }
+  
+
+  return result;
+}
+
+vector<llvm::Instruction*> trackVariable(llvm::Function* F, llvm::Value* variable)
+{
+  vector<llvm::Instruction*> result;
+  // Logic.
+  // Check Operands about ALL INSTRUCTIONS in a Function.
+
+  for(auto fIter = F->begin(); fIter != F->end(); fIter++)
+  {
+    // Loop BasicBlocks.
+
+    for(auto bIter = fIter->begin(); bIter != fIter->end(); bIter++)
+    {
+      // Loop Instructions
+      auto instruction = &*bIter;
+      // Check Operands.
+      for(auto oIter = instruction->op_begin(); oIter != instruction->op_end();
+         oIter++)
+      {
+        // operand Value.
+        auto operand = &*oIter->get();
+        if(variable == operand){
+          result.push_back(instruction);
+        }
+      }
+    }
+  }
+
   return result;
 }
 
 } // namespace analysis
+
