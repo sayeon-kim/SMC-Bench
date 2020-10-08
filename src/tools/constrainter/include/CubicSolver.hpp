@@ -1,5 +1,9 @@
+#ifndef SMC_CUBICSOLVER
+#define SMC_CUBICSOLVER
+
 #pragma once
-using namespace std;
+
+#include <iostream>
 #include <string>
 #include <set>
 #include <map>
@@ -9,6 +13,7 @@ using namespace std;
 #include <vector>
 #include <list>
 
+using namespace std;
 
 template <typename V, typename T, bool cycleElimination = true>
 class CubicSolver {
@@ -136,7 +141,7 @@ inline bool CubicSolver<V, T, cycleElimination>::Node::operator!=(const Node& ot
 template<typename V, typename T, bool cycleElimination>
 inline void CubicSolver<V, T, cycleElimination>::Node::print()
 {
-  cout << "현재 노드의 주소" << ' ' << this << '\n';
+  std::cout << "현재 노드의 주소" << ' ' << this << '\n';
   std::cout << "현재 노드가 가지고 있는 변수들 : ";
   for_each(vars.begin(), vars.end(), [](V v) {
     std::cout << v.toString() << " ";
@@ -529,3 +534,5 @@ inline void CubicSolver<V, T, cycleElimination>::print()
 //   }
   
 // }
+
+#endif

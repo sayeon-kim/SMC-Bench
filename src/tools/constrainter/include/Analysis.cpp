@@ -1,6 +1,7 @@
 // test Analysis
 
 #include "Analysis.h"
+#include "CubicSolver.hpp"
 
 #include <string>
 #include <set>
@@ -511,6 +512,10 @@ std::string idToString(int id){
 	return "Unknown Type";
 }
 
+std::string opcodeToString(int opcode){
+  
+}
+
 std::string operandToString(int id)
 {
 	switch(id){
@@ -520,13 +525,13 @@ std::string operandToString(int id)
 	return "Not Defined Operation.";
 }
 
-vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>* run(string file_name)
+
+
+vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>* run(llvm::Module* module)
 {
-  llvm::LLVMContext context;
-  llvm::SMDiagnostic error;
   vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>*
   result = new vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>();
-  unique_ptr<llvm::Module> module = readModule(file_name, error, context);
+  
 
   name_number = 0;
 
@@ -563,4 +568,191 @@ vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Op
   return result;
 }
 
+set<Operand> getAnswerVariables(CubicSolver<Operand, Operand> cubic){
+  set<Operand> returnAnswer;
+
+  auto answer = cubic.getSolution();
+
+  for(auto iter = answer.begin(); iter != answer.end(); iter++)
+  {
+    auto k = *iter;
+    Operand variable = k.first;
+
+    returnAnswer.insert(variable);
+
+    for(auto iter2 = k.second.begin(); iter2 != k.second.end(); iter2++)
+    {
+      auto token = *iter2;
+
+      variable.tokens->insert(token);
+    }
+  }
+  return returnAnswer;
+}
+
+void printOperand(set<Operand> operands){
+  cout << "print Operands\n";
+  for(auto iter = operands.begin(); iter != operands.end(); iter++)
+  {
+    Operand operand = *iter;
+    cout << operand.toString();
+  }
+  cout << "=======================\n";
+}
+
+// void printInstructions(vector<llvm::Instruction*>* instructions)
+// {
+  
+//   for(auto iter = instructions->begin(); iter != instructions->end(); iter++)
+//   {
+//     auto instruction = *iter;
+//     cout << instruction->getOpcodeName() << " ";
+//     const llvm::DebugLoc &debugInfo = instruction->getDebugLoc();
+//     auto k = debugInfo.getLine();
+//     cout << "";
+//     cout << "\n";
+//     // cout << (string) (*iter)->getName();
+//   }
+// }
+// set<llvm::Instruction> specificValue(llvm::Function* F)
+// {
+//   set<llvm::Instruction> result;
+
+//   return result;
+// }
+
+llvm::Value* findInstructionByName(llvm::Function* F, string instructionName){
+  for(auto fIter = F->begin(); fIter != F->end(); fIter++)
+  {
+    auto basic_block_iter = fIter;
+    for (auto iIter = basic_block_iter->begin(); iIter != basic_block_iter->end(); iIter++)
+    {
+      auto instruction = &*iIter;
+      if (instruction->getName() == instructionName)
+      {
+        return instruction;
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+llvm::Instruction* findVariableByName(llvm::Function* F, string valueName){
+  for(auto fIter = F->begin(); fIter != F->end(); fIter++)
+  {
+    auto basic_block_iter = fIter;
+    for (auto iIter = basic_block_iter->begin(); iIter != basic_block_iter->end(); iIter++)
+    {
+      auto instruction = &*iIter;
+      if (instruction->getName() == valueName)
+      {
+        return instruction;
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+llvm::Function* findFunctionByName(llvm::Module* module, string functionName)
+{
+  for(auto iter = module->begin(); iter != module->end(); iter++)
+  {
+    auto function = &*iter;
+
+    if(function->getName() == functionName) return function;
+  }
+
+  return nullptr;
+}
+
+vector<tuple<string, set<Operand>>>* getVariables(llvm::Module* module)
+{
+  auto result = new vector<tuple<string, set<Operand>>>();
+
+  auto analysis = analysis::run(module);
+
+  for(auto FunctionIter = analysis->begin(); FunctionIter != analysis->end(); FunctionIter++)
+  {
+    auto function_name = get<0>(*FunctionIter); 
+    auto constraints = get<1>(*FunctionIter);
+    auto tokens = get<2>(*FunctionIter);
+    auto variables = get<3>(*FunctionIter);
+    auto tokensAndVariables = get<4>(*FunctionIter);
+
+    CubicSolver<Operand, Operand> cubic;
+    cubic.init(tokensAndVariables);
+    cubic.setFunctionName(function_name);
+  
+    for(auto constraintIter = constraints->begin(); constraintIter != constraints->end(); constraintIter++)
+    {
+      auto constraint = *constraintIter;
+
+      switch(constraint.Type)
+      {
+        case 1:
+        {
+          cubic.addConstantConstraint(*constraint.operand1, *constraint.operand2);
+          break;
+        }
+        case 2:
+        {
+          cubic.addSubsetConstraint(*constraint.operand1, *constraint.operand2);
+          break;
+        }
+        case 3:
+        {
+          cubic.add3thConstraint(*constraint.operand1, *constraint.operand2);
+        }
+        case 4:
+        {
+          cubic.add4thConstraint(*constraint.operand1, *constraint.operand2);
+        }
+        default :
+        {
+          // Not Defined Type.
+        }
+      }
+    }
+    auto answers = getAnswerVariables(cubic);
+    
+    result->push_back(make_tuple(function_name, answers));
+  }
+  
+
+  return result;
+}
+
+vector<llvm::Instruction*> trackVariable(llvm::Function* F, llvm::Value* variable)
+{
+  vector<llvm::Instruction*> result;
+  // Logic.
+  // Check Operands about ALL INSTRUCTIONS in a Function.
+
+  for(auto fIter = F->begin(); fIter != F->end(); fIter++)
+  {
+    // Loop BasicBlocks.
+
+    for(auto bIter = fIter->begin(); bIter != fIter->end(); bIter++)
+    {
+      // Loop Instructions
+      auto instruction = &*bIter;
+      // Check Operands.
+      for(auto oIter = instruction->op_begin(); oIter != instruction->op_end();
+         oIter++)
+      {
+        // operand Value.
+        auto operand = &*oIter->get();
+        if(variable == operand){
+          result.push_back(instruction);
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
 } // namespace analysis
+

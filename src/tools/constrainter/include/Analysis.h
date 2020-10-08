@@ -3,6 +3,8 @@
 #ifndef SMC_ANALYSIS
 #define SMC_ANALYSIS
 
+#include "CubicSolver.hpp"
+
 #include <string>
 #include <set>
 #include <memory>
@@ -12,14 +14,17 @@
 #include <map>
 #include <tuple>
 
-#include <llvm/IR/Module.h>
 #include <llvm/IRReader/IRReader.h>
+#include <llvm/IR/Module.h>
 #include <llvm/IR/LLVMContext.h>
+#include "llvm/IR/Function.h"
+#include "llvm/IR/Instruction.h"
+#include <llvm/IR/Use.h>
+#include "llvm/Support/Casting.h"
+
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/raw_ostream.h>
-#include <llvm/IR/Use.h>
-#include "llvm/IR/Function.h"
 
 using namespace std;
 namespace analysis {
@@ -50,12 +55,6 @@ class Operand{
     Operand& operator=(const Operand& e);
     std::string toString() const;
 };
-
-
-// enum OperatorCode{
-//   in=0,
-//   subseteq
-// };
 
 //===----------------------------------------------------------------------===//
 // Constraint
@@ -116,15 +115,29 @@ std::unique_ptr<llvm::Module> readModule(std::string file_name, llvm::SMDiagnost
                                          llvm::LLVMContext& context);
 
 // std::map<std::string, std::map<std::set<Constraint>*, std::set<Operand>*>>* run(std::string file_name);
-vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>* run(std::string file_name);
+vector<tuple<string, set<Constraint>*, set<Operand>*, set<Operand>*, set<pair<Operand,Operand>>*>>* run(llvm::Module* module);
+
+set<Operand> getAnswerVariables(CubicSolver<Operand, Operand> cubic);
+
+llvm::Function* findFunctionByName(llvm::Module* module, string functionName);
+
+llvm::Instruction* findVariableByName(llvm::Function* F, string valueName);
 
 void clear();
 
 void giveName(llvm::Function &F);
 
+void printOperand(set<Operand> operands);
+
+// void printInstructions(vector<llvm::Instruction*>* instructions);
+
 std::string idToString(int id);
 
 std::string operandToString(int id);
+
+vector<tuple<string, set<Operand>>>* getVariables(llvm::Module* module);
+
+vector<llvm::Instruction*> trackVariable(llvm::Function* F, llvm::Value* variable);
 
 } // namespace analysis
 

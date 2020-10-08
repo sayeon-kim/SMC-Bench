@@ -5,10 +5,16 @@
 #include <tuple>
 
 using namespace std;
+using namespace analysis;
 
 int main(int argc, char **argv)
 {
-  auto k = analysis::run(argv[1]);
+  llvm::LLVMContext context;
+  llvm::SMDiagnostic error;
+  unique_ptr<llvm::Module> module = readModule(argv[1], error, context);
+
+  auto k = analysis::run(module.get());
+  
   for(auto item = k->begin(); item != k->end(); item++)
   {    
     // print function name

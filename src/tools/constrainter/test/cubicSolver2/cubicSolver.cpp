@@ -13,7 +13,11 @@ int main(int argc, char **argv)
 {
   // argv[1] is filename.
   // Constraint about Module
-  auto moduleConstraints = analysis::run(argv[1]);
+  llvm::LLVMContext context;
+  llvm::SMDiagnostic error;
+  unique_ptr<llvm::Module> module = readModule(argv[1], error, context);
+
+  auto moduleConstraints = analysis::run(module.get());
 
   // Cublic Solver
   
