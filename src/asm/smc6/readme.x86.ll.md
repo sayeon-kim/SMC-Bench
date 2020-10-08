@@ -1,7 +1,7 @@
 ```asm
 %7 = tail call zeroext i16 @__remill_read_memory_16(%struct.Memory* %2, i32 134512736) #3
 ```
-%7 에서 _start분기의 주소를 읽어와서,
+%7 에서 _start분기의 주소(134512736)를 읽어와서,
 
 
 ```asm
